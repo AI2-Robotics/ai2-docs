@@ -1,0 +1,37 @@
+---
+title: Welcome to AI² Documentation
+description: AI² product and technical documentation
+template: splash # Remove or comment out this line to display the site sidebar on this page.
+hero:
+  tagline: Let's extend AGI to the physical world together
+  image:
+    file: ../../../assets/robot_1.png
+  actions:
+    - text: Quick Start
+      link: start/product-introduction/
+      icon: right-arrow
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+{/* import TestReact from '../../../components/TestReact.jsx'
+
+<TestReact client:idle /> */}
+
+
+<CardGrid>
+	<Card title="🤖 Hardware">
+		System structure, specifications, connections, startup, and troubleshooting
+	</Card>
+	<Card title="🧰 SDK">
+		C++ API, Python API
+	</Card>
+	<Card title="❓Support">
+		FAQ, Troubleshooting
+	</Card>
+</CardGrid>
+
+<style>{`
+
+
+`}</style>

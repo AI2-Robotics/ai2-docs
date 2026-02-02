@@ -1,0 +1,52 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+const lang = Astro.currentLocale || 'en';
+const currentLocale = lang.startsWith('zh') ? 'zh' : lang;
+const year = new Date().getFullYear();
+
+const translations = {
+  en: {
+    copyright: `© ${year} AI² Robotics CO.,LTD All Rights Reserved`,
+    privacy: 'Privacy',
+    terms: 'Terms'
+  },
+  zh: {
+    copyright: `© ${year} 智平方科技版权所有`,
+    privacy: '隐私政策',
+    terms: '服务条款'
+  }
+};
+
+const t = translations[currentLocale] || translations.en;
+---
+
+<footer class="global-footer">
+    {t.copyright}
+    <!-- <a href="https://aptosnetwork.com/privacy" target="_blank">{t.privacy}</a>
+    <a href="https://aptosnetwork.com/terms" target="_blank">{t.terms}</a> -->
+</footer>
+
+<style>
+    .global-footer {
+        display: block;
+        width: 100%;
+        border-top: 1px solid var(--sl-color-hairline);
+        text-align: center;
+        padding: 2rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        font-size: var(--sl-text-xs);
+        color: var(--sl-color-gray-3);
+    }
+
+    .global-footer a {
+        color: var(--sl-color-text);
+        text-decoration: none;
+        &:hover {
+            color: var(--sl-color-white);
+        }
+    }
+</style>

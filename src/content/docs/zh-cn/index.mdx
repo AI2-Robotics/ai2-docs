@@ -1,0 +1,37 @@
+---
+title: 欢迎阅读智平方文档
+description: 智平方产品与技术文档
+template: splash # Remove or comment out this line to display the site sidebar on this page.
+hero:
+  tagline: 让我们一起把 AGI 从数字世界拓展到物理世界
+  image:
+    file: ../../../assets/robot_1.png
+  actions:
+    - text: 快速开始
+      link: start/product-introduction/
+      icon: right-arrow
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+{/* import TestReact from '../../../components/TestReact.jsx'
+
+<TestReact client:idle /> */}
+
+
+<CardGrid>
+	<Card title="🤖 硬件">
+		整机结构、产品参数、连接、启动、调试
+	</Card>
+	<Card title="🧰 SDK">
+		C++接口、Python接口
+	</Card>
+	<Card title="❓ 问题" >
+		硬件常见问题、软件常见问题
+	</Card>
+</CardGrid>
+
+<style>{`
+
+
+`}</style>
