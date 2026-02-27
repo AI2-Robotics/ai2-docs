@@ -1,0 +1,769 @@
+---
+title: 机械臂相关接口
+description: 机械臂 C++ 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+机械臂相关的接口由如下两个类实现。您可以在 `c++\include\drivers\arm` 目录下找到对应的头文件以获取完整 API。
+
+| 头文件 | 类名 | 说明 |
+|:------|:----|:-------|
+| `arm_factory.h` | `ArmFactory` | 机械臂工厂类，用于创建不同类型的机械臂实例。 |
+| `arm_interface.h` | `ArmInterface` | 机械臂接口基类，定义了机械臂控制的通用接口。所有特定厂商的机械臂驱动都应该继承此类。 |
+
+## 创建机械臂
+
+`ArmFactory` 类提供了三种方式创建机械臂实例，具体如下。
+
+1. 根据机械臂的厂商和名称，创建机械臂实例。
+
+   - 方法原型：
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm(
+        const std::string& arm_type,
+        const std::string& name,
+        const std::unordered_map<std::string, std::string>& params);
+       ```
+
+   - 参数说明：
+
+     | 参数名 | 类型 | 说明 |
+     |:-------|:---|:-|
+     | `arm_type` | 输入参数 | 机械臂厂商，如 `"realman"`。 |
+     | `name` | 输入参数 | 机械臂名称，如 `"left_arm"` 或 `"right_arm"`。 |
+     | `params` | 输入参数 | 机械臂其他参数，如 `{{"ip", "192.168.1.18"}, {"port", "8080"}}`。|
+
+   - 返回值：
+
+     若创建成功，则返回 `ArmInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+2. 根据机械臂参数，创建机械臂实例。
+
+   - 方法原型：
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm(const ArmFactoryParam& param)
+       ```
+
+   - 参数说明：
+
+     | 参数名 | 类型 | 说明 |
+     |:-------|:---|:-|
+     | `param` | 输入参数 | 机械臂相关参数，具体参见 [ArmFactoryParam](/sdk/c-plus-plus/data-structures#armfactoryparam)。 |
+
+   - 返回值：
+
+     若创建成功，则返回 `ArmInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+3. 根据配置文件，创建机械臂实例。
+
+   - 方法原型：
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm_from_config(const std::string& config_path)
+       ```
+
+   - 参数说明：
+
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+     
+     ```json
+     {
+         "arm_type":"realman", # 机械臂厂商
+         "arm_name":"left_arm", # 机械臂名称
+         "ip": "192.168.1.18", # TCP IP 地址
+         "port": "8080", # TCP 端口号
+         "udp_ip": "192.168.1.102", # UDP IP 地址
+         "udp_port": "8089", # UDP 端口号
+         "udp_cycle": "1", # UDP 周期，以 udp_cycle*5 毫秒为周期
+         "enable_gripper": "false" # 是否启用夹爪
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+   - 返回值：
+
+     若创建成功，则返回 `ArmInterface` 类型的共享智能指针；否则返回 `nullptr`。 
+
+## 连接机械臂
+
+在创建机械臂实例后，您可通过如下方法与机械臂建立连接。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 断开机械臂
+
+您可通过如下方法断开与机械臂的连接。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 控制机械臂轨迹
+
+控制机械臂轨迹包括控制运动和控制透传。
+
+- 运动：包括关节空间运动、笛卡尔直线运动、笛卡尔空间运动等。
+- 透传：包括角度透传和位姿透传。  
+
+### 关节空间运动
+
+在关节空间中规划一条运动轨迹，使机械臂各关节运动至指定关节位置。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+    const std::vector<AbcType>& joints,
+    int v,
+    int r,
+    int trajectory_connect,
+    int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
+  | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `0` 或 `1`。<br /> - `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br /> - `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 笛卡尔空间直线运动
+
+在笛卡尔空间中规划一条直线运动轨迹，使机械臂沿直线运动至指定位姿。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_cartesian_linear(
+    const AbcPose& pose,
+    int v,
+    int r,
+    int trajectory_connect,
+    int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcepose)。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
+  | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `0` 或 `1`。<br /> - `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br /> - `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 以关节空间运动到目标位姿
+
+在关节空间中规划一条运动轨迹，使机械臂运动至指定位姿。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_pose(
+      const AbcPose& pose,
+      int v,
+      int r,
+      int trajectory_connect,
+      int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcepose)。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大角速度和角加速度的百分比，取值范围为 0~100。 |
+  | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
+  | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `0` 或 `1`。<br /> - `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br /> - `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。  
+
+### 角度透传 {#movejointpositioncanfd}
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给机械臂，不需控制器规划。若调用正确，机械臂立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保机械臂的稳定运行。
+- I 系列有线网口周期最快可达 2ms，提供了更高的实时性。
+</Aside>
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(
+      const std::vector<AbcType>& joints,
+      bool follow,
+      int trajectory_mode = 0,
+      int radio = 0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
+  | `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
+  | `radio` | 输入参数（可缺省） | - 曲线拟合模式：`radio` 是平滑系数，取值范围为 0~100。<br />- 滤波模式：`radio` 是滤波参数，取值范围为 0\~1000。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 角度透传并避障
+
+在 [move_joint_position_canfd()](#movejointpositioncanfd) 基础上，本方法增加避障功能。当机械臂可能与本体发生碰撞时，机械臂将不会执行操作。
+
+- 方法原型：
+
+```cpp
+AbcErrorCode move_joint_position_canfd_collision_avoid(
+    const std::vector<AbcType>& arm_joints,
+    const std::vector<AbcType>& torso_head_joints,
+    bool follow,
+    int trajectory_mode = 0,
+    int radio = 0)
+```
+
+- 参数说明：
+
+| 参数名称 | 类型 | 说明 |
+|:---|:---|:---|
+| `arm_joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+| `torso_head_joints` | 输入参数 | 躯干与头部关节角，单位为度。 |
+| `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
+| `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
+| `radio` | 输入参数（可缺省） | - 曲线拟合模式：radio 是平滑系数，取值范围为 0~100。<br />- 滤波模式：radio 是滤波参数，取值范围为 0\~1000。 |
+
+- 返回值：
+
+`AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 位姿透传
+
+位姿通过 CAN FD（Controller Area Network Flexible Data-rate）透传给机械臂，不需控制器规划。
+
+当目标位姿被透传到机械臂控制器时，控制器首先尝试进行逆解计算。若逆解成功且计算出的各关节角度与当前角度差异不大，则直接下发至关节执行，跳过额外的轨迹规划步骤。
+
+这一特性适用于需要周期性调整位姿的场景，如视觉伺服等应用。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保机械臂的稳定运行。
+- I 系列有线网口周期最快可达 2ms，提供了更高的实时性。
+</Aside>
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_cartesian_pose_canfd(
+      const AbcPose& pose,
+      bool follow,
+      int trajectory_mode = 0,
+      int radio = 0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+  | `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
+  | `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
+  | `radio` | 输入参数（可缺省） | - 曲线拟合模式：radio 是平滑系数，取值范围为 0~100。<br />- 滤波模式：radio 是滤波参数，取值范围为 0\~1000。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 关节空间跟随运动
+
+关节空间跟随运动是指在关节空间内进行实时路径规划，以实现对目标关节位置的动态跟随。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_follow(std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置。其内部数据结构，请参见 [AbcType](#abctype)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 笛卡尔空间跟随运动
+
+笛卡尔空间跟随运动是指在笛卡尔空间内进行实时路径规划，以实现对目标位姿的动态跟随。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_pose_follow(const AbcPose& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 获取机械臂当前关节角度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输出参数 | 当前关节角数据。其内部数据结构，请参见 [AbcType](#abctype)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 算法
+
+本软件包提供了一系列与机械臂相关的算法接口，包括正逆运动学求解等。
+
+### 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      AbcPose& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 关节角数据。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `pose` | 输出参数 | 正解的位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcPose& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode = 0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+  | `ref_joints` | 输入参数 | 参考的关节角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `joints` | 输出参数 | 逆解的关节角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `mode` | 输入参数（可缺省） | 求解方式，取值为 0 或 1。<br/>- `0`：单步求解。<br/>- `1`：遍历求解。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 控制机械臂运动
+
+本软件包支持对机械臂进行缓停、急停、暂停及继续等基本运动控制。
+
+### 缓停
+
+机械臂在当前正在运行的轨迹上缓慢停止。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_arm_slow_stop()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 急停
+
+机械臂在当前正在运行的轨迹上以关节最快速度停止。此操作为不可恢复的中止，无法从中断点继续执行。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_arm_stop()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 暂停
+
+机械臂在当前正在运行的轨迹上暂停。此操作为可恢复的中止，支持从中断位置恢复执行。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_arm_pause()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 继续
+
+机械臂在暂停后，从中断点恢复并继续执行未完成的运动任务。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_arm_continue()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 控制夹爪
+
+本软件包提供对夹爪的全面控制，包括设置夹爪开合、抓取位置与抓取力度，并支持读取夹爪的状态。
+
+### 松开夹爪
+
+夹爪以指定的速度运动到开口最大处。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_gripper_release(
+      int speed,
+      bool block,
+      int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `speed` | 输入参数 | 夹爪松开速度，取值范围为 1~1000，无单位量纲。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `true` 或 `false`。<br/>- `true`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `false`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | 输入参数 | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 力控夹取
+
+夹爪以设定的速度和力夹取，当夹持力超过设定的力阈值后，停止夹取。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_gripper_pick(
+      int speed,
+      int force,
+      bool block,
+      int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `speed` | 输入参数 | 夹爪开合速度，取值范围为 1~1000，无单位量纲。 |
+  | `force` | 输入参数 | 力控阈值，取值范围为 50~1000，无单位量纲。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `true` 或 `false`。<br/>- `true`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `false`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | 输入参数 | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 持续力控夹取
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_gripper_pick_on(
+      int speed,
+      int force,
+      bool block,
+      int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `speed` | 输入参数 | 夹爪开合速度，取值范围为 1~1000，无单位量纲。 |
+  | `force` | 输入参数 | 力控阈值，取值范围为 50~1000，无单位量纲。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `true` 或 `false`。<br/>- `true`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `false`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | 输入参数 | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 控制开口位置
+
+在夹爪到达指定位置后，若当前开口小于指定开口，夹爪以指定速度松开到指定开口位置；若当前开口大于指定开口时，夹爪以指定速度和力矩往指定开口处闭合，当夹持力超过力矩阈值或者达到指定位置后，夹爪停止。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_gripper_position(
+      int position,
+      bool block,
+      int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `position` | 输入参数 | 夹爪开口位置，取值范围为 1~1000，无单位量纲。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 `true` 或 `false`。<br/>- `true`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `false`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | 输入参数 | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 获取夹爪状态
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_gripper_state(AbcGripperState* state)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `state` | 输出参数 | 存放夹爪状态。其内部数据结构，请参见 [AbcGripperState](#abcgripperstate)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 配置 Modbus
+
+### 配置 Modbus RTU 模式
+
+在机械臂启动后，用户必须先调用如下方法配置 Modbus RTU 模式，才可对通信端口进行操作，否则会返回错误信息。另外，机械臂将会对用户的配置方式进行保存，机械臂重启后会自动恢复到用户断电之前配置的模式。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_modbus_mode(
+      int port,
+      int baudrate,
+      int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `port` | 输入参数 | 指定通信端口，取值为 0、1 或 2。<br/>- `0`：控制器 RS485 端口为 RTU 主站。<br/>- `1`：末端接口板 RS485 接口为 RTU 主站。<br/>- `2`：控制器 RS485 端口为 RTU 从站。 |
+  | `baudrate` | 输入参数 | 波特率，支持 9600、115200 和 460800 三种常见波特率。 |
+  | `timeout` | 输入参数 | 超时时间，单位百毫秒。对 Modbus 设备所有的读写指令，在规定的超时时间内未返回响应数据，则返回超时错误提示信息。超时时间不能为 0，若设置为 0，则机械臂按通信端口 1 进行配置。 |
+
+  <Aside>
+  其他配置默认为：数据位-8，停止位-1，奇偶校验-无。
+  </Aside>
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 关闭 Modbus RTU 模式
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode close_modbus_mode(int port)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `port` | 输入参数 | 指定关闭的通信端口，取值为 0、1 或 2。<br/>- `0`：控制器 RS485 端口为 RTU 主站。<br/>- `1`：末端接口板 RS485 接口为 RTU 主站。<br/>- `2`：控制器 RS485 端口为 RTU 从站。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 写多个寄存器
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode write_registers(
+      const PeripheralReadWriteParams& params,
+      const std::vector<uint8_t>& data)
+  ```
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `params` | 输入参数 | 多个寄存器数据写入参数结构体。其中寄存器每次写的数量不超过 10 个，即该结构体成员 `num <= 10`。其内部数据结构，请参见 [PeripheralReadWriteParams](#peripheralreadwriteparams)。 |
+  | `data` | 输入参数 | 要写入寄存器的数据数组。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 配置 UDP 主动上报
+
+本软件包提供机械臂状态主动上报接口。在同一局域网下，通过设置 UDP 主动上报配置，以及注册机械臂状态回调函数，即可按设定周期（默认 5ms）接收机械臂周期性状态数据。
+
+### 设置 UDP 主动上报配置
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode realtime_arm_state_set_configuration(
+      const RealtimePushConfig& config)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `config` | 输入参数 | UDP 配置。其内部数据结构，请参见 [RealtimePushConfig](#realtimepushconfig)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+### 注册机械臂状态回调函数
+
+- 方法原型：
+
+  ```cpp
+  void realtime_arm_state_call_back(
+      AbcArmRealtimeStateCallback realtime_callback)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `realtime_callback` | 输入参数 | 当机械臂状态更新时，系统会自动调用此回调函数。`AbcArmRealtimeStateCallback` 为函数指针类型。其数据类型，请参见 [AbcArmRealtimeStateCallback](#abcarmrealtimestatecallback)。 |
+
+- 返回值：
+
+  无。
+
+## 获取错误信息
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_error_flag(
+      std::vector<uint16_t>& err_flag,
+      std::vector<uint16_t>& brake_state)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `err_flag` | 输出参数 | 反馈关节错误码。 |
+  | `brake_state` | 输出参数 | 反馈关节抱闸状态。<br/>- `1`：抱闸未打开。<br/>- `0`：抱闸已打开。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+
+## 获取机械臂名称
+
+- 方法原型：
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- 返回值：
+
+  机械臂名称。  

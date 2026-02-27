@@ -3,10 +3,14 @@ import starlight from '@astrojs/starlight';
 import starlightImageZoom from 'starlight-image-zoom';
 import starlightHeadingBadges from 'starlight-heading-badges';
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
+import { remarkHeadingId } from "remark-custom-heading-id";
 import react from '@astrojs/react';
 
 
 export default defineConfig({
+	markdown: {
+		remarkPlugins: [remarkHeadingId],
+	},
 	integrations: [
 		react(),
 		starlight({
@@ -46,28 +50,52 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'AlphaBot2 Hardware',
+					label: 'AlphaBot 2',
 					translations: {
-						'zh-CN': 'AlphaBot2 硬件',
+						'zh-CN': 'AlphaBot 2',
 					},
 					badge: {
 						text: {
 							'zh-CN': '新',
 							'en': 'New',
 						},
-						variant:"tip",
+						variant: "tip",
 					},
 					items: [
-						'alphabot2-hardware/architecture', 'alphabot2-hardware/specifications', 'alphabot2-hardware/interfaces', 'alphabot2-hardware/maintenance',
+						'alphabot2/hardware/getting-started',
+						'alphabot2/hardware/architecture',
+						'alphabot2/hardware/operation-guide',
+						'alphabot2/hardware/common-faults',
+						'alphabot2/hardware/maintenance',
 					],
 				},
 				{
-					label: 'AlphaBot SDK',
+					label: 'AlphaBotCore SDK',
 					translations: {
-						'zh-CN': 'AlphaBot SDK',
+						'zh-CN': 'AlphaBotCore SDK',
 					},
 					items: [
-						'sdk/overview', 'sdk/c-plus-plus-api', 'sdk/python-api',
+						'sdk/overview', {
+							label: 'C++ API',
+							translations: {
+								'zh-CN': 'C++ API',
+							},
+							items: [
+								// 'sdk/c-plus-plus/quick-start',
+								// 'sdk/c-plus-plus/arm-api',
+								// 'sdk/c-plus-plus/data-structures',
+							]
+						},
+						'sdk/python-api',
+					],
+				},
+				{
+					label: 'Statement',
+					translations: {
+						'zh-CN': '声明',
+					},
+					items: [
+						'statement/disclaimer', 'statement/safety-regulations',
 					],
 				},
 			],

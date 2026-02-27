@@ -3,6 +3,63 @@ title: 产品介绍
 description: 产品整体介绍
 ---
 
-智平方的通用智能机器人AlphaBot系列，是由智平方具身大模型Alpha Brain所定义、以量产为导向的机器人形态，是继智能手机和智能汽车之后，下一个改变世界的智能终端品类。
+智平方的通用智能机器人 AlphaBot 系列，是由智平方具身大模型 Alpha Brain 所定义、以量产为导向的机器人形态，是继智能手机和智能汽车之后，下一个改变世界的智能终端品类。
 
-它具备卓越的空间智能和强大的学习能力，可以像人类一样迅速适应新环境，灵活执行多种任务，无论在企业还是个人应用中，AlphaBot 系列都能为多种多样的任务提供高效、可靠的服务。
+{/* 它具备卓越的空间智能和强大的学习能力，可以像人类一样迅速适应新环境，灵活执行多种任务，无论在企业还是个人应用中，AlphaBot 系列都能为多种多样的任务提供高效、可靠的服务。 */}
+
+
+## AlphaBot 2
+
+最新款 AlphaBot 2 是首款搭载全域全身 VLA（GOVLA）大模型的通用智能机器人，通过视觉、语言与动作的端到端协同，在复杂工业与公共服务场景中展现出较强的泛化能力与适应性。
+
+import { Image } from 'astro:assets';
+import alphabot2 from 'img/alphabot2.png';
+
+<Image src={alphabot2} alt="" />
+
+{/* AlphaBot 2 的核心能力包括：
+
+- 全域全身 VLA 大模型：具备视觉、语言与动作的端到端协同能力，能够理解和执行复杂指令。
+- 强大的空间智能：能够感知和理解周围环境，灵活适应不同场景和任务需求。
+- 高效的任务执行：能够迅速完成多种任务，提高工作效率和服务质量。
+
+AlphaBot 2 的应用场景包括但不限于：
+
+- 汽车与电子制造：可灵活完成上下料、搬运、装配、设备操作等多类型任务，一机多能，适应产线的多样化需求。
+- 半导体制造：支持洁净环境下的多任务作业，包括产线衔接、物料搬运、装载与更换等操作，灵活满足高精度与高洁净度的生产要求。
+- 生物科技：在生物科技与生物医药场景中，满足无菌化作业需求，有效避免交叉污染。可胜任物料转运、拆包消毒、供料等多类任务，保障研发与生产过程的安全与高效。
+- 公共服务：在餐饮、零售、机场等公共服务场景中，提供高效的服务支持。可执行取放、引导、搬运等多种任务，提升客户体验和服务质量。    */}
+
+import automobiles_electronics from 'img/automobiles_electronics.jpg';
+import semiconductor_manufacturing from 'img/semiconductor_manufacturing.jpg';
+import biotechnology from 'img/biotechnology.jpg';
+import public_service from 'img/public_service.jpg';
+
+AlphaBot 2 的应用场景包括但不限于：
+
+<table>
+   <thead>
+      <tr>
+         <th><strong>场景</strong></th>
+         <th><strong>说明</strong></th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>汽车与电子制造</td>
+         <td>可灵活完成上下料、搬运、装配、设备操作等多类型任务，一机多能，适应产线的多样化需求。<Image src={automobiles_electronics} alt=""/></td>
+      </tr>
+      <tr>
+         <td>半导体制造</td>
+         <td>支持洁净环境下的多任务作业，包括产线衔接、物料搬运、装载与更换等操作，灵活满足高精度与高洁净度的生产要求。<Image src={semiconductor_manufacturing} alt="" /></td>
+      </tr>
+      <tr>
+         <td>生物科技</td>
+         <td>在生物科技与生物医药场景中，满足无菌化作业需求，有效避免交叉污染。可胜任物料转运、拆包消毒、供料等多类任务，保障研发与生产过程的安全与高效。<Image src={biotechnology} alt="" /></td>
+      </tr>
+      <tr>
+         <td>公共服务</td>
+         <td>适用于机场、轨道交通枢纽等公共环境，能够执行收纳整理、盘点分发、取放搬运等多样化任务，为公共服务带来更高效率与更佳体验。<Image src={public_service} alt="" /></td>
+      </tr>
+   </tbody>
+</table>

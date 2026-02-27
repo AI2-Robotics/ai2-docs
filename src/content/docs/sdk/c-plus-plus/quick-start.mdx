@@ -1,0 +1,221 @@
+---
+title: 快速开始
+description: 快速开始 C++ 接口开发
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+
+本节将帮助您快速掌握 C++ API 的基本结构及其使用方法。
+
+## 1. 搭建开发环境
+
+在开始开发前，请先确保已满足以下 C++ 开发环境：
+
+- 操作系统：Ubuntu22 及以上。
+- 编译器：GCC11 及以上。
+- C++ 语言标准：ISOC++17。
+
+## 2. 了解接口结构
+
+在获取并解压 AlphaBotCore SDK 软件包后，进入 `C++` 目录，整个文件组织结构如下所示。
+
+<FileTree>
+
+- c++
+  - examples # 示例程序
+    - Makefile  # 用于编译示例程序
+    - ...
+  - include    # 头文件
+    - base  # 基本数据类型
+      - abc_actuator_types.h
+      - abc_arm_types.h
+      - abc_base.h
+      - abc_chassis_types.h
+      - abc_ee_types.h
+      - abc_sensor_types.h
+      - abc_torso_types.h
+      - abc_version.h
+    - common  # 共用数据类型
+      - abc_common_types.h
+      - abc_core.h
+      - abc_define.h
+    - core
+      - algo
+        - control
+          - admittance_control.h  # 导纳控制律
+        - kinematics  # 运动学算法相关接口
+          - arm_kinematics.h
+          - collision.h
+          - kinematics.h
+          - torso_kinematics.h
+    - drivers
+      - arm  # 机械臂相关接口
+        - arm_factory.h
+        - arm_interface.h
+      - chassis  # 底盘相关接口
+        - chassis_factory.h
+        - chassis_interface.h
+      - head  # 头部相关接口
+        - head_factory.h
+        - head_interface.h
+      - sensors  # 传感器相关接口
+        - camera_data.h
+        - depth_camera_interface.h
+        - sensor_factory.h
+        - sensor_interface.h
+      - torso  # 躯干相关接口
+        - torso_factory.h
+        - torso_interface.h
+      - traj  # 轨迹规划器相关接口
+        - poly5_planner.h
+        - trajectory.h
+        - trajectory_planner.h
+      - sensor  # 传感器同步器相关接口
+        - sensor_emergency_stop_monitor.h
+        - sensor_synchronizer.h
+  - lib   # 共享库
+    - libalphabot_algo.so
+    - libalphabot_drivers_chassis.so
+    - libalphabot_drivers.so
+    - libalphabot_sensor.so
+    - libapi_cpp.so
+    - librealsense2.so
+
+</FileTree>
+
+## 3. 参考示例程序
+
+参考 `examples` 下的示例程序，掌握核心接口调用。
+
+例如，`c++\examples\arm\arm_factory_example.cpp` 样例程序代码如下所示。
+
+```cpp
+
+#include <iostream>
+#include <unordered_map>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // Check parameter
+    if (argc < 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <config_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== ArmFactory Example Program =====" << std::endl;
+
+    try
+    {
+        // Create a robotic arm factory instance
+        ArmFactory factory;
+
+        std::cout << "\n----- Method 1: Create a Robotic Arm Using Parameters -----" << std::endl;
+        // Configure robotic arm parameters
+        std::unordered_map<std::string, std::string> params = {
+            {"ip", "192.168.1.18"},
+            {"port", "8080"},
+            {"udp_ip", "192.168.1.102"},
+            {"udp_port", "8089"},
+            {"udp_cycle", "5"}};
+
+        // Create a Realman robotic arm instance
+        auto arm1 = factory.create_arm("realman", "right_arm", params);
+        if (!arm1)
+        {
+            std::cerr << "Failed to create robotic arm instance" << std::endl;
+            return 1;
+        }
+
+        // Connect to the robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm1->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+
+        std::cout << "\n----- Method 2: Create a Robotic Arm Using Configuration File -----" << std::endl;
+        // Create a robotic arm instance from configuration file
+        auto arm2 = factory.create_arm_from_config(config_path);
+        if (!arm2)
+        {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to the robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm2->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+
+        // Disconnect
+        arm1->disconnect();
+        std::cout << "Robotic arm disconnected" << std::endl;
+        // Disconnect
+        arm2->disconnect();
+        std::cout << "Robotic arm disconnected" << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+
+```
+
+通过上述示例程序，您可以快速了解如何创建机械臂接口实例，并连接机械臂。其他示例程序也具有类似的结构和调用方式，请参考更多的示例程序进行学习。
+
+## 4. 编译运行
+
+为便于 C++ 程序编译，AlphaBotCore SDK 在 `c++\examples` 目录下提供了 `Makefile` 文件。该
+ `Makefile` 支持自动发现并编译新增的 `.cpp` 文件，无需手动修改。
+
+接下来以 `c++\examples\arm\arm_factory_example.cpp` 文件为例，详细讲解编译及运行过程。
+
+<Steps>
+
+1. 在终端中进入 Makefile 所在目录。
+
+   ```bash
+   cd c++/examples
+   ```
+2. 执行 `make` 命令进行编译。编译成功后，所有可执行文件将输出至
+ `bin/` 目录。
+
+   ```bash
+   make
+   ```   
+
+3. 编译成功后，进入可执行文件所在目录。
+
+   ```bash
+   cd bin/arm
+   ```
+
+4. 运行示例程序。本示例需要传入机械臂配置文件路径参数。
+
+   ```bash     
+   ./arm_factory_example  ../../config/left_arm.json
+   ```  
+
+</Steps>
+
+其他示例程序的编译运行方式与此类似，请参考上述步骤进行操作。
+
+通过本节学习，您已经初步掌握了 C++ 接口的结构和使用方法。建议您继续深入学习其他示例程序，并结合接口文档进行开发实践，以更好地理解和应用 C++ 接口。

@@ -4,3 +4,32 @@ h1{
   background-clip: text;
   color: transparent;
 }
+
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+    border: 1px solid var(--sl-color-gray-5);
+    padding: 0.5rem 1rem;
+    vertical-align: baseline;
+}
+
+table {
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+    vertical-align: middle;
+}
+
+.sl-markdown-content th:not(:where(.not-content *)) {
+    background-color: var(--sl-color-gray-7);
+}
+
+
+.sl-markdown-content ul, ol {
+    padding-inline-start: 20px;
+}
+
+.sl-steps {
+    padding-inline-start: 0px;
+}
