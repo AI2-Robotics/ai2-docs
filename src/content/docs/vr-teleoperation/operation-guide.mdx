@@ -1,0 +1,519 @@
+---
+title: 常用操作
+description: 常用操作
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+
+在使用 VR 遥操设备时，掌握以下操作将有助于您更高效地使用和操作设备。
+
+## 启动 HMI 界面
+
+ROBOT-CONTROL-HMI（简称 HMI）是用于控制和监控机器人系统的图形用户界面，也是使用 VR 遥操设备时与机器人交互的核心工具。HMI 分为用户端（user）与机器人端（robot）两部分程序，使用前需分别启动，具体操作如下。
+
+### 启动用户端程序
+
+import operation_guide_1 from 'img/operation_guide_1.png';
+
+<Steps>
+
+1. 在工控机上，下载 [Microsoft Edge 浏览器安装包](https://www.microsoft.com/zh-cn/edge/download?form=MA13FJ) 。
+
+2. 在安装包所在文件夹下，打开终端，通过如下命令进行安装。
+
+
+   ```bash
+   sudo dpkg -i microsoft-edge-stable_xxx_arm64.deb
+   ```
+   <Aside>
+   请将命令中的 `microsoft-edge-stable_xxx_arm64.deb` 替换为实际的安装包文件名。
+   </Aside>
+
+
+3. 在 Ubuntu 操作系统中，依次点击 `设置 -> 默认应用程序 -> 网络(W)`，选择 Microsoft Edge，将 Microsoft Edge 设置为默认浏览器。
+
+4. 在工控机上，打开终端，输入以下命令。
+
+   ```bash
+   cd ~
+   bash ~/user_docker_start.sh
+   ```
+
+5. 上述脚本启动后，Microsoft Edge 浏览器会自动打开 HMI 界面。如未自动打开，请手动在浏览器地址栏输入 `http://127.0.0.1:4090`。
+
+   <Image src={operation_guide_1} alt="" />
+
+   <Aside>
+   - `外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，因此，在切换 `启动外骨骼设备` 、`启动 VR 控制设备` 和 `启动主动外骨骼设备` 时，需要将上一个设备下启动的所有控制一一关闭，即确保 `机器人控制` 区域中的按钮均为蓝色按钮，才可切换设备。
+   - 如需关闭 HMI，请先以 Ctrl+C 结束用户端与机器人端程序，再关闭对应终端，最后关闭 Microsoft Edge 浏览器。
+   </Aside>
+       
+
+</Steps>
+
+### 启动机器人端程序
+
+<Steps>
+
+1. 在工控机上，打开另一个新终端，通过 SSH 命令远程连接到机器人终端。
+
+   ```bash
+   zpf@zpf-MIC-770V3H:~$ ssh robot@192.168.1.100
+   # 密码为 robot
+   robot@192.168.1.100's password: 
+   # 如果终端的用户名以 robot 开头，则表示连接成功。
+   robot@ter30jb3-ubuntu:~$ 
+   ```
+
+2. 在连接成功的终端中，输入以下命令。
+
+   ```bash
+   cd ~
+   bash ~/robot_docker_start.sh
+   ```
+   <Aside>
+   如需关闭 HMI，请先以 Ctrl+C 结束用户端与机器人端程序，再关闭对应终端，最后关闭 Microsoft Edge 浏览器。
+   </Aside>
+</Steps>
+
+在启动 HMI 界面后，便可[使用 VR 设备](#using-vr-device)对机器人进行控制。
+
+## 使用 VR 设备{#using-vr-device}
+
+### 前置配置{#preconfiguration}
+
+在使用 VR 设备前，请确保已完成以下前置配置。
+
+import operation_guide_2 from 'img/operation_guide_2.png';
+import operation_guide_3 from 'img/operation_guide_3.png';
+import operation_guide_4 from 'img/operation_guide_4.png';
+import operation_guide_5 from 'img/operation_guide_5.png';
+import operation_guide_6 from 'img/operation_guide_6.png';
+import operation_guide_7 from 'img/operation_guide_7.png';
+import operation_guide_8 from 'img/operation_guide_8.png';
+
+<Aside type="tip">
+以下操作中的点击或确认，可通过按下左/右手柄的食指扳机键来实现。
+</Aside>
+
+<Steps>
+
+1. 确保 VR 头显电量充足、已开机，并通过稳定数据线连接至工控机。双手持握手柄后，视角将呈现以下画面。若为首次连接或断开后重连，请点击 Tab 栏通知按钮（小铃铛）进入通知中心。
+   <Image src={operation_guide_2} alt="" />
+
+2. 在通知中心，点击 `检测到 USB`，允许通过 USB 访问头显设备。   
+   <Image src={operation_guide_3} alt="" />
+
+3. 在如下弹窗中，点击 `允许`，允许 USB 调试。
+   <Image src={operation_guide_4} alt="" />
+
+4. 若以上操作无误，在工控机上打开一个新终端，输入如下命令。若显示以下内容，则表示头显设备已就绪。
+
+   ```bash
+   user@user:~$ adb devices
+   List of devices attached
+   2G0YC5ZH1P006G  device
+   ```
+   <Aside>
+   2G0YC5ZH1P006G 为头显设备的序列号，可能因设备不同而异，请以实际显示为准。
+   </Aside>
+
+5. 按下右手柄上的 `菜单` 键，Tab 栏会重新显示。
+   <Image src={operation_guide_5} alt="" width='200px' />  
+
+6. 点击 Tab 栏中的 `APP`，进入头显控制程序。
+   <Image src={operation_guide_6} alt=""/> 
+
+7. 若显示如下界面，则表示前置配置已完成。
+   <Image src={operation_guide_7} alt="" />
+</Steps>
+
+### 启动 VR 控制设备{#start-vr-control-device}
+
+<Steps>
+1. 在确保完成[前置配置](#preconfiguration)后，点击 HMI 界面中的 `启动 VR 控制设备` 按钮。启动成功后，按钮将变为红色，同时文字显示为 `停止 VR 控制设备`。
+   <Image src={operation_guide_8} alt="" />
+
+   <Aside>
+   - `外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，因此，在切换 `启动外骨骼设备` 、`启动 VR 控制设备` 和 `启动主动外骨骼设备` 时，需要将上一个设备下启动的所有控制一一关闭，即确保 `机器人控制` 区域中的按钮均为蓝色按钮，才可切换设备。
+   - 当机器人发生故障或机械臂运动异常、不受控制时，请立即点击 `停止 VR 控制设备` 按钮，机器人将紧急停止响应。
+   </Aside>
+
+2. 查看 `系统状态` 区域，若 `VR 设备状态` 显示为 `数据正常，共 3 条`，则表示启动成功。
+</Steps>
+
+### 启动机器臂
+
+import operation_guide_9 from 'img/operation_guide_9.png';
+import operation_guide_10 from 'img/operation_guide_10.png';
+import operation_guide_11 from 'img/operation_guide_11.png';
+import operation_guide_12 from 'img/operation_guide_12.png';
+
+<Steps>
+1. 在确保完成[启动 VR 控制设备](#start-vr-control-device)后，在 `机器人控制` 区域，点击 `启动机器臂` 按钮。
+   <Image src={operation_guide_9} alt="" />
+
+2. 此时页面会弹出如下提示信息，请耐心等待。
+
+   <Image src={operation_guide_10} alt="" />
+   <Image src={operation_guide_11} alt="" />
+
+3. 启动成功后，机械臂会进入自检状态，`启动机械臂` 蓝色按钮将变为 `停止机械臂` 红色按钮，同时 `系统状态` 区域中的机械臂状态为 `运行中`。
+
+   <Image src={operation_guide_12} alt="" />
+
+</Steps>
+
+### 启动底盘
+
+import operation_guide_13 from 'img/operation_guide_13.png';
+import operation_guide_14 from 'img/operation_guide_14.png';
+import operation_guide_15 from 'img/operation_guide_15.png';
+import operation_guide_16 from 'img/operation_guide_16.png';
+
+<Steps>
+1. 将底盘旋钮旋转至 `自动模式`，并断开充电线缆。
+
+2. 在确保完成[启动 VR 控制设备](#start-vr-control-device)后，在 `机器人控制` 区域，点击 `启动底盘` 按钮。
+   <Image src={operation_guide_13} alt="" />
+
+3. 此时页面会弹出如下提示信息，请耐心等待。
+
+   <Image src={operation_guide_14} alt="" />
+   <Image src={operation_guide_15} alt="" />
+
+4. 启动成功后，底盘会进入自检状态，`启动底盘` 蓝色按钮将变为 `停止底盘` 红色按钮，同时 `系统状态` 区域中的底盘状态为 `运行中`。
+
+   <Image src={operation_guide_16} alt="" />
+
+</Steps>
+
+### 启动 RealSense 相机
+
+import operation_guide_17 from 'img/operation_guide_17.png';
+import operation_guide_18 from 'img/operation_guide_18.png';
+import operation_guide_19 from 'img/operation_guide_19.png';
+import operation_guide_20 from 'img/operation_guide_20.png';
+import operation_guide_21 from 'img/operation_guide_21.png';
+import operation_guide_22 from 'img/operation_guide_22.png';
+import operation_guide_23 from 'img/operation_guide_23.png';
+
+<Steps>
+1. 在确保完成[启动 VR 控制设备](#start-vr-control-device)后，在 `机器人控制` 区域，点击 `启动 RealSense 相机` 按钮。
+   <Image src={operation_guide_17} alt="" />
+2. 此时页面会弹出如下提示信息，请耐心等待。
+
+   <Image src={operation_guide_18} alt="" />
+   <Image src={operation_guide_19} alt="" />
+
+3. 启动成功后，RealSense 相机会进入自检状态，`启动 RealSense 相机` 蓝色按钮将变为 `停止 RealSense 相机` 红色按钮，同时 `系统状态` 区域中的 RealSense 相机状态为 `运行中`。
+
+   <Aside>
+   该功能为数据采集的核心，若未启动 RealSense 相机，则无法进行数据采集。
+   </Aside>
+
+   <Image src={operation_guide_20} alt="" />
+
+4. 点击界面右上角的 `启动视频流` 按钮。
+   <Image src={operation_guide_21} alt="" />
+
+5. 弹出如下窗口。该窗口会自动关闭。
+   <Image src={operation_guide_22} alt="" />
+
+6. 视频流播放区将显示实时视频流，同时 `系统状态` 区域中的视频流状态为 `运行中`。
+   <Image src={operation_guide_23} alt="" />
+
+</Steps>
+
+### 启动腰腿
+
+import operation_guide_24 from 'img/operation_guide_24.png';
+import operation_guide_25 from 'img/operation_guide_25.png';
+import operation_guide_26 from 'img/operation_guide_26.png';
+import operation_guide_27 from 'img/operation_guide_27.png';
+
+<Steps>
+1. 在确保完成[启动 VR 控制设备](#start-vr-control-device)后，在 `机器人控制` 区域，点击 `启动腰腿` 按钮。
+   <Image src={operation_guide_24} alt="" />
+
+2. 此时页面会弹出如下提示信息，请耐心等待。
+
+   <Image src={operation_guide_25} alt="" />
+   <Image src={operation_guide_26} alt="" />
+
+3. 启动成功后，腰腿会进入自检状态，`启动腰腿` 蓝色按钮将变为 `停止腰腿` 红色按钮，同时 `系统状态` 区域中的腰腿状态为 `运行中`。
+
+   <Image src={operation_guide_27} alt="" />
+
+</Steps>
+
+## 使用 VR 手柄
+
+import operation_guide_28 from 'img/operation_guide_28.png';
+import operation_guide_29 from 'img/operation_guide_29.png';
+import operation_guide_30 from 'img/operation_guide_30.png';
+import operation_guide_31 from 'img/operation_guide_31.png';
+import operation_guide_32 from 'img/operation_guide_32.png';
+import operation_guide_33 from 'img/operation_guide_33.png';
+import operation_guide_34 from 'img/operation_guide_34.png';
+import operation_guide_35 from 'img/operation_guide_35.png';
+
+
+在[启动 VR 控制设备](#start-vr-control-device)后，您便可使用 VR 手柄对机器人进行控制。
+
+<table>
+   <thead>
+      <tr>
+         <th><strong>操作</strong></th>
+         <th><strong>说明</strong></th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>
+         移动底盘
+         </td>
+         <td>      
+            <Image src={operation_guide_28} alt=""/>
+
+            - 前进：左手中指扳机 + 左手摇杆向前
+            - 后退：左手中指扳机 + 左手摇杆向后
+            - 左转：右手中指扳机 + 左手摇杆向左
+            - 右转：右手中指扳机 + 左手摇杆向右
+         </td>
+      </tr>
+      <tr>
+         <td>
+         跟随机械臂末端
+         </td>
+         <td>      
+            <Image src={operation_guide_29} alt=""/>
+
+            - 跟随左臂末端：左手食指扳机
+            - 跟随右臂末端：右手食指扳机
+         </td>
+      </tr>
+      <tr>
+         <td>
+         控制夹爪
+         </td>
+         <td>      
+            <Image src={operation_guide_30} alt=""/>
+
+            - 左臂夹爪：X 键
+            - 右臂夹爪：A 键
+         </td>
+      </tr>
+      <tr>
+         <td>
+         控制表情
+         </td>
+         <td>      
+            <Image src={operation_guide_31} alt=""/>
+
+            - 切换表情（顺序）：B 键
+            - 切换表情（逆序）：Y 键
+         </td>
+      </tr>
+      <tr>
+         <td>
+         控制颈部
+         </td>
+         <td>      
+            <Image src={operation_guide_32} alt=""/>
+
+            - 偏航：右手控制器的摇杆左右
+            - 俯仰：右手控制器的摇杆上下
+         </td>
+      </tr>  
+      <tr>
+         <td>
+         控制腿部
+         </td>
+         <td>      
+            <Image src={operation_guide_33} alt=""/>
+
+            - 身体上升：右手中指扳机 + X 键
+            - 身体下降：右手中指扳机 + A 键
+         </td>
+      </tr> 
+      <tr>
+         <td>
+         控制腰部
+         </td>
+         <td>      
+            <Image src={operation_guide_34} alt=""/>
+
+            - 腰部左转：左手中指扳机 + X 键
+            - 腰部右转：左手中指扳机 + A 键
+         </td>
+      </tr>
+      <tr>
+         <td>
+         复位机械臂
+         </td>
+         <td>      
+            <Image src={operation_guide_35} alt=""/>
+
+            - 按下左手柄摇杆
+         </td>
+      </tr>       
+   </tbody>
+</table>
+
+## 采集数据
+
+在[启动 VR 控制设备](#start-vr-control-device)后，您可以通过 HMI 界面中的 `机器人数据采集` 功能来采集 VR 遥操设备的数据。
+
+<Aside>
+`外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，请勿混用。
+</Aside>
+
+### 创建任务{#create-task}
+
+import operation_guide_36 from 'img/operation_guide_36.png';
+import operation_guide_37 from 'img/operation_guide_37.png';
+import operation_guide_38 from 'img/operation_guide_38.png';
+import operation_guide_39 from 'img/operation_guide_39.png';
+import operation_guide_40 from 'img/operation_guide_40.png';
+import operation_guide_41 from 'img/operation_guide_41.png';
+
+<Steps>
+1. 在 `机器人数据采集` 区域，输入任务 ID，点击 `创建任务` 按钮。
+
+   <Aside>
+   任务 ID 只能为纯数字，禁止使用非法字符。
+   </Aside>
+   <Image src={operation_guide_36} alt="" />
+
+   - 若为新任务，页面会弹出如下提示信息。
+
+      <Image src={operation_guide_37} alt="" />
+
+      点击弹窗外空白处，即可关闭弹窗。
+   - 若任务 ID 已存在，页面会弹出如下提示信息，点击 `确认` 按钮，以续存任务。
+      <Image src={operation_guide_38} alt="" />
+
+      点击弹窗外空白处，即可关闭弹窗。
+      <Image src={operation_guide_39} alt="" />
+
+2. 点击 `发送任务` 按钮，发送成功后会有弹窗提示。
+
+   <Aside>
+   在点击 `发送任务` 按钮前，请确保已启动相机和机械臂，否则点击按钮将无响应。
+   </Aside>
+
+   <Image src={operation_guide_40} alt="" />
+
+3. 此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。   
+   <Image src={operation_guide_41} alt="" />
+
+</Steps>
+
+
+### 开始采集
+
+import operation_guide_42 from 'img/operation_guide_42.png';
+import operation_guide_43 from 'img/operation_guide_43.png';
+import operation_guide_44 from 'img/operation_guide_44.png';
+
+在成功[创建任务](#create-task)后，您便可开始采集数据了。
+
+<Steps>
+1. 通过以下三种方法中的任意一种，开始采集数据。
+
+   - 点击 `开始采集` 按钮。
+      <Image src={operation_guide_42} alt="" />
+      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      <Image src={operation_guide_43} alt="" />
+   - 通过按下键盘 `Ctrl+3` 快捷键来实现开始采集的功能。
+   - 通过按下踏板中键来实现开始采集的功能。
+
+2. 开始采集后，`机器人数据采集状态` 区域中的采集状态从 `等待开始` 变为 `采集中`，同时采集时间开始计时。
+   <Image src={operation_guide_44} alt="" />
+
+</Steps>
+
+### 取消采集
+
+import operation_guide_45 from 'img/operation_guide_45.png';
+import operation_guide_46 from 'img/operation_guide_46.png';
+import operation_guide_47 from 'img/operation_guide_47.png';
+
+在采集过程中，您可以随时取消采集。
+
+<Steps>
+1. 通过以下三种方法中的任意一种，取消采集数据。
+
+   - 点击 `取消采集` 按钮。
+      <Image src={operation_guide_45} alt="" />
+      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      <Image src={operation_guide_46} alt="" />
+   - 通过按下键盘 `Ctrl+4` 快捷键来实现取消采集的功能。
+   - 通过按下踏板右键来实现取消采集的功能。
+
+2. 取消采集后，`机器人数据采集状态` 区域中的采集状态从 `采集中` 变为 `等待开始`，同时运行时间停止计时，采集时间归零。
+   <Image src={operation_guide_47} alt="" />
+</Steps>
+
+### 结束采集
+
+import operation_guide_48 from 'img/operation_guide_48.png';
+import operation_guide_49 from 'img/operation_guide_49.png';
+import operation_guide_50 from 'img/operation_guide_50.png';
+
+在采集完成后，您需要手动结束采集过程。
+
+<Steps>
+1. 通过以下三种方法中的任意一种，结束采集数据。
+
+   - 点击 `结束采集` 按钮。
+      <Image src={operation_guide_48} alt="" />
+      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      <Image src={operation_guide_49} alt="" />
+   - 通过按下键盘 `Ctrl+3` 快捷键来实现结束采集的功能。
+   - 通过按下踏板中键来实现结束采集的功能。
+
+2. 结束采集后，`机器人数据采集状态` 区域中的采集状态从 `采集中` 变为 `等待开始`，同时运行时间停止计时，采集时间归零，数据落盘一条，采集条目数加 1。
+    <Image src={operation_guide_50} alt="" />
+
+</Steps>
+
+### 压缩数据
+
+import operation_guide_51 from 'img/operation_guide_51.png';
+import operation_guide_52 from 'img/operation_guide_52.png';
+import operation_guide_53 from 'img/operation_guide_53.png';
+
+在完成数据采集后，您需要将数据压缩，便于后续上传和使用。在开始以下操作前，请确保至少已完成一次数据采集。
+
+<Steps>
+1. 点击 `数据压缩` 按钮。
+   <Image src={operation_guide_51} alt="" />
+
+2. 在如下弹窗中，输入将要压缩的任务名称，点击 `开始压缩` 按钮。
+   <Image src={operation_guide_52} alt="" width="400" />
+
+3. 压缩过程如下，等待压缩完成，点击弹窗外空白处，即可关闭弹窗。
+   <Image src={operation_guide_53} alt="" width="400"/>
+
+</Steps>
+
+### 上传数据
+
+import operation_guide_54 from 'img/operation_guide_54.png';
+import operation_guide_55 from 'img/operation_guide_55.png';
+
+在完成数据采集和压缩后，您可以使用 `数据上传` 功能来上传数据。在开始以下操作前，请确保至少已完成一次数据采集和压缩。
+
+<Steps>
+1. 点击 `数据上传` 按钮。  
+   <Aside>
+   在上传过程中，请保持 HMI 界面活跃，且不可切换至浏览器其他标签页，否则可能导致上传失败。
+   </Aside>
+   <Image src={operation_guide_54} alt="" />
+2. 在如下弹窗中，请耐心等待数据上传完成。若需要取消上传，请点击 `取消上传` 按钮。
+   <Image src={operation_guide_55} alt="" width="400" />
+</Steps>

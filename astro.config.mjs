@@ -67,6 +67,16 @@ export default defineConfig({
 						'alphabot2/hardware/operation-guide',
 						'alphabot2/hardware/common-faults',
 						'alphabot2/hardware/maintenance',
+						'alphabot2/hardware/safety-regulations',
+					],
+				},
+				{
+					label: 'VR Teleoperation',
+					translations: {
+						'zh-CN': 'VR 遥操',
+					},
+					items: [
+						'vr-teleoperation/getting-started', 'vr-teleoperation/introduction', 'vr-teleoperation/operation-guide', 'vr-teleoperation/common-faults', 'vr-teleoperation/maintenance', 'vr-teleoperation/safety-regulations',
 					],
 				},
 				{
@@ -95,7 +105,7 @@ export default defineConfig({
 						'zh-CN': '声明',
 					},
 					items: [
-						'statement/disclaimer', 'statement/safety-regulations',
+						'statement/disclaimer', 
 					],
 				},
 			],
