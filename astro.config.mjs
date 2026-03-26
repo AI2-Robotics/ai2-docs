@@ -80,6 +80,15 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Exoskeleton Teleoperation',
+					translations: {
+						'zh-CN': '外骨骼遥操',
+					},
+					items: [
+						'exoskeleton-teleoperation/getting-started', 'exoskeleton-teleoperation/introduction', 'exoskeleton-teleoperation/operation-guide', 'exoskeleton-teleoperation/common-faults', 'exoskeleton-teleoperation/maintenance', 'exoskeleton-teleoperation/safety-regulations',
+					],
+				},
+				{
 					label: 'AlphaBotCore SDK',
 					translations: {
 						'zh-CN': 'AlphaBotCore SDK',
