@@ -1,0 +1,630 @@
+---
+title: 底盘相关接口
+description: 底盘 C++ 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+底盘相关的接口由如下两个类实现。您可以在 `c++\include\drivers\chassis` 目录下找到对应的头文件以获取完整 API。
+
+| 头文件 | 类名 | 说明 |
+|:------|:----|:-------|
+| `chassis_factory.h` | `ChassisFactory` | 底盘工厂类，用于创建不同类型的底盘实例。 |
+| `chassis_interface.h` | `ChassisInterface` | 底盘接口基类，定义了底盘控制的通用接口。所有特定厂商的底盘驱动都应该继承此类。 |
+
+## 创建底盘
+
+`ChassisFactory` 类提供了两种方式创建底盘实例，具体如下。
+
+1. 根据底盘参数，创建底盘实例。
+
+   - 方法原型：
+
+      ```cpp
+      static std::shared_ptr<ChassisInterface> create_chassis_from_config(const std::string& config_path)
+       ```
+
+   - 参数说明：
+
+     | 参数名 | 类型 | 说明 |
+     |:-------|:---|:-|
+     | `config_path` | 输入参数 | 底盘相关参数，具体参见 [ChassisFactoryParam](/sdk/c-plus-plus/data-structures#ChassisFactoryParam)。 |
+
+   - 返回值：
+
+     若创建成功，则返回 `ChassisInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+2. 根据配置文件，创建底盘实例。
+
+   - 方法原型：
+
+      ```cpp
+      static std::shared_ptr<ChassisInterface> create_chassis_from_config(const std::string& config_path)
+       ```
+
+   - 参数说明：
+
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+     
+     ```json
+     {
+        "chassis_type": "woosh", # 底盘厂商
+        "chassis_name": "chassis", # 底盘名称
+        "ip": "127.0.0.1", # IP 地址
+        "port": 51051 # 端口号
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+   - 返回值：
+
+     若创建成功，则返回 `ChassisInterface` 类型的共享智能指针；否则返回 `nullptr`。 
+
+## 连接底盘
+
+在创建底盘实例后，您可通过如下方法与底盘建立连接。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 断开底盘
+
+您可通过如下方法断开与底盘的连接。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘位置和速度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_pose_speed(alphabot::ChassisPoseSpeed& pose_spd)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose_spd` | 输出参数 | 底盘位置和速度。其内部数据结构，请参见 [ChassisPoseSpeed](/sdk/c-plus-plus/data-structures#ChassisPoseSpeed)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘位置
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_pose(alphabot::ChassisPose2D& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输出参数 | 底盘位置。其内部数据结构，请参见 [ChassisPose2D](/sdk/c-plus-plus/data-structures#ChassisPose2D)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘速度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_speed(alphabot::ChassisTwist& spd)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `spd` | 输出参数 | 底盘速度。其内部数据结构，请参见 [ChassisTwist](/sdk/c-plus-plus/data-structures#ChassisTwist)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘里程数
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_mileage(uint32_t& mileage)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `mileage` | 输出参数 | 累计里程数 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘盘电池信息
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_battery(alphabot::ChassisBattery& battery)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `battery` | 输出参数 | 电池信息。其内部数据结构，请参见 [ChassisBattery](/sdk/c-plus-plus/data-structures#ChassisBattery)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+
+## 获取底盘状态
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_robot_state(alphabot::ChassisState& robot_state)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `robot_state` | 输出参数 | 底盘状态相关的信息。其内部数据结构，请参见 [ChassisState](/sdk/c-plus-plus/data-structures#ChassisState)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘状态码
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_status_code(alphabot::ChassisStatusCode& status_code)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `status_state` | 输出参数 | 底盘相关的状态码。其内部数据结构，请参见 [ChassisStatusCode](/sdk/c-plus-plus/data-structures#ChassisStatusCode)。 |
+
+- 返回值：
+
+`AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘硬件状态
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_hardware_state(alphabot::ChassisHardwareState& hardware_state)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `hardware_state` | 输出参数 | 底盘硬件相关的状态信息。其内部数据结构，请参见 [ChassisHardwareState](/sdk/c-plus-plus/data-structures#ChassisHardwareState)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘静态变换
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_static_tf(std::vector<alphabot::ChassisTransformStamped>& transforms)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `transforms` | 输出参数 | 底盘静态变换。其内部数据结构，请参见 [ChassisTransformStamped](/sdk/c-plus-plus/data-structures#ChassisTransformStamped)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 设置底盘运动速度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode twist_control(float linear, float angular)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `linear` | 输入参数 | 线速度 |
+  | `angular` | 输入参数 | 角速度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 设置底盘最大速度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_max_speed(float max_spd)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `max_spd` | 输入参数 | 设置的最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 初始化底盘
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode init_robot(alphabot::ChassisPose2D pose, uint8_t update_flg)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 底盘位置。其内部数据结构，请参见 [ChassisPose2D](/sdk/c-plus-plus/data-structures#ChassisPose2D)。 |
+  | `update_flg` | 输入参数 | 是否更新位置。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 移动到目标位置
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_to_point_sync(
+      float x,
+      float y,
+      float theta,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      float max_spd = 1.0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `x` | 输入参数 | 目标位置的 X 轴坐标值。 |
+  | `y` | 输入参数 | 目标位置的 Y 轴坐标值。 |
+  | `theta` | 输入参数 | 目标位置的朝向。 |
+  | `func_callback` | 输入参数 | 回调函数。函数参数类型，请参见 [ChassisTaskResponse](/sdk/c-plus-plus/data-structures#ChassisTaskResponse)。 |
+  | `max_spd` | 输入参数（可缺省） | 最大速度。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 充电
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode to_charge_sync(float max_spd = 1.0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `max_spd` | 输入参数（可缺省） | 最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 退出充电
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode exit_charge_sync(float max_spd = 1.0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `max_spd` | 输入参数（可缺省） | 最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 直线移动
+
+- 方法原型：
+
+```cpp
+  AbcErrorCode move_straight_sync(
+      float distance,
+      float speed,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      bool use_avoid = true)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `distance` | 输入参数 | 移动距离。 |
+  | `speed` | 输入参数 | 移动速度。 |
+  | `func_callback` | 输入参数 | 回调函数。函数参数类型，请参见 [ChassisTaskResponse](/sdk/c-plus-plus/data-structures#ChassisTaskResponse)。 |
+  | `use_avoid` | 输入参数（可缺省） | 是否启用避障。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 旋转
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_rotate_sync(
+      float angle,
+      float speed,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      bool use_avoid = true)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `angle` | 输入参数 | 旋转角度。 |
+  | `speed` | 输入参数 | 旋转速度。 |
+  | `func_callback` | 输入参数 | 回调函数。函数参数类型，请参见 [ChassisTaskResponse](/sdk/c-plus-plus/data-structures#ChassisTaskResponse)。 |
+  | `use_avoid` | 输入参数（可缺省） | 是否启用避障。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 轮廓
+
+### 获取局部轮廓
+
+- 方法原型：
+  
+  ```cpp
+  AbcErrorCode get_local_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输出参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取全局轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_global_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输出参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取局部和全局轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_all_footprint(
+      std::vector<alphabot::ChassisPoint32>& local_points,
+      std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `local_points` | 输出参数 | 局部轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+  | `global_points` | 输出参数 | 全局轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取静态轮廓（基于odom和base_link坐标系）
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode ai2_get_local_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输出参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取静态轮廓（基于map和base_link坐标系）
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode ai2_get_global_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输出参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取静态轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode ai2_get_all_footprint(
+      std::vector<alphabot::ChassisPoint32>& local_points,
+      std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `local_points` | 输出参数 | 轮廓点（基于 odom 和 base_link 坐标系解算）。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+  | `global_points` | 输出参数 | 轮廓点（基于 map 和 base_link 坐标系解算）。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置局部轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_local_footprint(const std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输入参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置全局轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_global_footprint(const std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `points` | 输入参数 | 轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置局部和全局轮廓
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_all_footprint(
+      const std::vector<alphabot::ChassisPoint32>& local_points,
+      const std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `local_points` | 输入参数 | 局部轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+  | `global_points` | 输入参数 | 全局轮廓点。其内部数据结构，请参见 [ChassisPoint32](/sdk/c-plus-plus/data-structures#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取底盘名称
+
+- 方法原型：
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- 返回值：
+
+  底盘名称。

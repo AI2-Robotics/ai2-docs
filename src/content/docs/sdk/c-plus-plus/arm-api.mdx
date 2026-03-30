@@ -51,7 +51,7 @@ import { Aside } from '@astrojs/starlight/components';
 
      | 参数名 | 类型 | 说明 |
      |:-------|:---|:-|
-     | `param` | 输入参数 | 机械臂相关参数，具体参见 [ArmFactoryParam](/sdk/c-plus-plus/data-structures#armfactoryparam)。 |
+     | `param` | 输入参数 | 机械臂相关参数，具体参见 [ArmFactoryParam](/sdk/c-plus-plus/data-structures#ArmFactoryParam)。 |
 
    - 返回值：
 
@@ -124,7 +124,7 @@ import { Aside } from '@astrojs/starlight/components';
   ```
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 断开机械臂
 
@@ -137,7 +137,7 @@ import { Aside } from '@astrojs/starlight/components';
   ```
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 控制机械臂轨迹
 
@@ -165,7 +165,7 @@ import { Aside } from '@astrojs/starlight/components';
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
   | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
   | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
   | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
@@ -173,7 +173,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 笛卡尔空间直线运动
 
@@ -194,7 +194,7 @@ import { Aside } from '@astrojs/starlight/components';
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcepose)。 |
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
   | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
   | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
   | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
@@ -202,7 +202,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 以关节空间运动到目标位姿
 
@@ -223,7 +223,7 @@ import { Aside } from '@astrojs/starlight/components';
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcepose)。 |
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
   | `v` | 输入参数 | 规划速度和加速度占关节最大角速度和角加速度的百分比，取值范围为 0~100。 |
   | `r` | 输入参数 | 轨迹交融半径，默认值为 `0`。 |
   | `trajectory_connect` | 输入参数 | 轨迹连接标志，取值为 `0` 或 `1`。<br /> - `0`：立即规划并执行轨迹，不与后续轨迹连接。<br /> - `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
@@ -231,7 +231,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。  
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。  
 
 ### 角度透传 {#movejointpositioncanfd}
 
@@ -257,14 +257,14 @@ import { Aside } from '@astrojs/starlight/components';
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
   | `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
   | `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
   | `radio` | 输入参数（可缺省） | - 曲线拟合模式：`radio` 是平滑系数，取值范围为 0~100。<br />- 滤波模式：`radio` 是滤波参数，取值范围为 0\~1000。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 角度透传并避障
 
@@ -285,7 +285,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 | 参数名称 | 类型 | 说明 |
 |:---|:---|:---|
-| `arm_joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+| `arm_joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
 | `torso_head_joints` | 输入参数 | 躯干与头部关节角，单位为度。 |
 | `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
 | `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
@@ -293,7 +293,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-`AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+`AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 位姿透传
 
@@ -323,14 +323,14 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
   | `follow` | 输入参数 | 设置跟随模式，取值为 `true` 或 `false`。<br />- `true`：高跟随。<br />- `false`：低跟随。<br />若使用高跟随，透传周期要求不超过 10ms。 |
   | `trajectory_mode` | 输入参数（可缺省） | 在**高跟随模式**下使用，取值为 0、1 或 2。<br />- `0`：完全透传模式。<br />- `1`：曲线拟合模式。<br />- `2`：滤波模式。 |
   | `radio` | 输入参数（可缺省） | - 曲线拟合模式：radio 是平滑系数，取值范围为 0~100。<br />- 滤波模式：radio 是滤波参数，取值范围为 0\~1000。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 关节空间跟随运动
 
@@ -346,11 +346,11 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `joints` | 输入参数 | 目标关节位置。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `joints` | 输入参数 | 目标关节位置。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 笛卡尔空间跟随运动
 
@@ -366,11 +366,11 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+  | `pose` | 输入参数 | 目标位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 获取机械臂当前关节角度
 
@@ -384,11 +384,11 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `joints` | 输出参数 | 当前关节角数据。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `joints` | 输出参数 | 当前关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 算法
 
@@ -408,12 +408,12 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `joints` | 输入参数 | 关节角数据。其内部数据结构，请参见 [AbcType](#abctype)。 |
-  | `pose` | 输出参数 | 正解的位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
+  | `joints` | 输入参数 | 关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 逆运动学
 
@@ -431,14 +431,14 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `pose` | 输入参数 | 位姿。其内部数据结构，请参见 [AbcPose](#abcpose)。 |
-  | `ref_joints` | 输入参数 | 参考的关节角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
-  | `joints` | 输出参数 | 逆解的关节角度。其内部数据结构，请参见 [AbcType](#abctype)。 |
+  | `pose` | 输入参数 | 位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `ref_joints` | 输入参数 | 参考的关节角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints` | 输出参数 | 逆解的关节角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
   | `mode` | 输入参数（可缺省） | 求解方式，取值为 0 或 1。<br/>- `0`：单步求解。<br/>- `1`：遍历求解。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 控制机械臂运动
 
@@ -456,7 +456,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 急停
 
@@ -470,7 +470,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 暂停
 
@@ -484,7 +484,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 继续
 
@@ -498,7 +498,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 控制夹爪
 
@@ -527,7 +527,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 力控夹取
 
@@ -554,7 +554,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 持续力控夹取
 
@@ -579,7 +579,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 控制开口位置
 
@@ -604,7 +604,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 获取夹爪状态
 
@@ -618,11 +618,11 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `state` | 输出参数 | 存放夹爪状态。其内部数据结构，请参见 [AbcGripperState](#abcgripperstate)。 |
+  | `state` | 输出参数 | 存放夹爪状态。其内部数据结构，请参见 [AbcGripperState](/sdk/c-plus-plus/data-structures#AbcGripperState)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 配置 Modbus
 
@@ -653,7 +653,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 关闭 Modbus RTU 模式
 
@@ -671,7 +671,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 写多个寄存器
 
@@ -686,12 +686,12 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `params` | 输入参数 | 多个寄存器数据写入参数结构体。其中寄存器每次写的数量不超过 10 个，即该结构体成员 `num <= 10`。其内部数据结构，请参见 [PeripheralReadWriteParams](#peripheralreadwriteparams)。 |
+  | `params` | 输入参数 | 多个寄存器数据写入参数结构体。其中寄存器每次写的数量不超过 10 个，即该结构体成员 `num <= 10`。其内部数据结构，请参见 [PeripheralReadWriteParams](/sdk/c-plus-plus/data-structures#PeripheralReadWriteParams)。 |
   | `data` | 输入参数 | 要写入寄存器的数据数组。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 配置 UDP 主动上报
 
@@ -710,11 +710,11 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `config` | 输入参数 | UDP 配置。其内部数据结构，请参见 [RealtimePushConfig](#realtimepushconfig)。 |
+  | `config` | 输入参数 | UDP 配置。其内部数据结构，请参见 [RealtimePushConfig](/sdk/c-plus-plus/data-structures#RealtimePushConfig)。 |
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ### 注册机械臂状态回调函数
 
@@ -729,7 +729,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   | 参数名称 | 类型 | 说明 |
   |:---|:---|:---|
-  | `realtime_callback` | 输入参数 | 当机械臂状态更新时，系统会自动调用此回调函数。`AbcArmRealtimeStateCallback` 为函数指针类型。其数据类型，请参见 [AbcArmRealtimeStateCallback](#abcarmrealtimestatecallback)。 |
+  | `realtime_callback` | 输入参数 | 当机械臂状态更新时，系统会自动调用此回调函数。`AbcArmRealtimeStateCallback` 为函数指针类型。其数据类型，请参见 [AbcArmRealtimeStateCallback](/sdk/c-plus-plus/data-structures#AbcArmRealtimeStateCallback)。 |
 
 - 返回值：
 
@@ -754,7 +754,7 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
 - 返回值：
 
-  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](#abcerrorcode)。
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
 ## 获取机械臂名称
 

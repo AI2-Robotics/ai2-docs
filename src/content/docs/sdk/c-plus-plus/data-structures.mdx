@@ -4,21 +4,15 @@ description: C++ 接口涉及的数据结构
 ---
 
 
+## 共用数据结构
 
-## ArmFactoryParam {#armfactoryparam}
+### AbcType {#AbcType}
 
-| 结构体成员 | 数据类型 | 说明 |
-|:-------|:---|:-|
-|arm_type | string | 机械臂厂商，例如 `"realman"`。|
-|arm_name |string | 机械臂名称，例如 `"left_arm"`。 |
-|ip | string | TCP IP地址。|
-|udp_ip | string | UDP IP地址。|
-|port | int | TCP 端口号。 |
-|udp_port | int | UDP 端口号。|
-|udp_cycle | int | UDP 周期，以 `udp_cycle*5` 毫秒为周期。|
-|enable_gripper | bool | 夹爪状态。|
+```cpp
+using AbcType = double;
+```
 
-## AbcErrorCode {#abcerrorcode}
+### AbcErrorCode {#AbcErrorCode}
 
 <table>
 <thead>
@@ -31,7 +25,7 @@ description: C++ 接口涉及的数据结构
 <tbody>
 <tr>
 <td>
-SUCCESS
+`SUCCESS`
 </td>
 <td>
 0
@@ -43,7 +37,7 @@ SUCCESS
 
 <tr>
 <td>
-UNKNOWN_ERROR
+`UNKNOWN_ERROR`
 </td>
 <td>
 -1
@@ -58,7 +52,7 @@ UNKNOWN_ERROR
 
 <tr>
 <td>
-TIMEOUT
+`TIMEOUT`
 </td>
 <td>
 -2
@@ -70,7 +64,7 @@ TIMEOUT
 
 <tr>
 <td>
-INVALID_HANDLE
+`INVALID_HANDLE`
 </td>
 <td>
 -3
@@ -82,7 +76,7 @@ INVALID_HANDLE
 
 <tr>
 <td>
-INVALID_STATE
+`INVALID_STATE`
 </td>
 <td>
 -4
@@ -94,7 +88,7 @@ INVALID_STATE
 
 <tr>
 <td>
-NOT_INITIALIZED
+`NOT_INITIALIZED`
 </td>
 <td>
 -5
@@ -106,7 +100,7 @@ NOT_INITIALIZED
 
 <tr>
 <td>
-NOT_IMPLEMENTED
+`NOT_IMPLEMENTED`
 </td>
 <td>
 -6
@@ -118,7 +112,7 @@ NOT_IMPLEMENTED
 
 <tr>
 <td>
-INVALID_ARGUMENT
+`INVALID_ARGUMENT`
 </td>
 <td>
 -7
@@ -130,7 +124,7 @@ INVALID_ARGUMENT
 
 <tr>
 <td>
-PARAM_ERROR
+`PARAM_ERROR`
 </td>
 <td>
 -50
@@ -145,7 +139,7 @@ PARAM_ERROR
 
 <tr>
 <td>
-PARAM_OUT_OF_RANGE
+`PARAM_OUT_OF_RANGE`
 </td>
 <td>
 -51
@@ -157,7 +151,7 @@ PARAM_OUT_OF_RANGE
 
 <tr>
 <td>
-ARM_ERROR
+`ARM_ERROR`
 </td>
 <td>
 -100
@@ -172,7 +166,7 @@ ARM_ERROR
 
 <tr>
 <td>
-ARM_CTRL_FALSE
+`ARM_CTRL_FALSE`
 </td>
 <td>
 -101
@@ -184,7 +178,7 @@ ARM_CTRL_FALSE
 
 <tr>
 <td>
-ARM_DATA_SEND_FAILED
+`ARM_DATA_SEND_FAILED`
 </td>
 <td>
 -102
@@ -196,7 +190,7 @@ ARM_DATA_SEND_FAILED
 
 <tr>
 <td>
-ARM_DATA_RECEIVE_FAILED
+`ARM_DATA_RECEIVE_FAILED`
 </td>
 <td>
 -103
@@ -208,7 +202,7 @@ ARM_DATA_RECEIVE_FAILED
 
 <tr>
 <td>
-ARM_RETURN_DATA_ERR
+`ARM_RETURN_DATA_ERR`
 </td>
 <td>
 -104
@@ -220,7 +214,7 @@ ARM_RETURN_DATA_ERR
 
 <tr>
 <td>
-ARM_CHECK_FAILED
+`ARM_CHECK_FAILED`
 </td>
 <td>
 -105
@@ -232,7 +226,7 @@ ARM_CHECK_FAILED
 
 <tr>
 <td>
-ARM_TIMEOUT
+`ARM_TIMEOUT`
 </td>
 <td>
 -106
@@ -244,7 +238,7 @@ ARM_TIMEOUT
 
 <tr>
 <td>
-ARM_OUT_OF_RANGE
+`ARM_OUT_OF_RANGE`
 </td>
 <td>
 -107
@@ -256,7 +250,7 @@ ARM_OUT_OF_RANGE
 
 <tr>
 <td>
-TORSO_ERROR
+`TORSO_ERROR`
 </td>
 <td>
 -200
@@ -271,7 +265,7 @@ TORSO_ERROR
 
 <tr>
 <td>
-TORSO_CANBUS_ERROR
+`TORSO_CANBUS_ERROR`
 </td>
 <td>
 -201
@@ -283,7 +277,7 @@ TORSO_CANBUS_ERROR
 
 <tr>
 <td>
-TORSO_ACTUATOR_ERROR
+`TORSO_ACTUATOR_ERROR`
 </td>
 <td>
 -202
@@ -295,7 +289,7 @@ TORSO_ACTUATOR_ERROR
 
 <tr>
 <td>
-TORSO_TIMEOUT
+`TORSO_TIMEOUT`
 </td>
 <td>
 -206
@@ -307,7 +301,7 @@ TORSO_TIMEOUT
 
 <tr>
 <td>
-TORSO_OUT_OF_RANGE
+`TORSO_OUT_OF_RANGE`
 </td>
 <td>
 -207
@@ -319,7 +313,7 @@ TORSO_OUT_OF_RANGE
 
 <tr>
 <td>
-SENSOR_ERROR
+`SENSOR_ERROR`
 </td>
 <td>
 -300
@@ -334,7 +328,7 @@ SENSOR_ERROR
 
 <tr>
 <td>
-SENSOR_NOT_CONNECTED
+`SENSOR_NOT_CONNECTED`
 </td>
 <td>
 -301
@@ -346,7 +340,7 @@ SENSOR_NOT_CONNECTED
 
 <tr>
 <td>
-SENSOR_DATA_ERROR
+`SENSOR_DATA_ERROR`
 </td>
 <td>
 -302
@@ -358,7 +352,7 @@ SENSOR_DATA_ERROR
 
 <tr>
 <td>
-CHASSIS_ERROR
+`CHASSIS_ERROR`
 </td>
 <td>
 -400
@@ -373,7 +367,7 @@ CHASSIS_ERROR
 
 <tr>
 <td>
-CHASSIS_INIT_ERROR
+`CHASSIS_INIT_ERROR`
 </td>
 <td>
 -401
@@ -385,7 +379,7 @@ CHASSIS_INIT_ERROR
 
 <tr>
 <td>
-CHASSIS_TIMEOUT
+`CHASSIS_TIMEOUT`
 </td>
 <td>
 -402
@@ -397,7 +391,7 @@ CHASSIS_TIMEOUT
 
 <tr>
 <td>
-ALGO_ERROR
+`ALGO_ERROR`
 </td>
 <td>
 -900
@@ -412,7 +406,7 @@ ALGO_ERROR
 
 <tr>
 <td>
-ALGO_NOT_CONVERGED
+`ALGO_NOT_CONVERGED`
 </td>
 <td>
 -901
@@ -424,7 +418,7 @@ ALGO_NOT_CONVERGED
 
 <tr>
 <td>
-ALGO_APPROXIMATE_SOLUTION
+`ALGO_APPROXIMATE_SOLUTION`
 </td>
 <td>
 -902
@@ -436,3 +430,620 @@ ALGO_APPROXIMATE_SOLUTION
 
 </tbody>
 </table>
+
+### AbcPose {#AbcPose}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `position` | [AbcPosition](#AbcPosition) | XYZ 坐标 |
+| `quaternion` | [AbcQuat](#AbcQuat) | 四元数 |
+
+### AbcPosition {#AbcPosition}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**结构体成员**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+         <td rowspan="3">[AbcType](#AbcType)</td>
+         <td rowspan="3">XYZ 坐标值，单位为米。</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>            
+   </tbody>
+</table>
+
+
+### AbcQuat {#AbcQuat}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**结构体成员**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`w`</td>
+         <td rowspan="4">[AbcType](#AbcType)</td>
+         <td rowspan="4">四元数</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>            
+   </tbody>
+</table>
+
+### AbcPoseVelocity {#AbcPoseVelocity}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**结构体成员**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+         <td rowspan="6">[AbcType](#AbcType)</td>
+         <td rowspan="6">笛卡尔空间速度</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>
+      <tr>
+         <td>`wx`</td>
+      </tr>
+      <tr>
+         <td>`wy`</td>
+      </tr>
+      <tr>
+         <td>`wz`</td>
+      </tr>            
+   </tbody>
+</table>
+
+
+### ArmType {#ArmType}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**枚举量**</td>
+         <td>**值**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`RM65_B`</td>
+         <td>0</td>
+         <td rowspan="8">机械臂型号</td>
+      </tr>
+      <tr>
+         <td>`RM65_6FB`</td>
+         <td>1</td>
+      </tr>
+      <tr>
+         <td>`RM65_6F`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`RM75_B`</td>
+         <td>3</td>
+      </tr>
+      <tr>
+         <td>`RM75_6FB`</td>
+         <td>4</td>
+      </tr>
+      <tr>
+         <td>`RM75_6F`</td>
+         <td>5</td>
+      </tr>
+      <tr>
+         <td>`ZM73L_6F`</td>
+        <td>6</td>
+      </tr>
+      <tr>
+         <td>`ZM73R_6F`</td>
+         <td>7</td>
+      </tr>
+   </tbody>
+</table>
+
+### RobotType {#RobotType}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**枚举量**</td>
+         <td>**值**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s`</td>
+         <td>1</td>
+         <td rowspan="3">机器人型号</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot2`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s_HuiKe`</td>
+         <td>3</td>
+      </tr>
+   </tbody>
+</table>
+
+### AbcTorsoPose4D {#AbcTorsoPose4D}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `height` | [AbcType](#AbcType) | 垂直高度，单位为米（m）。 |
+| `forward` | [AbcType](#AbcType) | 前后方向位移，单位为米（m）。 |
+| `pitch` | [AbcType](#AbcType) | 俯仰角，单位为弧度（rad）。 |
+| `yaw` | [AbcType](#AbcType) | 腰部旋转角，单位为弧度（rad）。 |
+
+
+## 机械臂相关的数据结构
+
+### ArmFactoryParam {#ArmFactoryParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:-------|:---|:-|
+|`arm_type` | string | 机械臂厂商，例如 `"realman"`。|
+|`arm_name` |string | 机械臂名称，例如 `"left_arm"`。 |
+|`ip` | string | TCP IP地址。|
+|`udp_ip` | string | UDP IP地址。|
+|`port` | int | TCP 端口号。 |
+|`udp_port` | int | UDP 端口号。|
+|`udp_cycle` | int | UDP 周期，以 `udp_cycle*5` 毫秒为周期。|
+|`enable_gripper` | bool | 夹爪状态。|
+
+### AbcArmCurrentStatus {#AbcArmCurrentStatus}
+
+| 枚举量 | 说明 |
+|:---|:---|
+| `ARM_IDLE` | 使能但空闲状态 |
+| `ARM_MOVE` | 运动中状态 |
+| `ARM_MOVE_THROUGH_JOINT` | 角度透传状态 |
+| `ARM_MOVE_THROUGH_POSE` | 位姿透传状态 |
+| `ARM_MOVE_THROUGH_FORCE_POSE` | 力控透传状态 |
+| `ARM_MOVE_THROUGH_CURRENT` | 电流环透传状态 |
+| `ARM_STOP` | 急停状态 |
+| `ARM_SLOW_STOP` | 缓停状态 |
+| `ARM_PAUSE` | 暂停状态 |
+| `ARM_CURRENT_DRAG` | 电流环拖动状态 |
+| `ARM_SENSOR_DRAG` | 六维力拖动状态 |
+| `ARM_TECH_DEMONSTRATION` | 示教状态 |
+
+### AbcJointState {#AbcJointState}
+
+关节状态结构体包含以下成员。如果关节数量小于 [MAX_ARM_DOF](#MAX_ARM_DOF)，则多余的数据为 0。
+
+<table>
+   <tbody>
+      <tr>
+         <td>**结构体成员**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`joints`</td>
+         <td rowspan="6">array\<[AbcType](#AbcType), [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>当前各关节角度，单位为 rad（弧度）。</td>
+      </tr>
+      <tr>
+         <td>`joint_position`</td>
+         <td>当前各关节角度，单位为 °（度）。</td>
+      </tr>
+      <tr>
+         <td>`joint_speed`</td>
+         <td>当前各关节速度，单位为 RPM（转/分）。</td>
+      </tr>
+      <tr>
+         <td>`joint_current`</td>
+         <td>当前各关节电流，单位为 mA（毫安）。</td>
+      </tr>
+      <tr>
+         <td>`joint_temperature`</td>
+         <td>当前各关节温度，单位为 °C（摄氏度）。</td>
+      </tr>
+      <tr>
+         <td>`joint_voltage`</td>
+         <td>当前各关节电压，单位为 V（伏特）。</td>
+      </tr>
+      <tr>
+         <td>`joint_err_code`</td>
+         <td>array\<uint16_t, [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>当前各关节错误码。</td>
+        </tr>
+      <tr>
+         <td>`joint_en_flag`</td>
+         <td>array\<bool, [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>当前各关节使能标志位。<br/>- `true` 为上使能。<br/>- `false` 为掉使能。</td>
+      </tr>            
+   </tbody>
+</table>
+
+### AbcArmForceSensor {#AbcArmForceSensor}
+
+力传感器
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `force` | [AbcType](#AbcType)[6] | 当前力传感器原始数据，单位为 0.001N 或 0.001N·m。 |
+| `zero_force` | [AbcType](#AbcType)[6] | 当前力传感器系统外受力数据，单位为 0.001N 或 0.001N·m。 |
+| `coordinate` | int | 系统外受力数据的坐标系。<br/>- `0`：传感器坐标系。<br/>- `1`：当前工作坐标系。<br/>- `2`：当前工具坐标系。 |
+
+### AbcArmRealtimeState {#AbcArmRealtimeState}
+
+实时回调机械臂信息
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `name` | char[64] | 机械臂名称 |
+| `timestamp` | std::chrono::system_clock::time_point | 状态时间戳 |
+| `joint_status` | [AbcJointState](#AbcJointState) | 关节状态 |
+| `pose` | [AbcPose](#AbcPose) | 机械臂当前位姿 |
+| `force_sensor` | [AbcArmForceSensor](#AbcArmForceSensor) | 力传感器状态 |
+| `arm_current_status` | [AbcArmCurrentStatus](#AbcArmCurrentStatus) | 机械臂状态 |
+| `gripper_state` | [AbcGripperState](#AbcGripperState) | 夹爪状态 |
+| `ee_pose` | [AbcPose](#AbcPose) | 末端位姿 |
+
+### PeripheralReadWriteParams {#PeripheralReadWriteParams}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `port` | int | 通信端口。<br/>- `0`：控制器 RS485 端口。<br/>- `1`：末端接口板 RS485 接口。<br/>- `3`：控制器 Modbus TCP 设备。 |
+| `address` | int | 数据起始地址 |
+| `device` | int | 外设设备地址 |
+| `num` | int | 数据的数量 |
+
+### UdpCustomConfig {#UdpCustomConfig}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `joint_speed` | int | 关节速度。 |
+| `lift_state` | int | 升降关节信息。<br/>- `1`：上报。<br/>- `0`：关闭上报。<br/>- `-1`：不设置，保持之前的状态。 |
+| `expand_state` | int | 扩展关节信息（升降关节和扩展关节为二选一，优先显示升降关节）。<br/>- `1`：上报。<br/>- `0`：关闭上报。<br/>- `-1`：不设置，保持之前的状态。 |
+| `hand_state` | int | 灵巧手状态。<br/>- `1`：上报。<br/>- `0`：关闭上报。<br/>- `-1`：不设置，保持之前的状态。 |
+| `arm_current_status` | int | 机械臂当前状态。<br/>- `1`：上报。<br/>- `0`：关闭上报。<br/>- `-1`：不设置，保持之前的状态。 |
+| `aloha_state` | int | AlphaBot 主臂状态。<br/>- `1`：上报。<br/>- `0`：关闭上报。<br/>- `-1`：不设置，保持之前的状态。 |
+
+### RealtimePushConfig {#RealtimePushConfig}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `cycle` | int | 广播周期，值为 5ms 的倍数。 |
+| `enable` | bool | 使能，是否主动上报。 |
+| `port` | int | 广播的端口号。 |
+| `force_coordinate` | int | 系统外受力数据的坐标系。<br/>- `-1`：不支持力传感器。<br/>- `0`：传感器坐标系。<br/>- `1`：当前工作坐标系。<br/>- `2`：当前工具坐标系。 |
+| `ip` | char[28] | 自定义的上报目标 IP 地址。 |
+| `custom_config` | [UdpCustomConfig](#UdpCustomConfig) | 自定义项内容。 |
+
+### ArmFactoryParam {#ArmFactoryParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `arm_type` | string | 机械臂厂商，例如 `"realman"`。 |
+| `arm_name` | string | 机械臂名称，例如 `"left_arm"`。 |
+| `ip` | string | TCP IP 地址。 |
+| `udp_ip` | string | UDP IP 地址。 |
+| `port` | int | TCP 端口号。 |
+| `udp_port` | int | UDP 端口号。 |
+| `udp_cycle` | int | UDP 周期，以 `udp_cycle * 5` 毫秒为周期。 |
+| `enable_gripper` | bool | 夹爪状态。 |
+
+### MAX_ARM_DOF {#MAX_ARM_DOF}
+
+```cpp
+const size_t MAX_ARM_DOF = 7;
+```
+
+### AbcArmRealtimeStateCallback {#AbcArmRealtimeStateCallback}
+
+```cpp
+using AbcArmRealtimeStateCallback =
+    std::function<void(std::shared_ptr<const AbcArmRealtimeState>)>;
+```
+
+## 底盘相关的数据结构
+
+### ChassisFactoryParam {#ChassisFactoryParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:-------|:---|:-|
+|`chassis_type` | string | 底盘厂商，例如 `"woosh"`。|
+|`chassis_name` |string | 底盘名称，例如 `"chassis"`。 |
+|`ip` | string | IP 地址，例如 `"127.0.0.1"`。|
+|`port` | int | 端口号，例如 `54051`。|
+
+### ChassisPose2D {#ChassisPose2D}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `theta` | float | 朝向 |
+| `x` | float | X 轴坐标值 |
+| `y` | float | Y 轴坐标值 |
+
+### ChassisPoseSpeed {#ChassisPoseSpeed}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `map_id` | uint32_t | 当前地图 ID |
+| `mileage` | uint32_t | 累计里程数 |
+| `robot_id` | uint32_t | 底盘 ID |
+| `pose` | [ChassisPose2D](#ChassisPose2D) | 2D 位姿 |
+| `twist` | [ChassisTwist](#ChassisTwist) | 速度 |
+
+### ChassisPoint32 {#ChassisPoint32}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `x` | float | X 轴坐标值 |
+| `y` | float | Y 轴坐标值 |
+| `z` | float | Z 轴坐标值 |
+
+### ChassisTwist {#ChassisTwist}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `angular` | float | 角速度 |
+| `linear` | float | 线速度 |
+
+### ChassisTransformStamped {#ChassisTransformStamped}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**结构体成员**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`frame_id`</td>
+         <td>string</td>
+         <td>父坐标系</td>
+      </tr>
+      <tr>
+         <td>`secs`</td>
+         <td>int32_t</td>
+         <td>秒</td>
+      </tr>
+      <tr>
+         <td>`nsecs`</td>
+         <td>uint32_t</td>
+         <td>纳秒</td>
+      </tr>
+      <tr>
+         <td>`child_frame_id`</td>
+         <td>string</td>
+         <td>子坐标系</td>
+      </tr>
+      <tr>
+         <td>`t_x`</td>
+         <td>double</td>
+         <td rowspan="3">XYZ 坐标值</td>
+      </tr>
+      <tr>
+         <td>`t_y`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`t_z`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_x`</td>
+         <td>double</td>
+         <td rowspan="4">四元数</td>
+      </tr>
+      <tr>
+         <td>`r_y`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_z`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_w`</td>
+         <td>double</td>
+      </tr>            
+   </tbody>
+</table>
+
+### ChassisBattery {#ChassisBattery}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `charge_state` | [ChargeState](#ChassisBatteryChargeState) | 充电状态 |
+| `robot_id` | uint32_t | 底盘 ID |
+| `power` | uint32_t | 电量百分比，取值范围为 0~100。<br/>- `100`：全满。<br/>- `0`：无电量。 |
+| `health` | uint32_t | 电池健康（充满容量/设计容量） |
+| `charge_cycle` | uint32_t | 循环次数 |
+| `battery_cycle` | uint32_t | 电池寿命 |
+| `temp_max` | uint32_t | 电池温度（最高温度） |
+| `success` | bool | 请求是否成功。<br/>- `true`：成功响应请求。<br/>- `false`：未成功处理请求。 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisBattery::ChargeState {#ChassisBatteryChargeState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kChargeStateUndefined` | 0 | 未定义 |
+| `kNot` | 1 | 未充电 |
+| `kManual` | 2 | 手动充电中 |
+| `kAuto` | 3 | 自动充电中 |
+
+### ChassisOperationState {#ChassisOperationState}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | uint32_t | 底盘 ID |
+| `nav` | [NavState](#ChassisOperationStateNavState) | 底盘导航相关位信息 |
+| `robot` | [RobotBit](#ChassisOperationStateRobotBit) | 底盘位信息 |
+| `success` | bool | 请求是否成功。<br/>- `true`：成功响应请求。<br/>- `false`：未成功处理请求。 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisOperationState::NavState {#ChassisOperationStateNavState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kNavBitUndefined` | 0 | 未定义 |
+| `kNarrow` | 1 | 狭窄通道 |
+| `kGuide` | 2 | 引导到达 |
+| `kInaLift` | 3 | 乘梯中 |
+| `kImpede` | 4 | 阻碍 |
+| `kQRCode` | 5 | 二维码 |
+| `kStage` | 6 | 分段到达 |
+
+### ChassisOperationState::RobotBit {#ChassisOperationStateRobotBit}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kRobotBitUndefined` | 0 | 未定义 |
+| `kTaskable` | 1 | 可接任务 |
+
+### ChassisState {#ChassisState}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | uint32_t | 底盘 ID |
+| `state` | [State](#ChassisStateState) | 底盘自动模式状态 |
+| `success` | bool | 请求是否成功。<br/>- `true`：成功响应请求。<br/>- `false`：未成功处理请求。 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisState::State {#ChassisStateState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kStateUndefined` | 0 | 未定义 |
+| `kUninit` | 1 | 未初始化 |
+| `kIdle` | 2 | 空闲 |
+| `kParking` | 3 | 泊车中 |
+| `kTask` | 4 | 任务中 |
+| `kWarning` | 5 | 警告 |
+| `kFault` | 6 | 异常 |
+| `kFollowing` | 7 | 跟随中 |
+| `kCharging` | 8 | 充电中 |
+| `kMapping` | 9 | 构图中 |
+
+### ChassisStatusCode {#ChassisStatusCode}
+
+单个状态码信息
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | uint32_t | 底盘 ID |
+| `code` | uint64_t | 状态码 |
+| `time` | uint64_t | 时间 |
+| `status_msg` | string | 描述 |
+| `robot_task_id` | int64_t | 任务 ID |
+| `state` | [RobotState](#ChassisStatusCodeRobotState) | 自动模式状态 |
+| `type` | [ActionType](#ChassisStatusCodeActionType) | 动作类型 |
+| `level` | [Level](#ChassisStatusCodeLevel) | 等级 |
+| `success` | bool | 请求是否成功。<br/>- `true`：成功响应请求。<br/>- `false`：未成功处理请求。 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisStatusCode::RobotState {#ChassisStatusCodeRobotState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `rs_kStateUndefined` | 0 | 未定义 |
+| `rs_kUninit` | 1 | 未初始化 |
+| `rs_kIdle` | 2 | 空闲 |
+| `rs_kParking` | 3 | 泊车中 |
+| `rs_kTask` | 4 | 任务中 |
+| `rs_kWarning` | 5 | 警告 |
+| `rs_kFault` | 6 | 异常 |
+| `rs_kFollowing` | 7 | 跟随中 |
+| `rs_kCharging` | 8 | 充电中 |
+| `rs_kMapping` | 9 | 构图中 |
+
+### ChassisStatusCode::ActionType {#ChassisStatusCodeActionType}
+
+动作类型
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `at_kTypeUndefined` | 0 | 未定义 |
+| `at_kNav` | 1 | 导航 |
+| `at_kStepCtrl` | 2 | 单步控制 |
+| `at_kSecondposEnter` | 3 | 二次定位进入 |
+| `at_kSecondposQuit` | 4 | 二次定位退出 |
+| `at_kCarry` | 5 | 搬运动作 |
+| `at_kWait` | 6 | 等待 |
+| `at_kCharge` | 7 | 充电 |
+
+### ChassisStatusCode::Level {#ChassisStatusCodeLevel}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `l_kNormal` | 0 | 正常 |
+| `l_kTips` | 1 | 提示 |
+| `l_kWarn` | 2 | 警告 |
+| `l_kFault` | 3 | 故障 |
+
+### ChassisHardwareState {#ChassisHardwareState}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | uint32_t | 底盘 ID |
+| `lidars` | vector\<[HardwareState_State](#ChassisHardwareStateHardwareState_State)\> | repeated 激光雷达 2 |
+| `cameras` | vector\<[HardwareState_State](#ChassisHardwareStateHardwareState_State)\> | repeated 摄像头 2 |
+| `success` | bool | 请求是否成功。<br/>- `true`：成功响应请求。<br/>- `false`：未成功处理请求。 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisHardwareState::HardwareState_State {#ChassisHardwareStateHardwareState_State}
+
+硬件状态类型
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kNormal` | 0 | 正常 |
+| `kInfo` | 1 | 提示 |
+| `kWarn` | 16 | 警告 |
+| `kFatal` | 17 | 故障 |
+
+### ChassisTaskResponse {#ChassisTaskResponse}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `task_state` | [TaskState](#ChassisTaskResponseTaskState) | 任务状态 |
+| `current_pose` | [ChassisPose2D](#ChassisPose2D) | 当前 2D 位姿 |
+| `msg_type` | [MassageType](#ChassisTaskResponseMassageType) | 消息类型 |
+| `msg` | string | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+### ChassisTaskResponse::TaskState {#ChassisTaskResponseTaskState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kSuccess` | 0 | 完成 |
+| `kRunning` | 1 | 执行中 |
+| `kFailed` | 2 | 失败 |
+
+### ChassisTaskResponse::MassageType {#ChassisTaskResponseMassageType}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `kNormal` | 0 | 正常 |
+| `kWarn` | 1 | 警告 |
+| `kFault` | 2 | 故障 |
