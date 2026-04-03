@@ -1,0 +1,1195 @@
+---
+title: 示例
+description: Python 接口示例程序
+---
+
+为帮助用户快速上手，本软件包在 `python\examples` 目录中提供了完整的示例程序集。每个示例都专注于特定接口或功能模块的使用演示，建议按需参考。
+
+## 机械臂相关示例
+
+### ArmFactory 类使用示例
+
+```python
+import sys
+import os
+from alphabot import ArmFactory, ArmFactoryParam
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== ArmFactory示例程序 =====")
+
+    try:
+        print("\n----- 方法1: 通过参数创建机械臂 -----")
+        # 配置机械臂参数
+        param = ArmFactoryParam({
+            "arm_type": "realman",
+            "arm_name": "right_arm",
+            "ip": "192.168.1.18",
+            "port": "8080",
+            "udp_ip": "192.168.1.102",
+            "udp_port": "8089",
+            "udp_cycle": "5"
+        })
+
+        # 创建Realman机械臂实例
+        arm1 = ArmFactory.create_arm(param)
+        if not arm1:
+            print("创建机械臂实例失败")
+            return 1
+
+        print(f"成功创建机械臂: {arm1}")
+
+        print("\n----- 方法2: 通过配置文件创建机械臂 -----")
+        # 从配置文件创建机械臂实例
+        arm2 = ArmFactory.create_arm_from_config(config_path)
+        if not arm2:
+            print("从配置文件创建机械臂实例失败")
+            return 1
+
+        print(f"成功从配置文件创建机械臂: {arm2}")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 机械臂算法使用示例
+
+```python
+import sys
+import random
+from alphabot import ArmFactory, Pose, AbcErrorCode
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Arm算法示例程序 =====")
+
+    try:
+        # 从配置文件创建机械臂实例
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("从配置文件创建机械臂实例失败")
+            return 1
+
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("连接机械臂失败")
+            return 1
+
+        print("机械臂连接成功!")
+
+        # 获取当前关节角度
+        result, joints = arm.get_joint_degree()
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"获取关节角度失败: {result}")
+            return 1
+
+        print(f"当前关节角度: {joints}")
+
+        # 正向运动学示例
+        print("\n----- 正向运动学示例 -----")
+        result, pose = arm.forward_kinematics(joints)
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"正向运动学计算失败: {result}")
+            return 1
+
+        print(f"通过正向运动学计算的位姿: 位置({pose.position.x}, {pose.position.y}, {pose.position.z}), "
+              f"四元数({pose.quaternion.w}, {pose.quaternion.x}, {pose.quaternion.y}, {pose.quaternion.z})")
+
+        # 逆向运动学示例
+        print("\n----- 逆向运动学示例 -----")
+        # 稍微修改位姿
+        pose.position.x += random.uniform(-0.05, 0.05)
+        pose.position.y += random.uniform(-0.05, 0.05)
+        pose.position.z += random.uniform(-0.05, 0.05)
+
+        print(f"目标位姿: 位置({pose.position.x}, {pose.position.y}, {pose.position.z}), "
+              f"四元数({pose.quaternion.w}, {pose.quaternion.x}, {pose.quaternion.y}, {pose.quaternion.z})")
+
+        # 计算逆向运动学
+        result, target_joints = arm.inverse_kinematics(pose, joints, 1)
+        # 1: 遍历模式，冗余参数遍历的求解策略。
+        # 适于当前位姿跟要求解的位姿差别特别大的应用场景，
+        # 如MOVJ_P、位姿编辑等，耗时较长;
+
+        # 0: 单步模式，自动调整冗余参数的求解策略
+        # 适于当前位姿跟要求解的位姿差别特别小、连续周期控制的场景，
+        # 如笛卡尔空间规划的位姿求解等，耗时短
+
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"逆向运动学计算失败: {result}")
+            return 1
+
+        print(f"通过逆向运动学计算的关节角度: {target_joints}")
+
+        # 断开连接
+        arm.disconnect()
+        print("已断开与机械臂的连接")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 机械臂夹爪使用示例
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, GripperState, AbcErrorCode, ArmRealtimeState
+
+
+def arm_callback(state: ArmRealtimeState):
+    print(f"[回调] 夹爪状态更新: "
+          f"开口度: {state.gripper_state.actpos}, ")
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Arm夹爪示例程序 =====")
+
+    try:
+        # 从配置文件创建机械臂实例
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("从配置文件创建机械臂实例失败")
+            return 1
+
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("连接机械臂失败")
+            return 1
+
+        print("机械臂连接成功!")
+        arm.realtime_arm_state_call_back(arm_callback)
+
+        # 获取夹爪状态
+        result, gripper_state = arm.get_gripper_state()
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"获取夹爪状态失败: {result}")
+            return 1
+
+        print(f"夹爪状态: 状态={gripper_state.status}, "
+              f"错误={gripper_state.error}, 模式={gripper_state.mode}, "
+              f"当前力={gripper_state.current_force}, 温度={gripper_state.temperature}, "
+              f"开口度={gripper_state.actpos}")
+
+        # 夹爪闭合示例
+        print("\n----- 夹爪闭合示例 -----")
+        speed = 500  # 速度(0~1000)
+        force = 100  # 力度(0~1000)
+        block = True  # 阻塞模式
+        timeout = 5  # 超时时间(s)
+
+        print(f"正在闭合夹爪: 速度={speed}, 力度={force}, 阻塞={block}, 超时={timeout}ms")
+        result = arm.set_gripper_pick(speed, force, block, timeout)
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"夹爪闭合失败: {result}")
+            return 1
+
+        print("夹爪闭合成功!")
+
+        # 等待一段时间
+        time.sleep(2)
+
+        # 夹爪张开示例
+        print("\n----- 夹爪张开示例 -----")
+        speed = 500  # 速度(0~1000)
+        block = True  # 阻塞模式
+        timeout = 5  # 超时时间(s)
+
+        print(f"正在张开夹爪: 速度={speed}, 阻塞={block}, 超时={timeout}s")
+        result = arm.set_gripper_release(speed, block, timeout)
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"夹爪张开失败: {result}")
+            return 1
+
+        print("夹爪张开成功!")
+
+        # 断开连接
+        arm.disconnect()
+        print("已断开与机械臂的连接")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 机械臂运动使用示例
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, Pose, AbcErrorCode, Position
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Arm运动示例程序 =====")
+
+    try:
+        # 从配置文件创建机械臂实例
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("从配置文件创建机械臂实例失败")
+            return 1
+
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("连接机械臂失败")
+            return 1
+
+        print("机械臂连接成功!")
+
+        # 关节空间运动示例
+        print("\n----- 关节空间运动示例 -----")
+        target_joints = [20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0]  # 目标关节角度
+        print(f"移动到目标关节角度: {target_joints}")
+
+        result = arm.move_joint_position(target_joints, 10, 0, 0, 1)  # v=10, r=0, trajectory_connect=0, block=1
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"关节空间运动失败: {result}")
+            return 1
+
+        print("关节空间运动成功!")
+        time.sleep(0.5)
+
+        # 获取当前关节角度
+        result, joints = arm.get_joint_degree()
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"获取关节角度失败: {result}")
+            return 1
+
+        print(f"当前关节角度: {joints}")
+
+        diff = [abs(t - j) for t, j in zip(target_joints, joints)]
+        print(f"关节角度误差: {diff}")
+
+        print("\n----- 关节笛卡尔空间运动示例 -----")
+
+        target_pose = Pose(
+            position=(0.158377, 0.386882, 0.265853),
+            quaternion=(0.660822, -0.625990, -0.135772, 0.391173)
+        )
+
+        result = arm.move_joint_pose(target_pose, 10, 0, 0, 1)
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"关节笛卡尔空间运动失败: {result}")
+            return 1
+        print("关节笛卡尔空间运动成功!")
+        print(f"移动到目标位姿: 位置({target_pose.position.x}, {target_pose.position.y}, {target_pose.position.z}), "
+              f"四元数({target_pose.quaternion.w}, {target_pose.quaternion.x}, {target_pose.quaternion.y}, {target_pose.quaternion.z})")
+
+        target_pose.position = Position(0.2, 0.4, 0.2)
+
+        # 笛卡尔空间直线运动示例
+        print("\n----- 笛卡尔空间直线运动示例 -----")
+
+        result = arm.move_cartesian_linear(target_pose, 10, 0, 0, 1)  # v=10, r=0, trajectory_connect=0, block=1
+        if result != AbcErrorCode.SUCCESS:  # SUCCESS
+            print(f"笛卡尔空间运动失败: {result}")
+            return 1
+        print("笛卡尔空间运动成功!")
+
+        # 断开连接
+        arm.disconnect()
+        print("已断开与机械臂的连接")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+
+### 机械臂透传使用示例
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, ArmRealtimeState, AbcErrorCode
+
+
+def arm_callback(state: ArmRealtimeState):
+    """臂状态回调函数"""
+    print(f"[回调] 机械臂状态更新: "
+          f"关节1角度: {state.joint_status.joint_position[0]}, "
+          f"关节2角度: {state.joint_status.joint_position[1]}, "
+          f"关节3角度: {state.joint_status.joint_position[2]}, "
+          f"关节4角度: {state.joint_status.joint_position[3]}, "
+          f"关节5角度: {state.joint_status.joint_position[4]}, "
+          f"关节6角度: {state.joint_status.joint_position[5]}, "
+          f"关节7角度: {state.joint_status.joint_position[6]}, "
+          f"末端位置: {state.waypoint.position.x, state.waypoint.position.y, state.waypoint.position.z}, "
+          f"末端姿态: {state.waypoint.quaternion.w, state.waypoint.quaternion.x, state.waypoint.quaternion.y, state.waypoint.quaternion.z}")
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    try:
+        arm = ArmFactory.create_arm_from_config(config_path)
+
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("连接机械臂失败")
+            return 1
+
+        print("机械臂连接成功!")
+
+        arm.realtime_arm_state_call_back(arm_callback)
+
+        ret, joints = arm.get_joint_degree()
+        if ret != AbcErrorCode.SUCCESS:
+            print("获取关节角度失败", ret)
+            return 1
+
+        for _ in range(200):
+            time.sleep(0.01)
+            joints[6] += 0.1
+            ret = arm.move_joint_position_canfd(joints, True)  # 高跟随，要求控制频率大于100Hz
+            if ret != AbcErrorCode.SUCCESS:
+                print("透传失败", ret)
+
+        for _ in range(200):
+            time.sleep(0.01)
+            joints[6] -= 0.1
+            ret = arm.move_joint_position_canfd(joints, True)  # 高跟随，要求控制频率大于100Hz
+            if ret != AbcErrorCode.SUCCESS:
+                print("透传失败", ret)
+
+        arm.disconnect()
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 机械臂注册回调函数使用示例
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, ArmRealtimeState, AbcErrorCode
+
+
+def arm_left_callback(state: ArmRealtimeState):
+    """左臂状态回调函数"""
+    print(f"[回调] 机械臂left状态更新: "
+          f"关节1角度: {state.joint_status.joint_position[0]}, "
+          f"关节2角度: {state.joint_status.joint_position[1]}, "
+          f"关节3角度: {state.joint_status.joint_position[2]}, "
+          f"关节4角度: {state.joint_status.joint_position[3]}, "
+          f"关节5角度: {state.joint_status.joint_position[4]}, "
+          f"关节6角度: {state.joint_status.joint_position[5]}, "
+          f"关节7角度: {state.joint_status.joint_position[6]}")
+
+
+def arm_right_callback(state: ArmRealtimeState):
+    """右臂状态回调函数"""
+    print(f"[回调] 机械臂right状态更新: "
+          f"关节1角度: {state.joint_status.joint_position[0]}, "
+          f"关节2角度: {state.joint_status.joint_position[1]}, "
+          f"关节3角度: {state.joint_status.joint_position[2]}, "
+          f"关节4角度: {state.joint_status.joint_position[3]}, "
+          f"关节5角度: {state.joint_status.joint_position[4]}, "
+          f"关节6角度: {state.joint_status.joint_position[5]}, "
+          f"关节7角度: {state.joint_status.joint_position[6]}")
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 3:
+        print(f"使用方法: {sys.argv[0]} <左臂配置文件路径> <右臂配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json config/right_arm.json")
+        return 1
+
+    config_path_left = sys.argv[1]
+    config_path_right = sys.argv[2]
+
+    print("===== Arm回调示例程序 =====")
+
+    try:
+        # 从配置文件创建左臂实例
+        arm1 = ArmFactory.create_arm_from_config(config_path_left)
+        if not arm1:
+            print("从配置文件创建左臂实例失败")
+            return 1
+
+        # 连接左臂
+        print("正在连接左臂...")
+        if arm1.connect() != AbcErrorCode.SUCCESS:
+            print("连接左臂失败")
+            return 1
+
+        print("左臂连接成功!")
+
+        # 从配置文件创建右臂实例
+        arm2 = ArmFactory.create_arm_from_config(config_path_right)
+        if not arm2:
+            print("从配置文件创建右臂实例失败")
+            return 1
+
+        # 连接右臂
+        print("正在连接右臂...")
+        if arm2.connect() != AbcErrorCode.SUCCESS:
+            print("连接右臂失败")
+            return 1
+
+        print("右臂连接成功!")
+
+        # 注册回调函数
+        arm1.realtime_arm_state_call_back(arm_left_callback)
+        arm2.realtime_arm_state_call_back(arm_right_callback)
+
+        print("已注册回调函数，等待接收状态更新...")
+        print("按Ctrl+C退出程序")
+
+        # 保持程序运行以接收回调
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\n接收到退出信号")
+
+        # 断开连接
+        arm1.disconnect()
+        arm2.disconnect()
+        print("已断开与机械臂的连接")
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 机械臂 Modbus 使用示例
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, GripperState, AbcErrorCode
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Arm Modbus示例程序 =====")
+
+    try:
+        # 从配置文件创建机械臂实例
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("从配置文件创建机械臂实例失败")
+            return 1
+
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("连接机械臂失败")
+            return 1
+
+        print("机械臂连接成功!")
+
+        arm.set_modbus_mode(1, 115200, 100)
+
+        # 断开连接
+        arm.disconnect()
+        print("已断开与机械臂的连接")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## 底盘相关示例
+
+```python
+import sys
+import time
+import random
+from alphabot import ChassisFactory, AbcErrorCode, ChassisInterface, ChassisBattery
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/woosh_chassis.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Chassis示例程序 =====")
+
+    try:
+        # 从配置文件创建底盘实例
+        chassis = ChassisFactory.create_chassis_from_config(config_path)
+        chassis.connect()
+
+        ret, battery = chassis.get_battery()
+        if ret == AbcErrorCode.SUCCESS:
+            print(f"电池电量: {battery}%")
+        else:
+            print(f"获取电池电量失败: {ret}")
+
+        ret, pose_speed = chassis.get_pose_speed()
+        if ret == AbcErrorCode.SUCCESS:
+            print(f"位姿及速度: {pose_speed}")
+
+        chassis.disconnect()
+
+    except Exception as e:
+        print(f"发生错误: {e}")
+        return 1
+
+    print("===== 底盘示例程序结束 =====")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## 头部相关示例
+
+```python
+import sys
+import time
+import random
+from alphabot import HeadFactory, AbcErrorCode, HeadInterface
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/ti5_head.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Head示例程序 =====")
+
+    try:
+        # 从配置文件创建头部实例
+        head = HeadFactory.create_head_from_config(config_path)
+        if not head:
+            print("从配置文件创建头部实例失败")
+            return 1
+
+        # 连接头部
+        print("正在连接头部...")
+        if head.connect() != AbcErrorCode.SUCCESS:
+            print("连接头部失败")
+            return 1
+        print("头部连接成功!")
+
+        head.move_joint_position([0, 0], 60, True)
+
+        status, joints = head.get_joint_degree()
+        if int(status) != 0:
+            print("获取关节角度失败! ", status)
+
+        head_yaw_range = (-90, 90)
+        head_pitch_range = (10, -30)
+
+        for i in range(20):
+            random_head = (
+                random.uniform(*head_yaw_range),
+                random.uniform(*head_pitch_range),
+            )
+            status = head.move_joint_position(random_head, 60, True)
+            time.sleep(0.05)
+            ret, joints = head.get_joint_degree()
+            assert ret == AbcErrorCode.SUCCESS, f"move joint position failed {ret}"
+            print(f"move to {random_head}")
+            print(f"cur joints: ", joints)
+            time.sleep(0.5)
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## 躯干相关示例
+
+```python
+import sys
+import time
+import random
+from alphabot import ArmFactory, Pose, AbcErrorCode, TorsoFactoryPose4D
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/ti5_torso.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Torso示例程序 =====")
+
+    try:
+        # 从配置文件创建躯干实例
+        torso = TorsoFactoryPose4D.create_torso_from_config(config_path)
+        if not torso:
+            print("从配置文件创建躯干实例失败")
+            return 1
+
+        # 连接躯干
+        print("正在连接躯干...")
+        if torso.connect() != AbcErrorCode.SUCCESS:
+            print("连接躯干失败")
+            return 1
+        print("躯干连接成功!")
+
+        torso.move_joint_position([-10, 20, -10, 0], 60, True)
+
+        status, joints = torso.get_joint_degree()
+        if int(status) != 0:
+            print("获取关节角度失败! ", status)
+
+        status, pose = torso.forward_kinematics(joints)
+
+        height_range = (0.35, 0.7)
+        forward_range = (-0.15, 0)
+        pitch_range = (-5, 5)
+        yaw_range = (-30, 30)
+
+        for i in range(20):
+            random_height, random_forward, random_pitch, random_yaw = (
+                random.uniform(*height_range),
+                random.uniform(*forward_range),
+                random.uniform(*pitch_range),
+                random.uniform(*yaw_range)
+            )
+            pose.height = random_height
+            pose.forward = random_forward
+            pose.pitch = random_pitch
+            pose.yaw = random_yaw
+
+            status = torso.move_cartesian_linear(pose, 60, True)
+            time.sleep(0.1)
+            ret, joints = torso.get_joint_degree()
+            print(f"move to {random_height} {random_forward} {random_pitch} {random_yaw}")
+            ret, cur_pose = torso.forward_kinematics(joints)
+            print("cur pose: ", cur_pose)
+            time.sleep(0.5)
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## 传感器相关示例
+
+### SensorFactory 类使用示例
+
+```python
+import sys
+import time
+from alphabot import SensorFactory, DepthSensorParam, DepthCamera, RGBDData
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <传感器配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/realsense1.json")
+        return 1
+
+    param = DepthSensorParam({
+        'sensor_name': 'rs1',
+        'sensor_type': 'realsense',
+        'serial_number': '230422273294',
+        'color_width': '640',
+        "color_height": '480',
+        'depth_width': '640',
+        "depth_height": '480',
+        "frame_rate": '30',
+        'align_to_color': 'true'
+    })
+    sensor: DepthCamera = SensorFactory.create_depth_camera(param)
+    sensor.connect()
+    rgbd_data: RGBDData = sensor.get_data()
+    depth_data = rgbd_data.depth_data
+    mean_depth = depth_data[depth_data > 0].mean()
+
+    color_intrinsic = rgbd_data.get_color_intrinsic()
+    depth_intrinsic = rgbd_data.get_depth_intrinsic()
+    print(sensor.name, rgbd_data.timestamp, "平均深度: ", mean_depth)
+    print('color camera 内参\n', color_intrinsic)
+    print('depth camera 内参\n', depth_intrinsic)
+
+    print(rgbd_data)
+    sensor.disconnect()
+
+    config_path = sys.argv[1]
+    sensor1: DepthCamera = SensorFactory.create_depth_camera_from_config(config_path)
+    sensor1.connect()
+    rgbd_data: RGBDData = sensor1.get_data()
+    depth_data = rgbd_data.depth_data
+    mean_depth = depth_data[depth_data > 0].mean()
+    color_intrinsic = rgbd_data.get_color_intrinsic()
+    depth_intrinsic = rgbd_data.get_depth_intrinsic()
+    print(sensor1.name, rgbd_data.timestamp, "平均深度: ", mean_depth)
+    print('color camera 内参\n', color_intrinsic)
+    print('depth camera 内参\n', depth_intrinsic)
+    sensor1.disconnect()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### RealSense 相机使用示例
+
+```python
+import sys
+import time
+from alphabot import SensorFactory, DepthSensorParam, RGBDData, DepthCamera, SensorSynchronizer
+
+
+def callback(data: RGBDData):
+    print(data.timestamp)
+    print("深度相机内参: ", data.get_depth_intrinsic())
+    print("彩色相机内参: ", data.get_color_intrinsic())
+    # print(data.rgb_data)
+    # print(data)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"使用方法: {sys.argv[0]} <相机配置文件路径>")
+        print(f"示例: {sys.argv[0]} config/realsense1.json")
+        return 1
+
+    config_path = sys.argv[1]
+    sensor: DepthCamera = SensorFactory.create_depth_camera_from_config(config_path)
+
+    sensor.set_data_callback(callback)
+
+    try:
+        ret = sensor.connect()
+        if ret.value != 0:
+            print("连接相机失败", ret)
+            return 1
+
+        ret = sensor.start_stream()
+        if ret.value != 0:
+            print("打开流失败", ret)
+            return 1
+
+        for _ in range(5):
+            time.sleep(1)
+
+        sensor.disconnect()
+        return 0
+
+    except Exception as e:
+        print(e)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 传感器数据同步使用示例
+
+```python
+import sys
+import time
+from datetime import datetime
+from alphabot import ArmFactory, SensorFactory, SyncDataPackage, SyncMode, SyncPolicy, SensorSynchronizer, RGBDData
+
+
+def callback(data: SyncDataPackage):
+    arms_data = data.get_all_arm_data()
+    sensors_data = data.get_all_sensor_data()
+    ts: datetime = data.get_timestamp()
+    print(f"同步时间戳: {ts}")
+
+    for arm_name, arm_data in arms_data.items():
+        print(arm_name, arm_data.timestamp, *arm_data.joint_status.joint_position,
+              "夹爪开合度: ", arm_data.gripper_state.actpos)
+    for sensor_name, sensor_data in sensors_data.items():
+        if isinstance(sensor_data, RGBDData):
+            depth_data = sensor_data.depth_data
+            mean_depth = depth_data[depth_data > 0].mean()
+            print(sensor_name, sensor_data.timestamp, "平均深度: ", mean_depth)
+
+
+def main():
+    """主函数"""
+    # 参数检查
+    if len(sys.argv) < 6:
+        print(f"使用方法: {sys.argv[0]} <机械臂配置文件路径1> <机械臂配置文件路径2> <传感器配置文件路径1> <传感器配置文件路径2> <传感器配置文件路径3> ")
+        print(f"示例: {sys.argv[0]} config/left_arm.json config/right_arm.json config/realsense1.json config/realsense2.json config/realsense3.json ")
+        return 1
+
+    arm1_config_path = sys.argv[1]
+    arm2_config_path = sys.argv[2]
+    sensor1_config_path = sys.argv[3]
+    sensor2_config_path = sys.argv[4]
+    sensor3_config_path = sys.argv[5]
+
+    arm1 = ArmFactory.create_arm_from_config(arm1_config_path)
+    arm2 = ArmFactory.create_arm_from_config(arm2_config_path)
+    sensor1 = SensorFactory.create_depth_camera_from_config(sensor1_config_path)
+    sensor2 = SensorFactory.create_depth_camera_from_config(sensor2_config_path)
+    sensor3 = SensorFactory.create_depth_camera_from_config(sensor3_config_path)
+
+    sync = SensorSynchronizer(SyncPolicy.NEAREST, time_tolerance_ms=100)
+
+    if int(sync.add_arm(arm1.name, arm1)) != 0:
+        print("添加机械臂1失败")
+    if int(sync.add_arm(arm2.name, arm2)) != 0:
+        print("添加机械臂2失败")
+
+    if int(sync.add_sensor(sensor1.name, sensor1)) != 0:
+        print("添加传感器1失败")
+        return 1
+    if int(sync.add_sensor(sensor2.name, sensor2)) != 0:
+        print("添加传感器2失败")
+        return 1
+    if int(sync.add_sensor(sensor3.name, sensor3)) != 0:
+        print("添加传感器3失败")
+        return 1
+
+    sync.set_sync_mode(SyncMode.REFERENCE_SENSOR)
+    sync.set_reference_sensor(sensor3.name)
+
+    sync.set_sync_data_callback(callback)
+
+    print("启动同步器")
+    ret = sync.start()
+    if int(ret) != 0:
+        print("同步器启动失败", ret)
+        return 1
+
+    print("已注册回调函数，等待接收状态更新...")
+    print("按Ctrl+C退出程序")
+
+    # 保持程序运行以接收回调
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n接收到退出信号")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 监控急停按钮示例
+
+```python
+import time
+import threading
+from alphabot import EStopMonitor, EStopMConfig, ESState
+
+
+def main():
+    cfg = EStopMConfig()
+    cfg.auto_start_ = False
+    esm = EStopMonitor(cfg)
+
+    # 设置若干回调
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed\033[0m"))
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed(02)\033[0m"))
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed(03)\033[0m"))
+
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released\033[0m"))
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released(02)\033[0m"))
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released(03)\033[0m"))
+
+    esm.run()
+
+    stop_flag = False
+
+    def monitor_loop():
+        while not stop_flag:
+            state = esm.get_state()  # 主动获取急停状态
+            if state == ESState.Invalid:
+                print("esm state: None")
+            elif state == ESState.Pressed:
+                print("esm state: Pressed")
+            elif state == ESState.Released:
+                print("esm state: Released")
+            else:
+                print(f"esm state: {state}")
+            time.sleep(1)
+
+    t = threading.Thread(target=monitor_loop)
+    t.start()
+
+    while False:
+        print("10s后暂停")
+        time.sleep(10)
+        esm.pause()
+        print("暂停!10s后恢复")
+        time.sleep(10)
+        esm.run()
+
+    time.sleep(600)
+
+    stop_flag = True
+    t.join()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## 算法相关示例
+
+### 机械臂运动学示例
+
+```python
+import sys
+import random
+import numpy as np
+from alphabot import ArmType, ArmKinematics, AbcErrorCode
+
+
+def main():
+    """主函数"""
+    print("===== 机械臂运动学示例程序 =====")
+
+    try:
+        # 创建机械臂运动学实例 - 选择ZM型号
+        print("创建机械臂运动学实例...")
+        kin = ArmKinematics.create(ArmType.ZM73L_6F)
+        if not kin:
+            print("创建机械臂运动学实例失败")
+            return 1
+
+        print("机械臂运动学实例创建成功!")
+
+        # 定义示例关节角度（以弧度为单位）
+        joints = [
+            0.08355030879064443,
+            0.021789388835488886,
+            -0.21593039291738889,
+            -1.6911874182518334,
+            -0.8637442609501667,
+            0.1572672578973611,
+            -0.8943957337265
+        ]
+        print(f"初始关节角度: {[f'{j:.4f}' for j in joints]}")
+
+        # 正向运动学示例
+        print("\n----- 正向运动学示例 -----")
+        result, pose = kin.forward_kinematics(joints)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"正向运动学计算失败: {result}")
+            return 1
+
+        print("通过正向运动学计算的末端位姿:")
+        print(pose)
+
+        # 逆向运动学示例 - 解析解
+        print("\n----- 逆向运动学示例（数值解） -----")
+        # 稍微修改位姿
+        target_pose = pose
+        target_pose.position.x += 0.02
+        target_pose.position.y -= 0.03
+
+        print("目标位姿:")
+        print(target_pose)
+
+        # 计算逆向运动学（解析解）
+        result, target_joints = kin.inverse_kinematics(target_pose, joints, 0)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"逆向运动学计算失败: {result}")
+        else:
+            print("通过逆向运动学计算的关节角度（解析解）:")
+            print(f"目标关节角度: {[f'{j:.4f}' for j in target_joints]}")
+
+            # 验证逆解结果
+            result, new_pose = kin.forward_kinematics(target_joints)
+            if result == AbcErrorCode.SUCCESS:
+                print("验证结果（将逆解关节角度代入正解）:")
+                print(new_pose)
+
+                # 计算位置误差
+                pos_error = np.sqrt((target_pose.position.x - new_pose.position.x) ** 2 +
+                                    (target_pose.position.y - new_pose.position.y) ** 2 +
+                                    (target_pose.position.z - new_pose.position.z) ** 2)
+                print(f"位置误差: {pos_error:.6f} 米")
+
+        # 关节限位检查示例
+        print("\n----- 关节限位检查示例 -----")
+        valid_joints = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        invalid_joints = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]  # 超出限位的关节角度
+
+        result = kin.check_range(valid_joints)
+        print(f"有效关节角度检查结果: {result}")
+
+        result = kin.check_range(invalid_joints)
+        print(f"无效关节角度检查结果: {result}")
+
+        return 0
+
+    except Exception as e:
+        print(f"发生异常: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 导纳控制律
+
+```python
+from alphabot import AbcErrorCode, ArmKinematics, ArmType, Pose
+from alphabot import addmittance_control_law
+
+
+def main() -> None:
+    arm = ArmKinematics.create(ArmType.RM65_6F)
+
+    pose = Pose(
+        position=(0.35, 0.00, 0.25),
+        quaternion=(1.0, 0.0, 0.0, 0.0),
+    )
+
+    # q 的长度必须与机械臂自由度一致。
+    # 例如 6 自由度机械臂必须传入 6 个关节值。
+    # 维度不匹配时，算法可能返回：
+    # PARAM_ERROR / ALGO_ERROR / ARM_OUT_OF_RANGE。
+    q = [0.0, -0.2, 0.3, 0.0, 0.1, 0.0]
+
+    # force 必须是长度为 6 的数组，顺序为：
+    # [Mx, My, Mz, Fx, Fy, Fz]
+    # 长度不是 6 时，pybind11 类型转换会抛出 TypeError。
+    force = [0.0, 0.0, 0.0, 3.5, 0.0, -1.0]
+
+    ret, next_q = addmittance_control_law(
+        arm=arm,
+        pose=pose,
+        p_stiffness=200.0,
+        r_stiffness=8.0,
+        force=force,
+        t=0.005,
+        q=q,
+    )
+
+    if ret != AbcErrorCode.SUCCESS:
+        raise RuntimeError(f"addmittance_control_law failed: {ret}")
+
+    print("next_q =", next_q)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+
+

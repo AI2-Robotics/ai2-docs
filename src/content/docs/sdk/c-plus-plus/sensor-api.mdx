@@ -6,3 +6,712 @@ description: 传感器 C++ 接口说明
 import { Aside } from '@astrojs/starlight/components';
 
 
+传感器相关的接口由如下类实现。您可以在 `c++\include\drivers\sensors` 目录下找到对应的头文件以获取完整 API。
+
+<table>
+   <tbody>
+      <tr>
+         <td>**头文件**</td>
+         <td>**类名**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`sensor_factory.h`</td>
+         <td>`SensorFactory`</td>
+         <td>传感器工厂类，用于创建不同类型的传感器实例。</td>
+      </tr>
+      <tr>
+         <td rowspan="3">`sensor_interface.h`</td>
+         <td>`SensorData`</td>
+         <td>传感器数据基类。所有传感器数据类型都应该继承此类，以提供时间戳信息。</td>
+      </tr>
+      <tr>
+         <td>`SensorInterface`</td>
+         <td>传感器接口基类，定义了传感器控制的通用接口。所有特定类型的传感器驱动都应该继承此类。</td>
+      </tr>
+      <tr>
+         <td>`StreamableSensor`</td>
+         <td>传感器数据流类型，继承自 `SensorInterface`。</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`camera_data.h`</td>
+         <td>`RGBData`</td>
+         <td>彩色图像数据类型，继承自 `SensorData`。</td>
+      </tr>
+      <tr>
+         <td>`RGBDData`</td>
+         <td>深度图像数据类型，继承自 `RGBData`。</td>
+      </tr>
+      <tr>
+         <td>`depth_camera_interface.h`</td>
+         <td>`DepthCamera`</td>
+         <td>深度相机接口类，继承自 `SensorInterface`。</td>
+      </tr>
+   </tbody>
+</table>
+
+## 传感器
+
+### 创建传感器
+
+创建传感器实例有两种方式，具体如下所示。
+
+1. 根据传感器参数，创建传感器实例。
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<SensorInterface> create_sensor(
+         const std::unordered_map<std::string, std::string>& params)
+     ```
+   
+   - 参数说明：
+   
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `params`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     传感器相关参数，例如：
+     
+     ```json
+     {
+        "sensor_name":"rs1", #传感器名称
+        "sensor_type":"realsense", #传感器厂商
+        "serial_number":"215322070063", #序列号
+        "color_width":"640", #彩色图宽
+        "color_height":"480", #彩色图高
+        "depth_width":"640", #深度图宽
+        "depth_height":"480", #深度图高
+        "align_to_color":"true", #是否将深度图对齐到彩色图
+        "frame_rate":"30" #帧率
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>  
+   
+   - 返回值：
+   
+     若创建成功，则返回 `SensorInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+2. 根据配置文件，创建传感器实例。
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<SensorInterface> create_sensor_from_config(
+         const std::string& config_path)
+     ```
+   
+   - 参数说明：
+   
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，例如：
+     
+     ```json
+     {
+        "sensor_name":"rs1", #传感器名称
+        "sensor_type":"realsense", #传感器厂商
+        "serial_number":"215322070063", #序列号
+        "color_width":"640", #彩色图宽
+        "color_height":"480", #彩色图高
+        "depth_width":"640", #深度图宽
+        "depth_height":"480", #深度图高
+        "align_to_color":"true", #是否将深度图对齐到彩色图
+        "frame_rate":"30" #帧率
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>  
+   
+   - 返回值：
+   
+     若创建成功，则返回 `SensorInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+### 连接传感器
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 断开传感器
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 注册传感器数据处理回调函数
+
+此方法用于注册一个回调函数，当传感器采集到新数据时，系统会自动调用该回调函数进行数据处理。
+
+- 方法原型：
+
+  ```cpp
+  void set_data_callback(SensorCallback cb)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `cb` | 输入参数 | 当传感器数据更新时，系统会自动调用此回调函数。`SensorCallback` 为函数指针类型。其数据类型，请参见 [SensorCallback](/sdk/c-plus-plus/data-structures#SensorCallback)。 |
+
+- 返回值：
+
+  无。
+
+### 获取传感器名称
+
+- 方法原型：
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- 返回值：
+
+  传感器名称。
+
+### 获取传感器类型
+
+- 方法原型：
+
+  ```cpp
+  SensorType get_type() const
+  ```
+
+- 返回值：
+
+  传感器类型，具体参见 [SensorType](/sdk/c-plus-plus/data-structures#SensorType)。
+
+### 获取传感器状态
+
+- 方法原型：
+
+  ```cpp
+  SensorStatus get_status() const
+  ```
+
+- 返回值：
+
+  传感器状态，具体参见 [SensorStatus](/sdk/c-plus-plus/data-structures#SensorStatus)。
+
+### 设置传感器状态
+
+- 方法原型：
+
+  ```cpp
+  void set_status(SensorStatus status)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `status` | 输入参数 | 传感器状态，具体参见 [SensorStatus](/sdk/c-plus-plus/data-structures#SensorStatus)。 |
+
+- 返回值：
+
+  无。
+
+## 传感器数据
+
+### 获取数据时间戳
+
+- 方法原型：
+
+  ```cpp
+  std::chrono::system_clock::time_point get_timestamp()
+  ```
+
+- 返回值：
+
+  时间戳。
+
+### 设置数据时间戳
+
+- 方法原型：
+
+  ```cpp
+  void set_timestamp(const std::chrono::system_clock::time_point& timestamp)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `timestamp` | 输入参数 | 时间戳 |
+
+- 返回值：
+
+  无。
+
+## 传感器数据流
+
+### 启动数据流
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode start_stream()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 停止数据流
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode stop_stream()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 图像数据
+
+### 获取彩色图像宽度
+
+- 方法原型：
+
+  ```cpp
+  int get_width() const
+  ```
+
+- 返回值：
+
+  彩色图像宽度。
+
+### 获取彩色图像高度
+
+- 方法原型：
+
+  ```cpp
+  int get_height() const
+  ```
+
+- 返回值：
+
+  彩色图像高度。
+
+### 获取彩色图像通道数
+
+- 方法原型：
+
+  ```cpp
+  int get_channels() const
+  ```
+
+- 返回值：
+
+  彩色图像通道数。
+
+### 获取彩色图像数据
+
+- 方法原型：
+
+  ```cpp
+  std::vector<uint8_t>& get_rgb_data()
+  ```
+
+- 返回值：
+
+  彩色图像数据。
+
+### 设置彩色图像数据
+
+- 方法原型：
+
+  ```cpp
+  void set_rgb_data(const std::vector<uint8_t>& data)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `data` | 输入参数 | 彩色图像数据。 |
+
+- 返回值：
+
+  无。
+
+### 获取彩色相机内参
+
+- 方法原型：
+
+  ```cpp
+  const AbcIntrinsic& get_color_intrinsic() const
+  ```
+
+- 返回值：
+
+  彩色相机内参，具体参见 [AbcIntrinsic](/sdk/c-plus-plus/data-structures#AbcIntrinsic)。
+
+### 设置彩色相机内参
+
+- 方法原型：
+
+  ```cpp
+  void set_color_intrinsic(const AbcIntrinsic& intrinsic)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `intrinsic` | 输入参数 | 彩色相机内参，具体参见 [AbcIntrinsic](/sdk/c-plus-plus/data-structures#AbcIntrinsic)。 |
+
+- 返回值：
+
+  无。
+
+### 获取深度图像数据
+
+- 方法原型：
+
+  ```cpp
+  const std::vector<float>& get_depth_data() const
+  std::vector<float>& get_depth_data()
+  ```
+
+- 返回值：
+
+  深度图像数据，单位为米。
+
+### 设置深度图像数据
+
+- 方法原型：
+
+  ```cpp
+  void set_depth_data(const std::vector<float>& data)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `data` | 输入参数 | 深度图像数据，单位为米。 |
+
+- 返回值：
+
+  无。
+
+### 获取深度图像宽度
+
+- 方法原型：
+
+  ```cpp
+  int get_depth_width() const
+  ```
+
+- 返回值：
+
+  深度图像宽度。
+
+### 获取深度图像高度
+
+- 方法原型：
+
+  ```cpp
+  int get_depth_height() const
+  ```
+
+- 返回值：
+
+  深度图像高度。
+
+### 获取深度相机内参
+
+- 方法原型：
+
+  ```cpp
+  const AbcIntrinsic& get_depth_intrinsic() const
+  ```
+
+- 返回值：
+
+  深度相机内参，具体参见 [AbcIntrinsic](/sdk/c-plus-plus/data-structures#AbcIntrinsic)。
+
+### 设置深度相机内参
+
+- 方法原型：
+
+  ```cpp
+  void set_depth_intrinsic(const AbcIntrinsic& intrinsic)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `intrinsic` | 输入参数 | 深度相机内参，具体参见 [AbcIntrinsic](/sdk/c-plus-plus/data-structures#AbcIntrinsic)。 |
+
+- 返回值：
+
+  无。
+
+## 深度相机
+
+### 创建深度相机
+
+创建深度相机实例有两种方式，具体如下所示。
+
+1. 根据深度相机参数，创建深度相机实例。
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<DepthCamera> create_depth_camera(
+         const DepthSensorParam& param)
+     ```
+   
+   - 参数说明：
+   
+     | 参数名称 | 类型 | 说明 |
+     |:---|:---|:---|
+     | `param` | 输入参数 | 深度相机相关参数。其内部数据结构，请参见 [DepthSensorParam](/sdk/c-plus-plus/data-structures#DepthSensorParam)。 |
+   
+   - 返回值：
+   
+     若创建成功，则返回 `DepthCamera` 类型的共享智能指针；否则返回 `nullptr`。
+
+2. 根据配置文件，创建深度相机实例。
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<DepthCamera> create_depth_camera_from_config(
+         const std::string& config_path)
+     ```
+   
+   - 参数说明：
+   
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+     
+     ```json
+     {
+        "sensor_name":"rs1", #传感器名称
+        "sensor_type":"realsense", #传感器厂商
+        "serial_number":"215322070063", #序列号
+        "color_width":"640", #彩色图宽
+        "color_height":"480", #彩色图高
+        "depth_width":"640", #深度图宽
+        "depth_height":"480", #深度图高
+        "align_to_color":"true", #是否将深度图对齐到彩色图
+        "frame_rate":"30" #帧率
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+   
+   - 返回值：
+   
+     若创建成功，则返回 `DepthCamera` 类型的共享智能指针；否则返回 `nullptr`。
+
+### 获取深度图像数据
+
+- 方法原型：
+
+  ```cpp
+  std::shared_ptr<const RGBDData> get_data()
+  ```
+
+- 返回值：
+
+  `RGBDData` 类型的共享智能指针。
+
+### 开始数据流
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode start_stream()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 停止数据流
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode stop_stream()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置彩色图像分辨率
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_color_resolution(int width, int height)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `width` | 输入参数 | 宽度 |
+  | `height` | 输入参数 | 高度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置深度图像分辨率
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_depth_resolution(int width, int height)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `width` | 输入参数 | 宽度 |
+  | `height` | 输入参数 | 高度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置帧率
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_framerate(int fps)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `fps` | 输入参数 | 帧率 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置深度图像对齐到彩色图像
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_align_to_color(bool align)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `align` | 输入参数 | 是否将深度图像对齐到彩色图像 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取当前对齐设置
+
+- 方法原型：
+
+  ```cpp
+  bool is_aligned_to_color()
+  ```
+
+- 返回值：
+
+  `true` 表示深度图像已对齐到彩色图像，`false` 表示深度图像未对齐到彩色图像。

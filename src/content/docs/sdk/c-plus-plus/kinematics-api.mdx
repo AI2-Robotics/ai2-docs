@@ -5,4 +5,549 @@ description: 运动学 C++ 接口说明
 
 import { Aside } from '@astrojs/starlight/components';
 
+运动学相关的接口由如下类实现。您可以在 `c++\include\core\algo\kinematics` 目录下找到对应的头文件以获取完整 API。
 
+| 头文件 | 类名 | 说明 |
+|:---|:---|:---|
+| `kinematics.h` | `Kinematics` | 运动学基类。 |
+| `arm_kinematics.h` | `ArmKinematics` | 机械臂运动学类，继承自 `Kinematics` 类。 |
+| `torso_kinematics.h` | `TorsoKinematics` | 躯干运动学类，继承自 `Kinematics` 类。 |
+| `collision.h` | `AbcCollisionEntity` | 碰撞体类。 |
+
+## 基本运动学相关接口
+
+### 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      PoseType& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。`PoseType` 是占位符类型名称。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const PoseType& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 给定位姿。`PoseType` 是占位符类型名称。 |
+  | `ref_joints` | 输入参数 | 参考关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints` | 输出参数 | 逆解的关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `mode` | 输入参数 | - `0`：数值解，单步模式，适用于当前位姿与目标位姿相差不大的情况，在连续运动的情况下使用。<br/>- `1`：数值解，多步模式，适用于当前位姿与目标位姿相差较大的情况，时间较长。<br/>- `2`：解析解。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints_v` | 输入参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_pose` | 输出参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `end_effector_v` | 输出参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_v` | 输入参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+  | `joints_v` | 输出参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 检测是否超出关节限位
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `j` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示未超出关节限位；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 机械臂运动学相关接口
+
+### 创建机械臂运动学
+
+- 方法原型：
+
+  ```cpp
+  static std::unique_ptr<ArmKinematics> create(ArmType type)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `type` | 输入参数 | 机械臂型号。其数据结构，请参见 [ArmType](/sdk/c-plus-plus/data-structures#ArmType)。 |
+
+- 返回值：
+
+  若创建成功，则返回 `ArmKinematics` 类型的独占智能指针；否则返回 `nullptr`。
+
+### 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      AbcPose& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcPose& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `ref_joints` | 输入参数 | 参考关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints` | 输出参数 | 逆解的关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `mode` | 输入参数 | - `0`：数值解，单步模式，适用于当前位姿与目标位姿相差不大的情况，在连续运动的情况下使用。<br/>- `1`：数值解，多步模式，适用于当前位姿与目标位姿相差较大的情况，时间较长。<br/>- `2`：解析解。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 搜索逆运动学冗余参数
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics_parameter_search(
+      const AbcPose& pose,
+      const size_t& select,
+      const std::function<AbcType(std::vector<AbcType>& joints)>& cost,
+      std::vector<AbcType>& joints,
+      AbcType& param)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `select` | 输入参数 | 逆运动学所有解的索引，推荐选 0 **（重要：末端位姿连续运动时，不要在运动时更改，固定选择的解也是连续的）**。 |
+  | `cost` | 输入参数 | 代价回调函数。 |
+  | `joints` | 输出参数 | 逆解关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `param` | 输出参数 | 逆解冗余参数。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 解析解逆运动学其中一个解
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics_analytical(
+      const AbcPose& pose,
+      const AbcType& parameter,
+      const size_t& select,
+      std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `parameter` | 输入参数 | 冗余参数。 |
+  | `select` | 输入参数 | 逆运动学所有解的索引，推荐选 0 **（重要：末端位姿连续运动时，不要在运动时更改，固定选择的解也是连续的）**。 |
+  | `joints` | 输出参数 | 逆解关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 检测机械臂与环境碰撞
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode arm_environment_collision(
+      const std::vector<AbcType>& joints,
+      const std::vector<AbcCollisionEntity>& environment,
+      const std::vector<AbcPose>& environment_entities_pose,
+      const std::vector<std::vector<bool>>& collision_bypass,
+      std::vector<std::vector<AbcType>>& collision_matrix)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `environment` | 输入参数 | 环境障碍物。`AbcCollisionEntity` 类可以定义障碍物的几何形状及尺寸。 |
+  | `environment_entities_pose` | 输入参数 | 环境障碍物位姿。 |
+  | `collision_bypass` | 输入参数 | 碰撞检测跳过矩阵。 |
+  | `collision_matrix` | 输出参数 | 碰撞检测结果。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 检测机械臂与躯干碰撞
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode arm_body_collision(
+      const std::vector<AbcType>& arm_joints,
+      const std::vector<AbcType>& torso_joints,
+      std::vector<std::vector<AbcType>>& collision_matrix)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `arm_joints` | 输入参数 | 机械臂关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `torso_joints` | 输入参数 | 躯干关节值。 |
+  | `collision_matrix` | 输出参数 | 碰撞检测结果（7x7 矩阵）。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints_v` | 输入参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_pose` | 输出参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `end_effector_v` | 输出参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_v` | 输入参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+  | `joints_v` | 输出参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 检测是否超出关节限位
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `j` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示未超出关节限位；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置数值求解精度
+
+- 方法原型：
+
+  ```cpp
+  void set_numerical_precision(AbcType precision)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `precision` | 输入参数 | 设置的精度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  无。
+
+## 导纳控制律
+
+导纳控制律在 `c++\include\core\algo\control\admittance_control.h` 头文件中。它根据当前末端执行器的位姿、期望位姿、外力、刚度和阻尼参数，计算下一个时刻的关节角度。
+
+<Aside>
+- 刚度和阻尼参数需要根据具体的应用场景进行调整。
+- 在机器人控制循环中调用此函数，输入为当前末端执行器的姿态，以及平移刚度与旋转刚度，输出为下一个时刻的关节位置。
+</Aside>
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode addmittance_control_law(
+      alphabot::ArmKinematics& arm, 
+      const AbcPose& pose, 
+      AbcType p_stiffness,
+      AbcType r_stiffness, 
+      const std::array<AbcType, 6>& force, 
+      AbcType t,
+      const std::vector<AbcType>& q, 
+      std::vector<AbcType>& next_q)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `arm` | 输入参数 | `ArmKinematics` 类型对象的引用 |
+  | `pose` | 输入参数 | 末端位置和姿态 |
+  | `p_stiffness` | 输入参数 | 平移刚度 |
+  | `r_stiffness` | 输入参数 | 旋转刚度 |
+  | `force` | 输入参数 | 末端施加的空间六维力顺序：<br/>`[Mx, My, Mz, Fx, Fy, Fz]` |
+  | `t` | 输入参数 | 积分时间（小于等于一次控制循环所用时间） |
+  | `q` | 输入参数 | 当前关节角度 |
+  | `next_q` | 输出参数 | 下一个时刻的关节角度 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 躯干运动学相关接口
+
+### 创建躯干运动学
+
+- 方法原型：
+
+  ```cpp
+  static std::unique_ptr<TorsoKinematics> create(RobotType type)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `type` | 输入参数 | 机器人型号。其数据结构，请参见 [RobotType](/sdk/c-plus-plus/data-structures#RobotType)。 |
+
+- 返回值：
+
+  若创建成功，则返回 `TorsoKinematics` 类型的独占智能指针；否则返回 `nullptr`。
+
+### 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      AbcTorsoPose4D& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。其数据结构，请参见 [AbcTorsoPose4D](/sdk/c-plus-plus/data-structures#AbcTorsoPose4D)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcTorsoPose4D& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 给定位姿。其数据结构，请参见 [AbcTorsoPose4D](/sdk/c-plus-plus/data-structures#AbcTorsoPose4D)。 |
+  | `ref_joints` | 输入参数 | 参考关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints` | 输出参数 | 逆解的关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `mode` | 输入参数 | - `0`：数值解，单步模式，适用于当前位姿与目标位姿相差不大的情况，在连续运动的情况下使用。<br/>- `1`：数值解，多步模式，适用于当前位姿与目标位姿相差较大的情况，时间较长。<br/>- `2`：解析解。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `joints_v` | 输入参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_pose` | 输出参数 | 末端的位置和姿态。其数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+  | `end_effector_v` | 输出参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 微分逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joint` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_effector_v` | 输入参数 | 末端速度。其数据结构，请参见 [AbcPoseVelocity](/sdk/c-plus-plus/data-structures#AbcPoseVelocity)。 |
+  | `joints_v` | 输出参数 | 关节速度。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 检测是否超出关节限位
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `j` | 输入参数 | 给定关节值。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示未超出关节限位；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。

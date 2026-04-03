@@ -6,3 +6,581 @@ description: 轨迹规划器 C++ 接口说明
 import { Aside } from '@astrojs/starlight/components';
 
 
+轨迹规划器相关的接口由如下类实现。您可以在 `c++\include\drivers\traj` 目录下找到对应的头文件以获取完整 API。
+
+<table>
+   <tbody>
+      <tr>
+         <td>**头文件**</td>
+         <td>**类名**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`trajectory.h`</td>
+         <td>`Trajectory`</td>
+         <td>轨迹类，包含一组有序的轨迹点，以及相关元数据。</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`trajectory_planner.h`</td>
+         <td>`TrajectoryPlanner`</td>
+         <td>定义轨迹规划器的通用接口，支持不同的规划算法。</td>
+      </tr>
+      <tr>
+         <td>`CollisionChecker`</td>
+         <td>避障约束接口。</td>
+      </tr>
+      <tr>
+         <td>`poly5_planner.h`</td>
+         <td>`Poly5Planner`</td>
+         <td>使用五次多项式进行轨迹规划，提供平滑的加减速过程，继承自 `TrajectoryPlanner`。</td>
+      </tr>
+   </tbody>
+</table>
+
+## 轨迹
+
+### 添加轨迹点
+
+- 方法原型：
+
+  ```cpp
+  void addPoint(const TrajectoryPoint& point)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `point` | 输入参数 | 轨迹点，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。 |
+
+- 返回值：
+
+  无。
+
+### 获取轨迹点
+
+- 方法原型：
+
+  ```cpp
+  const TrajectoryPoint& getPoint(size_t index) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `index` | 输入参数 | 索引 |
+
+- 返回值：
+
+  轨迹点，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。
+
+### 获取指定时间的轨迹点
+
+- 方法原型：
+
+  ```cpp
+  TrajectoryPoint getPointAtTime(
+      AbcType time,
+      bool interpolate = true) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `time` | 输入参数 | 时间戳，具体参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `interpolate` | 输入参数（可缺省） | 是否插值。 |
+
+- 返回值：
+
+  轨迹点，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。
+
+### 获取轨迹点数量
+
+- 方法原型：
+
+  ```cpp
+  size_t size() const
+  ```
+
+- 返回值：
+
+  轨迹点数量。
+
+### 获取轨迹总时长
+
+- 方法原型：
+
+  ```cpp
+  AbcType getDuration() const
+  ```
+
+- 返回值：
+
+  轨迹总时长，具体参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。
+
+### 获取关节数量
+
+- 方法原型：
+
+  ```cpp
+  size_t getJointCount() const
+  ```
+
+- 返回值：
+
+  关节数量。
+
+### 判断轨迹是否为空
+
+- 方法原型：
+
+  ```cpp
+  bool empty() const
+  ```
+
+- 返回值：
+
+  `true` 表示空，`false` 表示不为空。
+
+### 清空轨迹
+
+- 方法原型：
+
+  ```cpp
+  void clear()
+  ```
+
+- 返回值：
+
+  无。
+
+### 设置轨迹名称
+
+- 方法原型：
+
+  ```cpp
+  void setName(const std::string& name)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 轨迹名称 |
+
+- 返回值：
+
+  无。
+
+### 获取轨迹名称
+
+- 方法原型：
+
+  ```cpp
+  const std::string& getName() const
+  ```
+
+- 返回值：
+
+  轨迹名称。
+
+### 保存轨迹到文件
+
+- 方法原型：
+
+  ```cpp
+  bool saveToFile(const std::string& filename) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `filename` | 输入参数 | 文件路径及名称。 |
+
+- 返回值：
+
+  `true` 表示保存成功，`false` 表示保存失败。
+
+### 从文件加载轨迹
+
+- 方法原型：
+
+  ```cpp
+  bool loadFromFile(const std::string& filename)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `filename` | 输入参数 | 文件路径及名称。 |
+
+- 返回值：
+
+  `true` 表示加载成功，`false` 表示加载失败。
+
+### 获取所有轨迹点
+
+- 方法原型：
+
+  ```cpp
+  const std::vector<TrajectoryPoint>& getPoints() const
+  ```
+
+- 返回值：
+
+  轨迹点容器，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。
+
+### 修剪轨迹
+
+- 方法原型：
+
+  ```cpp
+  Trajectory trim(AbcType start_time, AbcType end_time) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `start_time` | 输入参数 | 起始时间，具体参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `end_time` | 输入参数 | 结束时间，具体参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  修剪后的轨迹。
+
+### 连接轨迹
+
+- 方法原型：
+
+  ```cpp
+  Trajectory append(const Trajectory& other, AbcType blend_time = 0.0) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `other` | 输入参数 | 将要连接的轨迹 |
+  | `blend_time` | 输入参数（可缺省） | 混合时间 |
+
+- 返回值：
+
+  连接后的轨迹。
+
+## 轨迹规划器
+
+### 初始化轨迹规划器
+
+初始化轨迹规划器有两种方式，具体如下所示。
+
+1. 根据起始和结束的位置，初始化轨迹规划器。
+
+   - 方法原型：
+   
+     ```cpp
+     bool init(
+         const std::vector<AbcType>& start_positions,
+         const std::vector<AbcType>& end_positions,
+         AbcType duration = 0,
+         int velocity_scale = 100)
+     ```
+   
+   - 参数说明：
+   
+     | 参数名称 | 类型 | 说明 |
+     |:---|:---|:---|
+     | `start_positions` | 输入参数 | 起始位置。 |
+     | `end_positions` | 输入参数 | 结束位置。 |
+     | `duration` | 输入参数（可缺省） | 规划时间。值为 0，表示自动计算规划时间。 |
+     | `velocity_scale` | 输入参数（可缺省） | 速度比例，取值范围为 0~100。 |
+   
+   - 返回值：
+   
+     `true` 表示初始化成功，`false` 表示初始化失败。
+
+2. 根据起始和结束的位置、速度、加速度，初始化轨迹规划器。
+
+   - 方法原型：
+   
+     ```cpp
+     bool initWithVelAcc(
+         const std::vector<AbcType>& start_positions,
+         const std::vector<AbcType>& start_velocities,
+         const std::vector<AbcType>& start_accelerations,
+         const std::vector<AbcType>& end_positions,
+         const std::vector<AbcType>& end_velocities,
+         const std::vector<AbcType>& end_accelerations,
+         AbcType duration = 0,
+         int velocity_scale = 100)
+     ```
+   
+   - 参数说明：
+   
+     | 参数名称 | 类型 | 说明 |
+     |:---|:---|:---|
+     | `start_positions` | 输入参数 | 起始位置。 |
+     | `start_velocities` | 输入参数 | 起始速度。 |
+     | `start_accelerations` | 输入参数 | 起始加速度。 |
+     | `end_positions` | 输入参数 | 结束位置。 |
+     | `end_velocities` | 输入参数 | 结束速度。 |
+     | `end_accelerations` | 输入参数 | 结束加速度。 |
+     | `duration` | 输入参数（可缺省） | 规划时间。值为 0，表示自动计算规划时间。 |
+     | `velocity_scale` | 输入参数（可缺省） | 速度比例，取值范围为 0~100。 |
+   
+   - 返回值：
+   
+     `true` 表示初始化成功，`false` 表示初始化失败。
+
+### 计算指定时间点的轨迹点
+
+- 方法原型：
+
+  ```cpp
+  bool computeTrajectoryPoint(AbcType time, TrajectoryPoint& point)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `time` | 输入参数 | 相对起始时间的时间点。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `point` | 输出参数 | 指定时间点对应的轨迹点。其数据结构，请参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。 |
+
+- 返回值：
+
+  `true` 表示计算成功，`false` 表示计算失败。
+
+### 生成轨迹
+
+- 方法原型：
+
+  ```cpp
+  Trajectory generateTrajectory(int sample_rate = 100)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sample_rate` | 输入参数（可缺省） | 采样频率，单位为 Hz。 |
+
+- 返回值：
+
+  生成的轨迹。
+
+### 评估轨迹
+
+- 方法原型：
+
+  ```cpp
+  TrajectoryEvaluation evaluateTrajectory(const Trajectory& trajectory)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `trajectory` | 输入参数 | 将要评估的轨迹 |
+
+- 返回值：
+
+  评估结果，具体参见 [TrajectoryEvaluation](/sdk/c-plus-plus/data-structures#TrajectoryEvaluation)。
+
+### 设置避障检查器
+
+- 方法原型：
+
+  ```cpp
+  void setCollisionChecker(std::shared_ptr<CollisionChecker> checker)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `checker` | 输入参数 | 避障检查器，指向 `CollisionChecker` 类型的共享智能指针。 |
+
+- 返回值：
+
+  无。
+
+### 获取总规划时间
+
+- 方法原型：
+
+  ```cpp
+  AbcType getTotalDuration() const
+  ```
+
+- 返回值：
+
+  总规划时间。
+
+### 注册轨迹状态回调函数
+
+- 方法原型：
+
+  ```cpp
+  void setStatusCallback(TrajectoryStatusCallback callback)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `callback` | 输入参数 | 当轨迹状态更新时，系统会自动调用此回调函数。`TrajectoryStatusCallback` 为函数指针类型。其数据类型，请参见 [TrajectoryStatusCallback](/sdk/c-plus-plus/data-structures#TrajectoryStatusCallback)。 |
+
+- 返回值：
+
+  无。
+
+### 设置最大速度和加速度约束
+
+- 方法原型：
+
+  ```cpp
+  void setConstraints(
+      const std::vector<AbcType>& max_velocities,
+      const std::vector<AbcType>& max_accelerations)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `max_velocities` | 输入参数 | 最大速度 |
+  | `max_accelerations` | 输入参数 | 最大加速度 |
+
+- 返回值：
+
+  无。
+
+### 检查轨迹点是否有碰撞
+
+- 方法原型：
+
+  ```cpp
+  bool checkCollision(const TrajectoryPoint& point)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `point` | 输入参数 | 轨迹点，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。 |
+
+- 返回值：
+
+  `true` 表示有碰撞，`false` 表示无碰撞。
+
+### 获取最小距离
+
+- 方法原型：
+
+  ```cpp
+  double getMinDistance(const TrajectoryPoint& point)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `point` | 输入参数 | 轨迹点，具体参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。 |
+
+- 返回值：
+
+  最小距离。
+
+## 五次多项式轨迹规划器
+
+`Poly5Planner` 类继承自 `TrajectoryPlanner` 类。`initWithVelAcc()` 为新增方法，其余方法为重写 `TrajectoryPlanner` 类中的方法。
+
+### 初始化轨迹规划器
+
+- 方法原型：
+
+  ```cpp
+  bool initWithVelAcc(
+      const std::vector<AbcType>& start_positions,
+      const std::vector<AbcType>& start_velocities,
+      const std::vector<AbcType>& start_accelerations,
+      const std::vector<AbcType>& end_positions,
+      const std::vector<AbcType>& end_velocities,
+      const std::vector<AbcType>& end_accelerations,
+      AbcType duration = 0,
+      int velocity_scale = 100)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `start_positions` | 输入参数 | 起始位置。 |
+  | `start_velocities` | 输入参数 | 起始速度。 |
+  | `start_accelerations` | 输入参数 | 起始加速度。 |
+  | `end_positions` | 输入参数 | 结束位置。 |
+  | `end_velocities` | 输入参数 | 结束速度。 |
+  | `end_accelerations` | 输入参数 | 结束加速度。 |
+  | `duration` | 输入参数（可缺省） | 规划时间。值为 0，表示自动计算规划时间。 |
+  | `velocity_scale` | 输入参数（可缺省） | 速度比例，取值范围为 0~100。 |
+
+- 返回值：
+
+  `true` 表示初始化成功，`false` 表示初始化失败。
+
+### 计算指定时间点的轨迹点
+
+- 方法原型：
+
+  ```cpp
+  bool computeTrajectoryPoint(AbcType time, TrajectoryPoint& point)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `time` | 输入参数 | 相对起始时间的时间点。其数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `point` | 输出参数 | 指定时间点对应的轨迹点。其数据结构，请参见 [TrajectoryPoint](/sdk/c-plus-plus/data-structures#TrajectoryPoint)。 |
+
+- 返回值：
+
+  `true` 表示计算成功，`false` 表示计算失败。
+
+### 获取总规划时间
+
+- 方法原型：
+
+  ```cpp
+  AbcType getTotalDuration() const
+  ```
+
+- 返回值：
+
+  总规划时间。
+
+### 设置最大速度和加速度约束
+
+- 方法原型：
+
+  ```cpp
+  void setConstraints(
+      const std::vector<AbcType>& max_velocities,
+      const std::vector<AbcType>& max_accelerations)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `max_velocities` | 输入参数 | 最大速度 |
+  | `max_accelerations` | 输入参数 | 最大加速度 |
+
+- 返回值：
+
+  无。

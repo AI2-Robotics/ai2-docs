@@ -1,0 +1,339 @@
+---
+title: 运动学相关接口
+description: 运动学 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ArmKinematics {#ArmKinematics}
+
+`ArmKinematics` 是一个机械臂运动学计算类，提供了一些列机械臂相关的运动学接口。
+
+### 创建机械臂运动学
+
+该方法是一个静态方法。
+
+- 方法原型：
+
+  ```python
+  create(arg0: ArmType) -> ArmKinematics
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 机械臂型号，具体参见 [ArmType](#ArmType)。 |
+
+- 返回值：
+
+  若创建成功，则返回 [ArmKinematics](#ArmKinematics) 实例对象；否则返回 `None`。
+
+### 正运动学
+
+- 方法原型：
+
+  ```python
+  forward_kinematics(self, arg0: list[float]) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.Pose]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 给定关节值。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `Pose` | 正解的位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+
+### 逆运动学
+
+- 方法原型：
+
+  ```python
+  inverse_kinematics(
+      self,
+      pose: alphabot.core.Pose,
+      ref_joints: list[float],
+      mode: int = 0
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `ref_joints` | 参考关节角度。 |
+  | `mode` | - `0`：数值解，单步模式，适用于当前位姿与目标位姿相差不大的情况，在连续运动的情况下使用。<br/>- `1`：数值解，多步模式，适用于当前位姿与目标位姿相差较大的情况，时间较长。<br/>- `2`：解析解。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 逆解的关节值。 |
+
+### 解析解逆运动学其中一个解
+
+- 方法原型：
+
+  ```python
+  inverse_kinematics_analytical(
+      self,
+      pose: alphabot.core.Pose,
+      parameter: float,
+      select: int
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 末端位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `parameter` | 冗余参数。 |
+  | `select` | 逆运动学所有解的索引，推荐选 `0`（**重要：末端位姿连续运动时，不要在运动时更改，固定选择的解也是连续的**）。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 逆解的关节角度。 |
+
+### 设置数值求解精度
+
+- 方法原型：
+
+  ```python
+  set_numerical_precision(self, precision: float) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `precision` | 设置的精度。 |
+
+- 返回值：
+
+  `None`。
+
+## ArmType {#ArmType}
+
+`ArmType` 类是一个枚举器，用于表示机械臂型号。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+<table>
+   <tbody>
+      <tr>
+         <td>**常量成员**</td>
+         <td>**值**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`RM65_B`</td>
+         <td>0</td>
+         <td rowspan="8">机械臂型号</td>
+      </tr>
+      <tr>
+         <td>`RM65_6FB`</td>
+         <td>1</td>
+      </tr>
+      <tr>
+         <td>`RM65_6F`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`RM75_B`</td>
+         <td>3</td>
+      </tr>
+      <tr>
+         <td>`RM75_6FB`</td>
+         <td>4</td>
+      </tr>
+      <tr>
+         <td>`RM75_6F`</td>
+         <td>5</td>
+      </tr>
+      <tr>
+         <td>`ZM73L_6F`</td>
+        <td>6</td>
+      </tr>
+      <tr>
+         <td>`ZM73R_6F`</td>
+         <td>7</td>
+      </tr>
+   </tbody>
+</table>
+
+## TorsoKinematics {#TorsoKinematics}
+
+`TorsoKinematics` 是一个躯干运动学计算类，提供了一些列躯干相关的运动学接口。
+
+### 创建躯干运动学
+
+该方法是一个静态方法。
+
+- 方法原型：
+
+  ```python
+  create(arg0: alphabot.core.RobotType) -> TorsoKinematics
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 机器人型号，具体参见 [RobotType](#RobotType)。 |
+
+- 返回值：
+
+  若创建成功，则返回 [TorsoKinematics](#TorsoKinematics) 实例对象；否则返回 `None`。
+
+### 正运动学
+
+- 方法原型：
+
+  ```python
+  forward_kinematics(self, arg0: list[float]) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.AbcTorsoPose4D]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 给定关节值。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `AbcTorsoPose4D` | 正解的位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+
+### 逆运动学
+
+- 方法原型：
+
+  ```python
+  inverse_kinematics(self, pose: alphabot.core.AbcTorsoPose4D) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 给定位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 逆解的关节值。 |
+
+### 检测是否超出关节限位
+
+- 方法原型：
+
+  ```python
+  check_range(self, arg0: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 给定关节值。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示未超出关节限位；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+## RobotType {#RobotType}
+
+`RobotType` 类是一个枚举器，用于表示机器人型号。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+<table>
+   <tbody>
+      <tr>
+         <td>**常量成员**</td>
+         <td>**值**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s`</td>
+         <td>1</td>
+         <td rowspan="3">机器人型号</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot2`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s_HuiKe`</td>
+         <td>3</td>
+      </tr>
+   </tbody>
+</table>
+
+
+## admittance_control_law {#admittance_control_law}
+
+- 方法原型：
+
+  ```python
+  admittance_control_law(
+      arm: ArmKinematics, 
+      pose: alphabot.core.Pose, 
+      p_stiffness: float, 
+      r_stiffness: float, 
+      force: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(6)], 
+      t: float, 
+      q: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arm` | [ArmKinematics](#ArmKinematics) 类型对象。 |
+  | `pose` | 末端位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `p_stiffness` | 平移刚度。 |
+  | `r_stiffness` | 旋转刚度。 |
+  | `force` | 末端施加的空间六维力顺序：<br/>`[Mx, My, Mz, Fx, Fy, Fz]`。|
+  | `t` | 积分时间（小于等于一次控制循环所用时间）。 |
+  | `q` | 当前关节角度。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 下一个时刻的关节角度。 |

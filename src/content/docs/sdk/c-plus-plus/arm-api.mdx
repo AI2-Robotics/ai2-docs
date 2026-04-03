@@ -62,7 +62,8 @@ import { Aside } from '@astrojs/starlight/components';
    - 方法原型：
 
       ```cpp
-      static std::shared_ptr<ArmInterface> create_arm_from_config(const std::string& config_path)
+      static std::shared_ptr<ArmInterface> create_arm_from_config(
+        const std::string& config_path)
        ```
 
    - 参数说明：
@@ -500,6 +501,24 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 
   `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
 
+## 设置末端生态协议模式
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_plus_mode(int mode)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `mode` | 输入参数 | 末端生态协议模式。<br/>- `0`：禁用协议。<br/>- `9600`：开启协议（波特率 9600）。<br/>- `115200`：开启协议（波特率 115200）。 <br/>- `256000`：开启协议（波特率 256000）。<br/>- `460800`：开启协议（波特率 460800）。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
 ## 控制夹爪
 
 本软件包提供对夹爪的全面控制，包括设置夹爪开合、抓取位置与抓取力度，并支持读取夹爪的状态。
@@ -623,6 +642,133 @@ AbcErrorCode move_joint_position_canfd_collision_avoid(
 - 返回值：
 
   `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+
+## 控制五指灵巧手
+
+### 设置灵巧手目标手势序列号
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_posture(
+    int posture_num, bool block, 
+    int timeout)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `posture_num` | 输入参数 | 预先保存在灵巧手内的手势序列号，取值范围为 1~40。|
+  | `block` | 输入参数 | - `true` 表示阻塞模式，等待灵巧手运动结束后返回。<br/>- `false` 表示非阻塞模式，发送后立即返回。|
+  | `timeout` | 输入参数 | 设置阻塞模式下的超时时间，单位为秒。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 设置灵巧手各自由度角度
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_angle(const std::vector<int>& hand_angle)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `hand_angle` | 输入参数 | 手指角度数组，数组长度为 6，每个元素的取值范围为 0~1000。另外，-1 代表该自由度不执行任何操作，保持当前状态。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。  
+
+### 设置灵巧手角度跟随控制
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_follow_angle(
+    const std::vector<int>& hand_angle, 
+    int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `hand_angle` | 输入参数 | 手指角度数组，数组长度为 6，角度范围由灵巧手厂商定义（例如因时的角度范围为 0~2000）。|
+  | `block` | 输入参数 | 等待返回超时时间，0 表示非阻塞，单位为毫秒。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。 
+
+### 设置灵巧手位置跟随控制
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_follow_pos(
+    const std::vector<int>& hand_pos, 
+    int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `hand_angle` | 输入参数 | 手指位置数组，数组长度为 6，位置范围由灵巧手厂商定义（例如因时的位置范围为 0~1000）。|
+  | `block` | 输入参数 | 等待返回超时时间，0 表示非阻塞，单位为毫秒。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。 
+
+### 设置灵巧手速度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_speed(int speed)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `speed` | 输入参数 | 手指速度，取值范围为 1~1000。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。   
+
+### 设置灵巧手力阈值
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode set_hand_force(int hand_force)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `hand_force` | 输入参数 | 手指力，取值范围为 1~1000。|
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。  
 
 ## 配置 Modbus
 

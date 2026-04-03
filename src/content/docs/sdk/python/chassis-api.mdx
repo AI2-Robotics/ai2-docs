@@ -1,0 +1,876 @@
+---
+title: 底盘相关接口
+description: 底盘 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ChassisFactory {#ChassisFactory}
+
+`ChassisFactory` 类用于创建底盘实例。
+
+- 方法原型：
+
+  ```python
+  create_chassis_from_config(config_file: str) -> ChassisInterface
+  ```
+
+- 参数说明：
+
+  <table>
+     <tbody>
+        <tr>
+           <td>**参数名称**</td>
+           <td>**说明**</td>
+        </tr>
+        <tr>
+           <td>`config_path`</td>
+           <td>
+                配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+
+                 ```json
+                 {
+                    "chassis_type":"woosh",   # 底盘厂商
+                    "chassis_name":"chassis", # 底盘名称
+                    "ip":"127.0.0.1",         # IP 地址
+                    "port":51051              # 端口号
+                 }
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>  
+
+- 返回值：
+
+  若创建成功，则返回 [ChassisInterface](#ChassisInterface) 实例；否则返回 `None`。
+
+## ChassisFactoryParam {#ChassisFactoryParam}
+
+`ChassisFactoryParam` 类用于描述创建底盘时所需的参数。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `chassis_type` | str | 底盘厂商，例如 `"woosh"`。 |
+| `chassis_name` | str | 底盘名称，例如 `"chassis"`。 |
+| `ip` | str | IP 地址，例如 `"127.0.0.1"`。 |
+| `port` | int | 端口号，例如 `54051`。 |
+
+## ChassisInterface {#ChassisInterface}
+
+`ChassisInterface` 类提供了一系列用于控制底盘的公共方法，例如移动底盘、获取轮廓和查询状态等。在使用前，请确保已创建底盘实例。
+
+### 连接底盘
+
+在创建底盘实例后，用户可通过如下方法与底盘建立连接。
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开底盘
+
+用户可通过如下方法断开与底盘的连接。
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取底盘位置和速度
+
+- 方法原型：
+
+  ```python
+  get_pose_speed(self) -> tuple[alphabot.core.AbcErrorCode, ChassisPoseSpeed]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisPoseSpeed` | 底盘位置和速度，具体参见 [ChassisPoseSpeed](#ChassisPoseSpeed)。 |
+
+### 获取底盘位置
+
+- 方法原型：
+
+  ```python
+  get_pose(self) -> tuple[alphabot.core.AbcErrorCode, ChassisPose2D]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisPose2D` | 底盘位置，具体参见 [ChassisPose2D](#ChassisPose2D)。 |
+
+### 获取底盘速度
+
+- 方法原型：
+
+  ```python
+  get_speed(self) -> tuple[alphabot.core.AbcErrorCode, ChassisTwist]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisTwist` | 底盘速度，具体参见 [ChassisTwist](#ChassisTwist)。 |
+
+### 获取底盘里程数
+
+- 方法原型：
+
+  ```python
+  get_mileage(self) -> tuple[alphabot.core.AbcErrorCode, int]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `int` | 底盘里程数。 |
+
+### 获取底盘电池信息
+
+- 方法原型：
+
+  ```python
+  get_battery(self) -> tuple[alphabot.core.AbcErrorCode, ChassisBattery]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisBattery` | 底盘电池相关的信息，具体参见 [ChassisBattery](#ChassisBattery)。 |
+
+### 获取底盘状态
+
+- 方法原型：
+
+  ```python
+  get_robot_state(self) -> tuple[alphabot.core.AbcErrorCode, ChassisState]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisState` | 底盘状态相关的信息，具体参见 [ChassisState](#ChassisState)。 |
+
+### 获取底盘状态码
+
+- 方法原型：
+
+  ```python
+  get_status_code(self) -> tuple[alphabot.core.AbcErrorCode, ChassisStatusCode]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisStatusCode` | 底盘相关的状态码，具体参见 [ChassisStatusCode](#ChassisStatusCode)。 |
+
+### 获取底盘硬件状态
+
+- 方法原型：
+
+  ```python
+  get_hardware_state(self) -> tuple[alphabot.core.AbcErrorCode, ChassisHardwareState]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `ChassisHardwareState` | 底盘硬件相关的状态信息，具体参见 [ChassisHardwareState](#ChassisHardwareState)。 |
+
+### 获取底盘静态变换
+
+- 方法原型：
+
+  ```python
+  get_static_tf(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisTransformStamped]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[ChassisTransformStamped]` | 底盘静态变换，具体参见 [ChassisTransformStamped](#ChassisTransformStamped)。 |
+
+### 设置底盘运动速度
+
+- 方法原型：
+
+  ```python
+  twist_control(self, linear: float, angular: float) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `linear` | 线速度 |
+  | `angular` | 角速度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置底盘最大速度
+
+- 方法原型：
+
+  ```python
+  set_max_speed(self, max_spd: float) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `max_spd` | 设置的最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 初始化底盘
+
+- 方法原型：
+
+  ```python
+  init_robot(self, pose: ChassisPose2D, update_flg: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 底盘位置，具体参见 [ChassisPose2D](#ChassisPose2D)。 |
+  | `update_flg` | 是否更新位置。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 移动到目标位置
+
+- 方法原型：
+
+  ```python
+  move_to_point_sync(
+      self,
+      x: float,
+      y: float,
+      theta: float,
+      callback: typing.Callable,
+      max_spd: float = 1.0
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `x` | 目标位置的 X 轴坐标值 |
+  | `y` | 目标位置的 Y 轴坐标值 |
+  | `theta` | 目标位置的朝向 |
+  | `callback` | 回调函数 |
+  | `max_spd` | 最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 充电
+
+- 方法原型：
+
+  ```python
+  to_charge_sync(self, max_spd: float = 1.0) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `max_spd` | 最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 退出充电
+
+- 方法原型：
+
+  ```python
+  exit_charge_sync(self, max_spd: float = 1.0) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `max_spd` | 最大速度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 直线移动
+
+- 方法原型：
+
+  ```python
+  move_straight_sync(
+      self,
+      distance: float,
+      speed: float,
+      callback: typing.Callable,
+      use_avoid: bool = True
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `distance` | 移动距离 |
+  | `speed` | 移动速度 |
+  | `callback` | 回调函数 |
+  | `use_avoid` | 是否启用避障 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 旋转
+
+- 方法原型：
+
+  ```python
+  move_rotate_sync(
+      self,
+      angle: float,
+      speed: float,
+      callback: typing.Callable,
+      use_avoid: bool = True
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `angle` | 旋转角度 |
+  | `speed` | 旋转速度 |
+  | `callback` | 回调函数 |
+  | `use_avoid` | 是否启用避障 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取局部轮廓
+
+- 方法原型：
+
+  ```python
+  get_local_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[ChassisPoint32]` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 获取全局轮廓
+
+- 方法原型：
+
+  ```python
+  get_global_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[ChassisPoint32]` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 获取局部和全局轮廓
+
+- 方法原型：
+
+  ```python
+  get_all_footprint(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[ChassisPoint32], list[ChassisPoint32]]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `tuple[list[ChassisPoint32], list[ChassisPoint32]]` | 第一个元素为局部轮廓，第二个元素为全局轮廓。轮廓点相关的数据结构，请参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 获取静态轮廓（基于 odom 和 base_link 坐标系）
+
+- 方法原型：
+
+  ```python
+  ai2_get_local_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[ChassisPoint32]` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 获取静态轮廓（基于 map 和 base_link 坐标系）
+
+- 方法原型：
+
+  ```python
+  ai2_get_global_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[ChassisPoint32]` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 获取静态轮廓
+
+- 方法原型：
+
+  ```python
+  ai2_get_all_footprint(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[ChassisPoint32], list[ChassisPoint32]]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `tuple[list[ChassisPoint32], list[ChassisPoint32]]` | 第一个元素为基于 odom 和 base_link 坐标系解算的轮廓，第二个元素为基于 map 和 base_link 坐标系解算的轮廓。<br/><br/>轮廓点相关的数据结构，请参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+### 设置局部轮廓
+
+- 方法原型：
+
+  ```python
+  set_local_footprint(self, points: list[ChassisPoint32]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `points` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置全局轮廓
+
+- 方法原型：
+
+  ```python
+  set_global_footprint(self, points: list[ChassisPoint32]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `points` | 轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置局部和全局轮廓
+
+- 方法原型：
+
+  ```python
+  set_all_footprint(
+      self,
+      local_points: list[ChassisPoint32],
+      global_points: list[ChassisPoint32]
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `local_points` | 局部轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+  | `global_points` | 全局轮廓点，具体参见 [ChassisPoint32](#ChassisPoint32)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取底盘名称
+
+- 方法原型：
+
+  ```python
+  get_name(self) -> str
+  ```
+
+- 返回值：
+
+  底盘名称。
+
+## ChassisPoseSpeed {#ChassisPoseSpeed}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `map_id` | int | 当前地图 ID |
+| `mileage` | int | 累计里程数 |
+| `robot_id` | int | 底盘 ID |
+| `pose` | [ChassisPose2D](#ChassisPose2D) | 2D 位姿 |
+| `twist` | [ChassisTwist](#ChassisTwist) | 速度 |
+
+## ChassisPose2D {#ChassisPose2D}
+
+`ChassisPose2D` 类用于表示底盘 2D 位姿。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `theta` | float | 朝向 |
+| `x` | float | X 轴坐标值 |
+| `y` | float | Y 轴坐标值 |
+
+## ChassisPoint32 {#ChassisPoint32}
+
+`ChassisPoint32` 类用于表示轮廓点的位置。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `x` | float | X 轴坐标值 |
+| `y` | float | Y 轴坐标值 |
+| `z` | float | Z 轴坐标值 |
+
+## ChassisTwist {#ChassisTwist}
+
+`ChassisTwist` 类用于表示底盘速度。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `angular` | float | 角速度 |
+| `linear` | float | 线速度 |
+
+## ChassisBattery {#ChassisBattery}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `charge_state` | [ChargeState](#ChargeState) | 充电状态 |
+| `robot_id` | int | 底盘 ID |
+| `power` | int | 电量百分比，取值范围为 0~100。<br/>- `100`：全满。<br/>- `0`：无电量。 |
+| `health` | int | 电池健康（充满容量/设计容量） |
+| `charge_cycle` | int | 循环次数 |
+| `battery_cycle` | int | 电池寿命 |
+| `temp_max` | int | 电池温度（最高温度） |
+| `success` | bool | 请求是否成功。<br/>- `True`：成功响应请求。<br/>- `False`：未成功处理请求。 |
+| `msg` | str | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+## ChargeState {#ChargeState}
+
+`ChargeState` 类是一个表示底盘电池充电状态的枚举器。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `NOT` | 1 | 未充电 |
+| `MANUAL` | 2 | 手动充电中 |
+| `AUTO` | 3 | 自动充电中 |
+
+## ChassisState {#ChassisState}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | int | 底盘 ID |
+| `state` | [ChassisStateType](#ChassisStateType) | 底盘自动模式状态 |
+| `success` | bool | 请求是否成功。<br/>- `True`：成功响应请求。<br/>- `False`：未成功处理请求。 |
+| `msg` | str | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+## ChassisStateType {#ChassisStateType}
+
+`ChassisStateType` 类是一个表示底盘状态的枚举器。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `UNINIT` | 1 | 未初始化 |
+| `IDLE` | 2 | 空闲 |
+| `PARKING` | 3 | 泊车中 |
+| `TASK` | 4 | 任务中 |
+| `WARNING` | 5 | 警告 |
+| `FAULT` | 6 | 异常 |
+| `FOLLOWING` | 7 | 跟随中 |
+| `CHARGING` | 8 | 充电中 |
+| `MAPPING` | 9 | 构图中 |
+
+## ChassisStatusCode {#ChassisStatusCode}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | int | 底盘 ID |
+| `code` | int | 状态码 |
+| `time` | int | 时间 |
+| `status_msg` | str | 描述 |
+| `robot_task_id` | int | 任务 ID |
+| `state` | [StatusCodeRobotState](#StatusCodeRobotState) | 自动模式状态 |
+| `type` | [ActionType](#ActionType) | 动作类型 |
+| `level` | [StatusLevel](#StatusLevel) | 等级 |
+| `success` | bool | 请求是否成功。<br/>- `True`：成功响应请求。<br/>- `False`：未成功处理请求。 |
+| `msg` | str | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+## StatusCodeRobotState {#StatusCodeRobotState}
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `UNINIT` | 1 | 未初始化 |
+| `IDLE` | 2 | 空闲 |
+| `PARKING` | 3 | 泊车中 |
+| `TASK` | 4 | 任务中 |
+| `WARNING` | 5 | 警告 |
+| `FAULT` | 6 | 异常 |
+| `FOLLOWING` | 7 | 跟随中 |
+| `CHARGING` | 8 | 充电中 |
+| `MAPPING` | 9 | 构图中 |
+
+## ActionType {#ActionType}
+
+`ActionType` 类是一个表示底盘动作类型的枚举器。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `NAV` | 1 | 导航 |
+| `STEP_CTRL` | 2 | 单步控制 |
+| `SECONDPOS_ENTER` | 3 | 二次定位进入 |
+| `SECONDPOS_QUIT` | 4 | 二次定位退出 |
+| `CARRY` | 5 | 搬运动作 |
+| `WAIT` | 6 | 等待 |
+| `CHARGE` | 7 | 充电 |
+
+## StatusLevel {#StatusLevel}
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `NORMAL` | 0 | 正常 |
+| `TIPS` | 1 | 提示 |
+| `WARN` | 2 | 警告 |
+| `FAULT` | 3 | 故障 |
+
+## ChassisHardwareState {#ChassisHardwareState}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | int | 底盘 ID |
+| `lidars` | list[[HardwareStateType](#HardwareStateType)] | repeated 激光雷达 2 |
+| `cameras` | list[[HardwareStateType](#HardwareStateType)] | repeated 摄像头 2 |
+| `success` | bool | 请求是否成功。<br/>- `True`：成功响应请求。<br/>- `False`：未成功处理请求。 |
+| `msg` | str | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+## HardwareStateType {#HardwareStateType}
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `NORMAL` | 0 | 正常 |
+| `INFO` | 1 | 提示 |
+| `WARN` | 16 | 警告 |
+| `FATAL` | 17 | 故障 |
+
+## ChassisTransformStamped {#ChassisTransformStamped}
+
+<table>
+   <tbody>
+      <tr>
+         <td>**属性**</td>
+         <td>**数据类型**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td>`frame_id`</td>
+         <td>str</td>
+         <td>父坐标系</td>
+      </tr>
+      <tr>
+         <td>`secs`</td>
+         <td>int</td>
+         <td>秒</td>
+      </tr>
+      <tr>
+         <td>`nsecs`</td>
+         <td>int</td>
+         <td>纳秒</td>
+      </tr>
+      <tr>
+         <td>`child_frame_id`</td>
+         <td>str</td>
+         <td>float</td>
+      </tr>
+      <tr>
+         <td>`t_x`</td>
+         <td>float</td>
+         <td rowspan="3">XYZ 坐标值</td>
+      </tr>
+      <tr>
+         <td>`t_y`</td>
+         <td>float</td>
+      </tr>
+      <tr>
+         <td>`t_z`</td>
+         <td>float</td>
+      </tr>
+      <tr>
+         <td>`r_x`</td>
+         <td>float</td>
+         <td rowspan="4">四元数</td>
+      </tr>
+      <tr>
+         <td>`r_y`</td>
+         <td>float</td>
+      </tr>
+      <tr>
+         <td>`r_z`</td>
+         <td>float</td>
+      </tr>
+      <tr>
+         <td>`r_w`</td>
+         <td>float</td>
+      </tr>            
+   </tbody>
+</table>
+
+## ChassisOperationState {#ChassisOperationState}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `robot_id` | int | 底盘 ID |
+| `nav` | [NavState](#NavState) | 底盘导航相关位信息 |
+| `robot` | [RobotBit](#RobotBit) | 底盘位信息 |
+| `success` | bool | 请求是否成功。<br/>- `True`：成功响应请求。<br/>- `False`：未成功处理请求。 |
+| `msg` | str | 应答消息描述，通常用于请求未能处理时的原因描述。 |
+
+## NavState {#NavState}
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `NARROW` | 1 | 狭窄通道 |
+| `GUIDE` | 2 | 引导到达 |
+| `INA_LIFT` | 3 | 乘梯中 |
+| `IMPEDE` | 4 | 阻碍 |
+| `QR_CODE` | 5 | 二维码 |
+| `STAGE` | 6 | 分段到达 |
+
+## RobotBit {#RobotBit}
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | 未定义 |
+| `TASKABLE` | 1 | 可接任务 |

@@ -1,0 +1,359 @@
+---
+title: 快速开始
+description: 快速开始 Python 接口开发
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+
+本节将帮助您快速掌握 Python API 的基本结构及其使用方法。
+
+## 1. 搭建开发环境
+
+在开始开发前，请先确保已满足以下 Python 开发环境：
+
+- 操作系统：Ubuntu22 及以上。
+- Python：3.10。
+
+## 2. 安装 alphabot 模块
+
+搭建完 Python 开发环境后，即可通过 pip 工具安装 alphabot 模块。
+
+<Steps>
+
+1. 在终端中，进入软件包解压后的 `python` 目录。
+
+   ```bash
+   cd python
+   ```
+2. 通过 `pip` 安装 `alphabot` 模块。
+
+   ```bash
+   pip install .
+   ```  
+</Steps>
+
+## 3. 了解模块结构
+
+您可以浏览 `alphabot` 目录下的 `.pyi` 接口文件，了解接口模块划分。
+
+`alphabot` 模块提供了多个可直接使用的类，支持通过 `from alphabot import 类名` 的方式导入。
+
+<table>
+   <tbody>
+      <tr>
+         <td>**类名**</td>
+         <td>**说明**</td>
+         <td>**模块**</td>
+      </tr>
+      <tr>
+         <td>[ArmFactory](/sdk/python/arm-api#ArmFactory)</td>
+         <td>创建机械臂</td>
+         <td rowspan="8">机械臂<br/>alphabot.arm</td>
+      </tr>
+      <tr>
+         <td>[ArmFactoryParam](/sdk/python/arm-api#ArmFactoryParam)</td>
+         <td>描述机械臂相关参数</td>
+      </tr>
+      <tr>
+         <td>[ArmInterface](/sdk/python/arm-api#ArmInterface)</td>
+         <td>机械臂控制的主接口</td>
+      </tr>
+      <tr>
+         <td>[ArmForceSensor](/sdk/python/arm-api#ArmForceSensor)</td>
+         <td>力传感器数据</td>
+      </tr>
+      <tr>
+         <td>[ArmRealtimeState](/sdk/python/arm-api#ArmRealtimeState)</td>
+         <td>机械臂实时状态</td>
+      </tr>
+      <tr>
+         <td>[GripperState](/sdk/python/arm-api#GripperState)</td>
+         <td>夹爪状态</td>
+      </tr>
+      <tr>
+         <td>[JointState](/sdk/python/arm-api#JointState)</td>
+         <td>关节状态</td>
+      </tr>
+      <tr>
+         <td>[PeripheralReadWriteParams](/sdk/python/arm-api#PeripheralReadWriteParams)</td>
+         <td>Modbus 通信参数配置类</td>
+      </tr>
+
+      <tr>
+         <td>[ChassisFactory](/sdk/python/chassis-api#ChassisFactory)</td>
+         <td>创建底盘</td>
+         <td rowspan="13">底盘<br/>alphabot.chassis</td>
+      </tr>
+      <tr>
+         <td>[ChassisInterface](/sdk/python/chassis-api#ChassisInterface)</td>
+         <td>底盘控制的主接口</td>
+      </tr>
+      <tr>
+         <td>[ChassisBattery](/sdk/python/chassis-api#ChassisBattery)</td>
+         <td>底盘电池相关信息</td>
+      </tr>
+      <tr>
+         <td>[ChassisPoint32](/sdk/python/chassis-api#ChassisPoint32)</td>
+         <td>轮廓点位置</td>
+      </tr>
+      <tr>
+         <td>[ChassisPose2D](/sdk/python/chassis-api#ChassisPose2D)</td>
+         <td>底盘 2D 位姿</td>
+      </tr>
+      <tr>
+         <td>[ChassisPoseSpeed](/sdk/python/chassis-api#ChassisPoseSpeed)</td>
+         <td>底盘位姿和速度</td>
+      </tr>
+      <tr>
+         <td>[ChassisState](/sdk/python/chassis-api#ChassisState)</td>
+         <td>底盘状态</td>
+      </tr>
+      <tr>
+         <td>[ChassisStatusCode](/sdk/python/chassis-api#ChassisStatusCode)</td>
+         <td>底盘状态码</td>
+      </tr>
+      <tr>
+         <td>[ChassisTransformStamped](/sdk/python/chassis-api#ChassisTransformStamped)</td>
+         <td>静态变换相关的数据</td>
+      </tr>
+      <tr>
+         <td>[ChassisTwist](/sdk/python/chassis-api#ChassisTwist)</td>
+         <td>底盘速度</td>
+      </tr>
+      <tr>
+         <td>[ChassisOperationState](/sdk/python/chassis-api#ChassisOperationState)</td>
+         <td>底盘操作状态</td>
+      </tr>
+      <tr>
+         <td>[NavState](/sdk/python/chassis-api#NavState)</td>
+         <td>底盘导航信息</td>
+      </tr>
+      <tr>
+         <td>[RobotBit](/sdk/python/chassis-api#RobotBit)</td>
+         <td>底盘位信息</td>
+      </tr>
+
+      <tr>
+         <td>[HeadFactory](/sdk/python/head-api#HeadFactory)</td>
+         <td>创建头部</td>
+         <td rowspan="3">头部<br/>alphabot.head</td>
+      </tr>
+      <tr>
+         <td>[HeadInterface](/sdk/python/head-api#HeadInterface)</td>
+         <td>头部控制的主接口</td>
+      </tr>
+      <tr>
+         <td>[AbcHeadState](/sdk/python/head-api#AbcHeadState)</td>
+         <td>头部关节状态</td>
+      </tr> 
+
+      <tr>
+         <td>[TorsoFactoryPose4D](/sdk/python/torso-api#TorsoFactoryPose4D)</td>
+         <td>创建躯干</td>
+         <td rowspan="3">躯干<br/>alphabot.torso</td>
+      </tr>
+      <tr>
+         <td>[TorsoInterfacePose4D](/sdk/python/torso-api#TorsoInterfacePose4D)</td>
+         <td>躯干控制的主接口</td>
+      </tr>
+      <tr>
+         <td>[AbcTorsoState](/sdk/python/torso-api#AbcTorsoState)</td>
+         <td>躯干关节状态</td>
+      </tr>
+
+      <tr>
+         <td>[SensorFactory](/sdk/python/sensor-api#SensorFactory)</td>
+         <td>创建传感器和深度相机</td>
+         <td rowspan="8">传感器<br/>alphabot.sensor</td>
+      </tr>
+      <tr>
+         <td>[SyncDataPackage](/sdk/python/sensor-api#SyncDataPackage)</td>
+         <td>同步传感器数据包</td>
+      </tr>
+      <tr>
+         <td>[SyncMode](/sdk/python/sensor-api#SyncMode)</td>
+         <td>同步模式</td>
+      </tr>
+      <tr>
+         <td>[SyncPolicy](/sdk/python/sensor-api#SyncPolicy)</td>
+         <td>同步策略</td>
+      </tr>
+      <tr>
+         <td>[RGBData](/sdk/python/sensor-api#RGBData)</td>
+         <td>彩色图像数据</td>
+      </tr>
+      <tr>
+         <td>[RGBDData](/sdk/python/sensor-api#RGBDData)</td>
+         <td>彩色+深度图像数据</td>
+      </tr>
+      <tr>
+         <td>[DepthCamera](/sdk/python/sensor-api#DepthCamera)</td>
+         <td>深度相机传感器</td>
+      </tr>
+      <tr>
+         <td>[DepthSensorParam](/sdk/python/sensor-api#DepthSensorParam)</td>
+         <td>深度传感器参数</td>
+      </tr>
+
+      <tr>
+         <td>[EStopMonitor](/sdk/python/sensor-emergency-stop-monitor-api#EStopMonitor)</td>
+         <td>急停按钮监控器</td>
+         <td rowspan="3">急停按钮监控器<br/>alphabot.estop</td>
+      </tr>
+      <tr>
+         <td>[EStopMConfig](/sdk/python/sensor-emergency-stop-monitor-api#EStopMConfig)</td>
+         <td>监控配置</td>
+      </tr>
+      <tr>
+         <td>[ESState](/sdk/python/sensor-emergency-stop-monitor-api#ESState)</td>
+         <td>急停按钮状态</td>
+      </tr>
+
+      <tr>
+         <td>[ArmKinematics](/sdk/python/kinematics-api#ArmKinematics)</td>
+         <td>机械臂运动学</td>
+         <td rowspan="4">运动学<br/>alphabot.algo</td>
+      </tr>
+      <tr>
+         <td>[ArmType](/sdk/python/kinematics-api#ArmType)</td>
+         <td>机械臂型号</td>
+      </tr>
+      <tr>
+         <td>[TorsoKinematics](/sdk/python/kinematics-api#TorsoKinematics)</td>
+         <td>躯干运动学</td>
+      </tr>
+      <tr>
+         <td>[admittance_control_law](/sdk/python/kinematics-api#admittance_control_law)</td>
+         <td>导纳控制律</td>
+      </tr>
+
+      <tr>
+         <td>[AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)</td>
+         <td>错误码</td>
+         <td rowspan="9">共用数据结构<br/>alphabot.core</td>
+      </tr>
+      <tr>
+         <td>[AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)</td>
+         <td>躯干位姿</td>
+      </tr>
+      <tr>
+         <td>[ArmCurrentStatus](/sdk/python/data-structures#ArmCurrentStatus)</td>
+         <td>机械臂当前状态码</td>
+      </tr>
+      <tr>
+         <td>[Euler](/sdk/python/data-structures#Euler)</td>
+         <td>欧拉角</td>
+      </tr>
+      <tr>
+         <td>[Pose](/sdk/python/data-structures#Pose)</td>
+         <td>3D 空间位姿</td>
+      </tr>
+      <tr>
+         <td>[Position](/sdk/python/data-structures#Position)</td>
+         <td>3D 坐标</td>
+      </tr>
+      <tr>
+         <td>[Quaternion](/sdk/python/data-structures#Quaternion)</td>
+         <td>四元数</td>
+      </tr>
+      <tr>
+         <td>[SensorStatus](/sdk/python/data-structures#SensorStatus)</td>
+         <td>传感器状态</td>
+      </tr>
+      <tr>
+         <td>[SensorType](/sdk/python/data-structures#SensorType)</td>
+         <td>传感器类型</td>
+      </tr>          
+   </tbody>
+</table>
+
+## 4. 参考示例程序
+
+参考 `examples` 下的示例程序，掌握核心接口调用。
+
+例如，`Python\examples\arm\arm_factory_example.py` 样例程序代码如下所示。
+
+```python
+import sys
+import os
+from alphabot import ArmFactory, ArmFactoryParam
+
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== ArmFactory Sample Program =====")
+
+    try:
+        print("\n----- Method 1: Creating a Robotic Arm Using Parameters -----")
+        # Configure robotic arm parameters
+        param = ArmFactoryParam({
+            "arm_type": "realman",
+            "arm_name": "right_arm",
+            "ip": "192.168.1.18",
+            "port": "8080",
+            "udp_ip": "192.168.1.102",
+            "udp_port": "8089",
+            "udp_cycle": "5"
+        })
+
+        # Create Realman robotic arm instance
+        arm1 = ArmFactory.create_arm(param)
+        if not arm1:
+            print("Failed to create robotic arm instance")
+            return 1
+
+        print(f"Successfully created robotic arm: {arm1}")
+
+        print("\n----- Method 2: Creating a Robotic Arm Using Configuration File -----")
+        # Create robotic arm instance from configuration file
+        arm2 = ArmFactory.create_arm_from_config(config_path)
+        if not arm2:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+
+        print(f"Successfully created robotic arm from configuration file: {arm2}")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+通过上述示例程序，您可以快速了解如何创建机械臂接口实例，并连接机械臂。其他示例程序也具有类似的结构和调用方式，请参考[更多的示例程序](/sdk/python/examples)进行学习。
+
+## 5. 运行
+
+接下来以 `Python\examples\arm\arm_factory_example.py` 文件为例，讲解运行过程。
+
+<Steps>
+
+1. 在终端中，进入示例程序所在目录。
+
+   ```bash
+   cd python/examples/arm
+   ```
+2. 执行 `python` 命令，便可运行程序。本示例需要传入机械臂配置文件路径参数。
+
+   ```bash
+   python arm_factory_example.py ../config/left_arm.json
+   ```    
+
+</Steps>
+
+其他示例程序的编译运行方式与此类似，请参考上述步骤进行操作。
+
+通过本节学习，您已经初步掌握了 Python 接口的结构和使用方法。建议您继续深入学习其他示例程序，并结合接口文档进行开发实践，以更好地理解和应用 Python 接口。

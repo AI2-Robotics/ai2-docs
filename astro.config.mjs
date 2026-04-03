@@ -96,6 +96,7 @@ export default defineConfig({
 					items: [
 						'sdk/overview', {
 							label: 'C++ API',
+							collapsed: true,
 							translations: {
 								'zh-CN': 'C++ API',
 							},
@@ -111,9 +112,28 @@ export default defineConfig({
 								'sdk/c-plus-plus/sensor-emergency-stop-monitor-api',
 								'sdk/c-plus-plus/kinematics-api',
 								'sdk/c-plus-plus/data-structures',
+								'sdk/c-plus-plus/examples',
 							]
 						},
-						'sdk/python-api',
+						{
+							label: 'Python API',
+							collapsed: true,
+							translations: {
+								'zh-CN': 'Python API',
+							},
+							items: [
+								'sdk/python/quick-start',
+								'sdk/python/arm-api',
+								'sdk/python/chassis-api',
+								'sdk/python/head-api',
+								'sdk/python/torso-api',
+								'sdk/python/sensor-api',
+								'sdk/python/sensor-emergency-stop-monitor-api',
+								'sdk/python/kinematics-api',
+								'sdk/python/data-structures',
+								'sdk/python/examples',
+							]
+						},
 					],
 				},
 				{

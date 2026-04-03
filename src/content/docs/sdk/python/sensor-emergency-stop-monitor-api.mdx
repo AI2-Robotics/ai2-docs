@@ -1,0 +1,149 @@
+---
+title: 监控急停按钮相关接口
+description: 监控急停按钮 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## EStopMonitor {#EStopMonitor}
+
+`EStopMonitor` 是一个急停按钮监控器类，提供主动获取急停按钮状态和设置事件回调。
+
+### 构造函数
+
+- 方法原型：
+
+  ```python
+  __init__(self, cfg: EStopMConfig = ...) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `cfg` | 配置参数，具体参见 [EStopMConfig](#EStopMConfig)。 |
+
+- 返回值：
+
+  `None`。
+
+### 启动监控
+
+若配置中 `EStopMConfig.auto_start_` 为 `True`（默认值），系统将自动启用监控，无需手动调用 `run()`。另外，多次调用 `run()` 方法无影响。
+
+当启动监控后，注册的事件回调函数才可能被触发。
+
+- 方法原型：
+
+  ```python
+  run(self) -> bool
+  ```
+
+- 返回值：
+
+  `True` 表示启动成功，`False` 表示启动失败。
+
+### 暂停监控
+
+当暂停监控后，注册的事件回调函数不会被触发。另外，多次调用 `pause()` 方法无影响。
+
+- 方法原型：
+
+  ```python
+  pause(self) -> bool
+  ```
+
+- 返回值：
+
+  `True` 表示暂停成功，`False` 表示暂停失败。
+
+### 是否正在监控
+
+- 方法原型：
+
+  ```python
+  is_running(self) -> bool
+  ```
+
+- 返回值：
+
+  `True` 表示正在监控，`False` 表示未监控。
+
+### 获取当前急停按钮的状态
+
+- 方法原型：
+
+  ```python
+  get_state(self) -> ESState
+  ```
+
+- 返回值：
+
+  急停按钮的状态，具体参见 [ESState](#ESState)。
+
+### 注册急停按钮按下回调函数
+
+- 方法原型：
+
+  ```python
+  set_pressed_event_callback(self, callback: typing.Callable[[], None]) -> int
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `callback` | 急停按钮按下的回调函数。<br/>当 `EStopMConfig.allow_multicb_` 为 `True` 时，允许设置多个回调函数。 |
+
+- 返回值：
+
+  `0` 或 `1` 表示成功，`1` 表示原有的回调函数被替换（仅在只允许一个回调函数的情况下才会出现）；`-1` 表示失败。
+
+### 注册急停按钮释放回调函数
+
+- 方法原型：
+
+  ```python
+  set_released_event_callback(self, callback: typing.Callable[[], None]) -> int
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `callback` | 急停按钮释放的回调函数。<br/>当 `EStopMConfig.allow_multicb_` 为 `True` 时，允许设置多个回调函数。 |
+
+- 返回值：
+
+  `0` 或 `1` 表示成功，`1` 表示原有的回调函数被替换（仅在只允许一个回调函数的情况下才会出现）；`-1` 表示失败。
+
+## EStopMConfig {#EStopMConfig}
+
+### 属性
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `pressed_level_` | int | 急停按钮按下时的 GPIO 电平极性。<br/>- `0`：低电平有效（Active-Low），按下时引脚电平为低。<br/>- `1`：高电平有效（Active-High），按下时引脚电平为高。 |
+| `allow_multicb_` | bool | 是否允许多个回调函数。<br/>- `True`：允许设置多个回调函数。<br/>- `False`：仅允许设置一个回调函数。 |
+| `name_` | str | 名称。 |
+
+### 静态方法
+
+| 静态方法 | 说明 |
+|:---|:---|
+| `ApacheOrin` | 返回配置完成的 `EStopMConfig` 实例（gpiochip0 + 引脚 2 + 低电平有效），适用于搭载 ApacheOrin 芯片的机器人。 |
+| `NvidiaOrin` | 返回配置完成的 `EStopMConfig` 实例（gpiochip1 + 引脚 9 + 高电平有效），适用于搭载 NvidiaOrin 芯片的机器人。|
+
+## ESState {#ESState}
+
+`ESState` 类是一个枚举器，用于表示急停按钮的状态。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `Invalid` | -1 | 无法获取状态 |
+| `Pressed` | 1 | 急停按钮处于被按下的状态 |
+| `Released` | 0 | 急停按钮处于被释放的状态 |

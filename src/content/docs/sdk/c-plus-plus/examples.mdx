@@ -1,0 +1,2071 @@
+---
+title: 示例
+description: C++ 接口示例程序
+---
+
+为帮助用户快速上手，本软件包在 `c++\examples` 目录中提供了完整的示例程序集。每个示例都专注于特定接口或功能模块的使用演示，建议按需参考。
+
+## 机械臂相关示例
+
+### ArmFactory 类使用示例
+
+   
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== ArmFactory示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        std::cout << "\n----- 方法1: 通过参数创建机械臂 -----" << std::endl;
+        // 配置机械臂参数
+        std::unordered_map<std::string, std::string> params = {
+            {"ip", "192.168.1.18"},
+            {"port", "8080"},
+            {"udp_ip", "192.168.1.102"},
+            {"udp_port", "8089"},
+            {"udp_cycle", "5"}};
+
+        // 创建Realman机械臂实例
+        auto arm1 = factory.create_arm("realman", "right_arm", params);
+        if (!arm1)
+        {
+            std::cerr << "创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm1->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        std::cout << "\n----- 方法2: 通过配置文件创建机械臂 -----" << std::endl;
+        // 从配置文件创建机械臂实例
+        auto arm2 = factory.create_arm_from_config(config_path);
+        if (!arm2)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm2->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 断开连接
+        arm1->disconnect();
+        std::cout << "机械臂已断开连接" << std::endl;
+        // 断开连接
+        arm2->disconnect();
+        std::cout << "机械臂已断开连接" << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂算法使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <random>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Arm算法示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 获取机械臂当前关节角
+        std::cout << "获取机械臂当前关节角..." << std::endl;
+        std::vector<AbcType> joints;
+        auto status = arm->get_joint_degree(joints);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "获取机械臂关节角失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "获取机械臂关节角成功" << std::endl;
+            for (int i = 0; i < 7; ++i)
+            {
+                std::cout << "Joint " << i << ": " << joints.at(i) << std::endl;
+            }
+        }
+        // 正解
+        std::cout << "正解..." << std::endl;
+        AbcPose pose;
+        status = arm->forward_kinematics(joints, pose);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "正解失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "正解成功" << std::endl;
+            std::cout << "position: " << pose.position.x << " " << pose.position.y << " " << pose.position.z << std::endl;
+            std::cout << "quaternion: " << pose.quaternion.w << " " << pose.quaternion.x << " " << pose.quaternion.y << " " << pose.quaternion.z << std::endl;
+        }
+        // 逆解
+        std::cout << "逆解..." << std::endl;
+        std::vector<AbcType> j2;
+        std::vector<AbcType> ref_j;
+        ref_j.resize(7);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        for (int i = 0; i < 7; ++i)
+        {
+            std::uniform_real_distribution<> dis(-3.0, 3.0);
+            AbcType randomNumber = dis(gen);
+            ref_j.at(i) += randomNumber;
+        }
+        // 遍历解
+        status = arm->inverse_kinematics(pose, ref_j, j2, 1);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "遍历逆解失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "遍历逆解成功" << std::endl;
+            for (int i = 0; i < 7; ++i)
+            {
+                std::cout << "Joint " << i << ": " << j2.at(i) << std::endl;
+            }
+            AbcPose p2;
+            arm->forward_kinematics(j2, p2);
+            std::cout << "逆解后正解的数值" << std::endl;
+            std::cout << "position: " << p2.position.x << " " << p2.position.y << " " << p2.position.z << std::endl;
+            std::cout << "quaternion: " << p2.quaternion.w << " " << p2.quaternion.x << " " << p2.quaternion.y << " " << p2.quaternion.z << std::endl;
+        }
+        // 单步解
+        for (int i = 0; i < 7; ++i)
+        {
+            std::uniform_real_distribution<> dis(-1.0, 1.0);
+            AbcType randomNumber = dis(gen);
+            ref_j.at(i) = 0;
+            ref_j.at(i) += (randomNumber + joints.at(i));
+        }
+        status = arm->inverse_kinematics(pose, ref_j, j2, 0);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "单步逆解失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "单步逆解成功" << std::endl;
+            for (int i = 0; i < 7; ++i)
+            {
+                std::cout << "Joint " << i << ": " << j2.at(i) << std::endl;
+            }
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂夹爪使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+void arm_callback(std::shared_ptr<const AbcArmRealtimeState> state)
+{
+    std::cout << "[回调] 夹爪状态更新:"
+              << " 开口度: " << state->gripper_state.actpos
+              << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Arm夹爪示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+        arm->realtime_arm_state_call_back(arm_callback);
+        // 夹爪执行夹取操作
+        std::cout << "执行夹取操作..." << std::endl;
+        auto status = arm->set_gripper_pick_on(500, 500, true, 5);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "夹爪操作失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "夹爪操作成功" << std::endl;
+        }
+
+        // 夹爪执行松开操作
+        std::cout << "执行松开操作..." << std::endl;
+        status = arm->set_gripper_release(500, true, 5);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "夹爪操作失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "夹爪操作成功" << std::endl;
+        }
+
+        // 获取夹爪状态
+        std::cout << "获取夹爪状态..." << std::endl;
+        AbcGripperState s;
+        status = arm->get_gripper_state(&s);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "获取夹爪状态失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "获取夹爪状态成功" << std::endl;
+            std::cout << "温度: " << s.temperature
+                      << ", 开口度: " << s.actpos
+                      << ", 当前压力: " << s.current_force
+                      << std::endl;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂运动使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== Arm运动示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 执行关节空间运动
+        std::cout << "执行关节空间运动..." << std::endl;
+        std::vector<AbcType> joints = {20.3f, 20.3f, 20.3f, 20.3f, 20.3f, 20.f, 20.f};
+        auto status = arm->move_joint_position(joints, 10, 0, 0, 1);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "关节运动失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "关节运动成功" << std::endl;
+        }
+
+        // 执行笛卡尔空间直线运动
+        std::cout << "执行笛卡尔空间直线运动..." << std::endl;
+        AbcPose target_pose = {
+            .position = {0.3f, 0.2f, 0.5f},
+            .quaternion = {1.0f, 0.0f, 0.0f, 0.0f}};
+        status = arm->move_cartesian_linear(target_pose, 10, 0, 0, 1);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "笛卡尔空间直线运动失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "笛卡尔空间直线运动成功" << std::endl;
+        }
+
+        // 执行关节-笛卡尔空间运动
+        std::cout << "执行关节-笛卡尔空间运动..." << std::endl;
+        AbcPose target_pose1 = {
+            .position = {0.3f, 0.2f, 0.4f},
+            .quaternion = {1.0f, 0.0f, 0.0f, 0.0f}};
+        status = arm->move_joint_pose(target_pose1, 10, 0, 0, 0);
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "关节-笛卡尔空间运动失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "关节-笛卡尔空间运动成功" << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        std::cout << "运行100毫秒后, 暂停1秒" << std::endl;
+        status = arm->set_arm_pause();
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "暂停失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "暂停成功" << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::cout << "恢复运动" << std::endl;
+        status = arm->set_arm_continue();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        status = arm->move_joint_pose(target_pose, 10, 0, 0, 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        std::cout << "运行500毫秒后, 缓停" << std::endl;
+        status = arm->set_arm_slow_stop();
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "缓停失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "缓停成功" << std::endl;
+        }
+
+        status = arm->move_joint_pose(target_pose1, 10, 0, 0, 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        std::cout << "运行500毫秒后, 急停" << std::endl;
+        status = arm->set_arm_stop();
+        if (status != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "急停失败，错误码: " << static_cast<int>(status) << std::endl;
+        }
+        else
+        {
+            std::cout << "急停成功" << std::endl;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂透传使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+// 状态回调函数
+void arm_state_callback(std::shared_ptr<const AbcArmRealtimeState> state)
+{
+    std::cout << "[回调] 机械臂状态更新:"
+              << " 关节1角度: " << state->joint_status.joint_position[0]
+              << ", 关节2角度: " << state->joint_status.joint_position[1]
+              << ", 关节3角度: " << state->joint_status.joint_position[2]
+              << ", 关节4角度: " << state->joint_status.joint_position[3]
+              << ", 关节5角度: " << state->joint_status.joint_position[4]
+              << ", 关节6角度: " << state->joint_status.joint_position[5]
+              << ", 关节7角度: " << state->joint_status.joint_position[6]
+              << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== Arm透传示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 注册状态回调函数
+        arm->realtime_arm_state_call_back(arm_state_callback);
+
+        // 获取关节角度
+        AbcErrorCode ret;
+        std::vector<AbcType> joints;
+        arm->get_joint_degree(joints);
+
+        for (int i = 0; i < 200; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            joints[6] += 0.1;
+            ret = arm->move_joint_position_canfd(joints, true);
+            if (ret != AbcErrorCode::SUCCESS)
+            {
+                std::cerr << "透传失败, 错误码: " << static_cast<int>(ret) << std::endl;
+                break;
+            }
+        }
+        for (int i = 0; i < 200; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            joints[6] -= 0.1;
+            ret = arm->move_joint_position_canfd(joints, true);
+            if (ret != AbcErrorCode::SUCCESS)
+            {
+                std::cerr << "透传失败, 错误码: " << static_cast<int>(ret) << std::endl;
+                break;
+            }
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂注册回调函数使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+// 状态回调函数
+void arm_left_callback(std::shared_ptr<const AbcArmRealtimeState> state)
+{
+    std::cout << "[回调] 机械臂left状态更新:"
+              << " 关节1角度: " << state->joint_status.joint_position[0]
+              << ", 关节2角度: " << state->joint_status.joint_position[1]
+              << ", 关节3角度: " << state->joint_status.joint_position[2]
+              << ", 关节4角度: " << state->joint_status.joint_position[3]
+              << ", 关节5角度: " << state->joint_status.joint_position[4]
+              << ", 关节6角度: " << state->joint_status.joint_position[5]
+              << ", 关节7角度: " << state->joint_status.joint_position[6]
+              << std::endl;
+}
+
+void arm_right_callback(std::shared_ptr<const AbcArmRealtimeState> state)
+{
+    std::cout << "[回调] 机械臂right状态更新:"
+              << " 关节1角度: " << state->joint_status.joint_position[0]
+              << ", 关节2角度: " << state->joint_status.joint_position[1]
+              << ", 关节3角度: " << state->joint_status.joint_position[2]
+              << ", 关节4角度: " << state->joint_status.joint_position[3]
+              << ", 关节5角度: " << state->joint_status.joint_position[4]
+              << ", 关节6角度: " << state->joint_status.joint_position[5]
+              << ", 关节7角度: " << state->joint_status.joint_position[6]
+              << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 3)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << " config/right_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path_left = argv[1];
+    const std::string config_path_right = argv[2];
+
+    std::cout << "===== Arm注册回调函数示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm1 = factory.create_arm_from_config(config_path_left);
+        if (!arm1)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm1->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 注册状态回调函数
+        arm1->realtime_arm_state_call_back(arm_left_callback);
+
+        auto arm2 = factory.create_arm_from_config(config_path_right);
+        if (!arm2)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm2->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+
+        // 注册状态回调函数
+        arm2->realtime_arm_state_call_back(arm_right_callback);
+
+        for (int i = 0; i < 20; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+### 机械臂 Modbus 使用示例
+
+```cpp
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include "drivers/arm/arm_factory.h"
+
+// 字节操作宏
+#define L_BYTE(v) static_cast<uint8_t>((v) & 0xFF)
+#define H_BYTE(v) static_cast<uint8_t>(((v) >> 8) & 0xFF)
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Arm modbus示例程序 =====" << std::endl;
+
+    try
+    {
+        // 创建机械臂工厂实例
+        ArmFactory factory;
+
+        // 从配置文件创建机械臂实例
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm)
+        {
+            std::cerr << "从配置文件创建机械臂实例失败" << std::endl;
+            return 1;
+        }
+
+        // 连接机械臂
+        std::cout << "正在连接机械臂..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "连接机械臂失败" << std::endl;
+            return 1;
+        }
+        std::cout << "机械臂连接成功" << std::endl;
+        auto ret = arm->set_modbus_mode(1, 115200, 10);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "设置modbus模式失败: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+
+        PeripheralReadWriteParams params{
+            .port = 1,
+            .address = 1135,
+            .device = 2,
+            .num = 6,
+        };
+        std::vector<uint16_t> pose = {0, 0, 0, 0, 0, 0}; // 每个元素对应一个关节
+
+        std::vector<uint8_t> write_data = {
+            H_BYTE(pose[0]), L_BYTE(pose[0]),
+            H_BYTE(pose[1]), L_BYTE(pose[1]),
+            H_BYTE(pose[2]), L_BYTE(pose[2]),
+            H_BYTE(pose[3]), L_BYTE(pose[3]),
+            H_BYTE(pose[4]), L_BYTE(pose[4]),
+            H_BYTE(pose[5]), L_BYTE(pose[5])};
+        ret = arm->write_registers(params, write_data);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "寄存器写入失败: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        pose = {30000, 65535, 65535, 65535, 65535, 0};
+        write_data = {
+            H_BYTE(pose[0]), L_BYTE(pose[0]),
+            H_BYTE(pose[1]), L_BYTE(pose[1]),
+            H_BYTE(pose[2]), L_BYTE(pose[2]),
+            H_BYTE(pose[3]), L_BYTE(pose[3]),
+            H_BYTE(pose[4]), L_BYTE(pose[4]),
+            H_BYTE(pose[5]), L_BYTE(pose[5])};
+        ret = arm->write_registers(params, write_data);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "寄存器写入失败: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+## 底盘相关示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/chassis/chassis_factory.h"
+
+using namespace alphabot;
+
+int chassis_interface_test(std::shared_ptr<alphabot::ChassisInterface> inter_face)
+{
+    while (1)
+    {
+
+        printf("please input a cmd:");
+        // char cmd = getchar();
+        std::string cmd;
+        getline(std::cin, cmd);
+        // // printf("\ninput cmd is[%c]\",cmd);
+        if (cmd == "quit")
+        {
+            printf("quit chassis interface test!\n");
+            return 0;
+        }
+        else if (cmd == "get_pose_speed")
+        {
+            alphabot::ChassisPoseSpeed pose_spd;
+            inter_face->get_pose_speed(pose_spd);
+        }
+        else if (cmd == "get_pose")
+        {
+            alphabot::ChassisPose2D pose;
+            inter_face->get_pose(pose);
+        }
+        else if (cmd == "get_speed")
+        {
+            alphabot::ChassisTwist spd;
+            inter_face->get_speed(spd);
+        }
+        else if (cmd == "get_mileage")
+        {
+            uint32_t mileage;
+            inter_face->get_mileage(mileage);
+        }
+        else if (cmd == "get_battery")
+        {
+            alphabot::ChassisBattery battery;
+            inter_face->get_battery(battery);
+        }
+        else if (cmd == "get_robot_state")
+        {
+            alphabot::ChassisState robot_state;
+            inter_face->get_robot_state(robot_state);
+        }
+        else if (cmd == "get_status_code")
+        {
+            alphabot::ChassisStatusCode status_code;
+            inter_face->get_status_code(status_code);
+        }
+        else if (cmd == "get_static_tf")
+        {
+            std::vector<alphabot::ChassisTransformStamped> transforms;
+            inter_face->get_static_tf(transforms);
+        }
+        else if (cmd == "twist_control")
+        {
+            // virtual AbcErrorCode twist_control(float linear, float angular) = 0;
+        }
+        else if (cmd == "init_robot")
+        {
+            // alphabot::ChassisPose2D pose;
+            // uint8_t update_flg;
+            // inter_face->init_robot(pose,update_flg);
+        }
+        else if (cmd == "point1")
+        {
+            // 目标A点
+            inter_face->move_to_point_sync(3.44, -1.8, -1.77,
+                                           [](const alphabot::ChassisTaskResponse &res)
+                                           {
+                                               // 状态报文
+                                               printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                                                      res.task_state,
+                                                      res.msg_type,
+                                                      res.msg.c_str(),
+                                                      res.current_pose.x,
+                                                      res.current_pose.y,
+                                                      res.current_pose.theta);
+                                           });
+        }
+        else if (cmd == "point2")
+        {
+            // 目标B点
+            inter_face->move_to_point_sync(5.45, -6.4, -0.24,
+                                           [](const alphabot::ChassisTaskResponse &res)
+                                           {
+                                               // 状态报文
+                                               printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                                                      res.task_state,
+                                                      res.msg_type,
+                                                      res.msg.c_str(),
+                                                      res.current_pose.x,
+                                                      res.current_pose.y,
+                                                      res.current_pose.theta);
+                                           });
+        }
+        else if (cmd == "to_charge")
+        {
+            printf("get to_charge cmd!\n");
+            inter_face->to_charge_sync();
+        }
+        else if (cmd == "exit_charge")
+        {
+            printf("get exit_charge cmd!\n");
+            inter_face->exit_charge_sync();
+        }
+        else if (cmd == "MF")
+        {
+            inter_face->move_straight_sync(1.0, 0.25, [](const alphabot::ChassisTaskResponse &res)
+                                           {
+        //状态报文
+        printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+          res.task_state,
+          res.msg_type,
+          res.msg.c_str(),
+          res.current_pose.x,
+          res.current_pose.y,
+          res.current_pose.theta); }, false);
+        }
+        else if (cmd == "MB")
+        {
+            inter_face->move_straight_sync(-1.0, 0.25, [](const alphabot::ChassisTaskResponse &res)
+                                           {
+        //状态报文
+        printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+          res.task_state,
+          res.msg_type,
+          res.msg.c_str(),
+          res.current_pose.x,
+          res.current_pose.y,
+          res.current_pose.theta); }, false);
+        }
+        else if (cmd == "TL")
+        {
+            inter_face->move_rotate_sync(1.57, 0.2, [](const alphabot::ChassisTaskResponse &res)
+                                         {
+        //状态报文
+        printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+          res.task_state,
+          res.msg_type,
+          res.msg.c_str(),
+          res.current_pose.x,
+          res.current_pose.y,
+          res.current_pose.theta); }, false);
+        }
+        else if (cmd == "TR")
+        {
+            inter_face->move_rotate_sync(-1.57, 0.2, [](const alphabot::ChassisTaskResponse &res)
+                                         {
+        //状态报文
+        printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+          res.task_state,
+          res.msg_type,
+          res.msg.c_str(),
+          res.current_pose.x,
+          res.current_pose.y,
+          res.current_pose.theta); }, false);
+        }
+        else if (cmd == "get_local_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->get_local_footprint(points);
+        }
+        else if (cmd == "get_global_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->get_global_footprint(points);
+        }
+        else if (cmd == "get_all_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> local_points, global_points;
+            inter_face->get_all_footprint(local_points, global_points);
+        }
+        else if (cmd == "ai2_get_local_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->ai2_get_local_footprint(points);
+        }
+        else if (cmd == "ai2_get_global_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->ai2_get_global_footprint(points);
+        }
+        else if (cmd == "ai2_get_all_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> local_points, global_points;
+            inter_face->ai2_get_all_footprint(local_points, global_points);
+        }
+        else if (cmd == "set_local_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+            alphabot::ChassisPoint32 point;
+
+            // point.x=0.217;
+            // point.y=0.121;
+            point.x = 0.217;
+            point.y = 0.15;
+            points.push_back(point);
+
+            point.x = 0.171;
+            point.y = 0.167;
+            points.push_back(point);
+
+            point.x = -0.171;
+            point.y = 0.167;
+            points.push_back(point);
+
+            point.x = -0.217;
+            point.y = 0.121;
+            points.push_back(point);
+
+            point.x = -0.217;
+            point.y = -0.121;
+            points.push_back(point);
+
+            point.x = -0.171;
+            point.y = -0.167;
+            points.push_back(point);
+
+            point.x = 0.171;
+            point.y = -0.167;
+            points.push_back(point);
+
+            point.x = 0.217;
+            point.y = -0.122;
+            points.push_back(point);
+
+            inter_face->set_local_footprint(points);
+        }
+        else if (cmd == "set_global_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> points;
+
+            alphabot::ChassisPoint32 point;
+
+            point.x = 0.32;
+            // point.x=0.367;
+            point.y = 0.272;
+            points.push_back(point);
+
+            point.x = 0.321;
+            point.y = 0.318;
+            points.push_back(point);
+
+            point.x = -0.321;
+            point.y = 0.318;
+            points.push_back(point);
+
+            point.x = -0.367;
+            point.y = 0.272;
+            points.push_back(point);
+
+            point.x = -0.367;
+            point.y = -0.270;
+            points.push_back(point);
+
+            point.x = -0.321;
+            point.y = -0.316;
+            points.push_back(point);
+
+            point.x = 0.321;
+            point.y = -0.316;
+            points.push_back(point);
+
+            point.x = 0.360;
+            point.y = -0.271;
+            points.push_back(point);
+
+            inter_face->set_global_footprint(points);
+        }
+        else if (cmd == "set_all_footprint")
+        {
+            std::vector<alphabot::ChassisPoint32> local_points;
+            alphabot::ChassisPoint32 point;
+
+            // point.x=0.217;
+            // point.y=0.121;
+            point.x = 0.217;
+            point.y = 0.15;
+            local_points.push_back(point);
+
+            point.x = 0.171;
+            point.y = 0.167;
+            local_points.push_back(point);
+
+            point.x = -0.171;
+            point.y = 0.167;
+            local_points.push_back(point);
+
+            point.x = -0.217;
+            point.y = 0.121;
+            local_points.push_back(point);
+
+            point.x = -0.217;
+            point.y = -0.121;
+            local_points.push_back(point);
+
+            point.x = -0.171;
+            point.y = -0.167;
+            local_points.push_back(point);
+
+            point.x = 0.171;
+            point.y = -0.167;
+            local_points.push_back(point);
+
+            point.x = 0.217;
+            point.y = -0.122;
+            local_points.push_back(point);
+            /**********************************************/
+            std::vector<alphabot::ChassisPoint32> global_points;
+            point.x = 0.32;
+            // point.x=0.367;
+            point.y = 0.272;
+            global_points.push_back(point);
+
+            point.x = 0.321;
+            point.y = 0.318;
+            global_points.push_back(point);
+
+            point.x = -0.321;
+            point.y = 0.318;
+            global_points.push_back(point);
+
+            point.x = -0.367;
+            point.y = 0.272;
+            global_points.push_back(point);
+
+            point.x = -0.367;
+            point.y = -0.270;
+            global_points.push_back(point);
+
+            point.x = -0.321;
+            point.y = -0.316;
+            global_points.push_back(point);
+
+            point.x = 0.321;
+            point.y = -0.316;
+            global_points.push_back(point);
+
+            point.x = 0.360;
+            point.y = -0.271;
+            global_points.push_back(point);
+
+            inter_face->set_all_footprint(local_points, global_points);
+        }
+        else if (cmd == "get_hardware_state")
+        {
+            alphabot::ChassisHardwareState hardware_state;
+            inter_face->get_hardware_state(hardware_state);
+        }
+        else
+        {
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/woosh_chassis.json" << std::endl;
+        return 1;
+    }
+    std::string config_path = argv[1];
+    ChassisFactory factory;
+    auto chassis = factory.create_chassis_from_config(config_path);
+    auto ret = chassis->connect();
+    if (ret != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "connect chassis failed: " << static_cast<int>(ret) << std::endl;
+        return 1;
+    }
+    ChassisPose2D pose;
+    ret = chassis->get_pose(pose);
+    if (ret != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "get pose failed: " << static_cast<int>(ret) << std::endl;
+        return 1;
+    }
+    std::cout << "pose: " << pose.x << ", " << pose.y << ", " << pose.theta << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    chassis_interface_test(chassis);
+
+    chassis->disconnect();
+    return 0;
+}
+```
+
+## 头部相关示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/head/head_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/ti5_head.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    try
+    {
+        // 创建头部工厂实例
+        HeadFactory factory;
+        auto head = factory.create_head_from_config(config_path);
+        auto ret = head->connect();
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "connect head failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::vector<AbcType> joints;
+        head->get_joint_degree(joints);
+        std::cout << "head joints: " << joints[0] << ", " << joints[1] << std::endl;
+        joints[0] = -45;
+        joints[1] = -10;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "head move failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        head->get_joint_degree(joints);
+        std::cout << "head joints: " << joints[0] << ", " << joints[1] << std::endl;
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "connect head failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        joints[0] = 45;
+        joints[1] = 10;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "head move failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        joints[0] = 0;
+        joints[1] = 0;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "head move failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+## 躯干相关示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/torso/torso_factory.h"
+
+using namespace alphabot;
+
+void torso_callback(std::shared_ptr<const AbcTorsoState> torso_state)
+{
+    std::cout << "joints position: "
+              << torso_state->joints_positions[0] << ", "
+              << torso_state->joints_positions[1] << ", "
+              << torso_state->joints_positions[2] << ", "
+              << torso_state->joints_positions[3] << ", speed: "
+              << torso_state->joints_speed[0] << ", "
+              << torso_state->joints_speed[1] << ", "
+              << torso_state->joints_speed[2] << ", "
+              << torso_state->joints_speed[3] << ", "
+
+              << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/ti5_torso.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    try
+    {
+        // 创建躯干工厂实例
+        TorsoFactory<AbcTorsoPose4D> factory;
+        auto torso = factory.create_torso_from_config(config_path);
+        auto ret = torso->connect();
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "connect torso failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        torso->set_torso_state_callback(torso_callback);
+        const std::vector<float> joints1{0, 0, 0, 3};
+
+        AbcTorsoPose4D pose{
+            .height = 0.6,
+            .forward = -0.2,
+            .pitch = 0,
+            .yaw = 0,
+        };
+        ret = torso->move_cartesian_linear(pose, 40, true);
+        if (ret != AbcErrorCode::SUCCESS)
+        {
+            std::cerr << "connect torso failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "异常发生: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== 示例程序结束 =====" << std::endl;
+    return 0;
+}
+```
+
+## 传感器相关示例
+
+### SensorFactory 类使用示例
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <iomanip>
+
+#include "drivers/sensors/depth_camera_interface.h"
+#include "drivers/sensors/sensor_factory.h"
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point &tp)
+{
+    // 1. 将 time_point 转换为 time_t（秒级精度）
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. 提取毫秒部分
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+                            duration_since_epoch) %
+                        1000000; // 取当前秒内的毫秒数
+
+    // 转换为 tm 结构体（线程安全）
+    std::tm tm;
+#if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0)
+    {
+        return {}; // 错误处理
+    }
+#else
+    if (localtime_r(&time, &tm) == nullptr)
+    {
+        return {}; // 错误处理
+    }
+#endif
+
+    // 4. 使用 stringstream 组合日期时间和毫秒
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // 示例输出：20231023 153045.123
+}
+
+using namespace alphabot;
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/sensor_realsense.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== SensorFactory示例程序 =====" << std::endl;
+    SensorFactory factory;
+    // auto sensor = std::dynamic_pointer_cast<RealsenseCamera>(factory.create_sensor_from_config(config_path));
+    auto sensor = factory.create_depth_camera_from_config(config_path);
+
+    if (!sensor)
+    {
+        std::cerr << "创建传感器失败" << std::endl;
+        return -1;
+    }
+    sensor->connect();
+    std::cout << "连接成功" << std::endl;
+    sensor->start_stream();
+    std::cout << "打开流" << std::endl;
+    // SensorData &data = std::dynamic_pointer_cast<RGBDData>(&sensor->get_data());
+    for (int i = 0; i < 50; ++i)
+    {
+        auto data = sensor->get_data();
+        if (!data)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
+        auto ts = data->get_timestamp();
+        std::cout << "time stamp: " << format_with_milliseconds(ts) << std::endl;
+    }
+    sensor->disconnect();
+}
+```
+
+### RealSense 相机使用示例
+
+```cpp
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <csignal>
+#include <sstream>
+#include <iomanip>
+
+#include <ctime>
+#include "drivers/sensors/sensor_factory.h"
+#include "drivers/sensors/depth_camera_interface.h"
+
+using namespace alphabot;
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point &tp)
+{
+    // 1. 将 time_point 转换为 time_t（秒级精度）
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. 提取毫秒部分
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+                            duration_since_epoch) %
+                        1000000; // 取当前秒内的毫秒数
+
+    // 转换为 tm 结构体（线程安全）
+    std::tm tm;
+#if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0)
+    {
+        return {}; // 错误处理
+    }
+#else
+    if (localtime_r(&time, &tm) == nullptr)
+    {
+        return {}; // 错误处理
+    }
+#endif
+
+    // 4. 使用 stringstream 组合日期时间和毫秒
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // 示例输出：20231023 153045.123
+}
+// 全局变量用于控制程序退出
+static bool g_running = true;
+
+// 信号处理函数
+void signal_handler(int signum)
+{
+    if (signum == SIGINT)
+    {
+        g_running = false;
+    }
+}
+
+// 相机数据回调函数
+// 修改回调函数的签名，使其接受 std::shared_ptr<const SensorData> 而不是 const SensorData&
+void camera_callback(std::shared_ptr<const SensorData> data)
+{
+    // 将 SensorData 转换为 RGBDData
+    auto rgbd_data = std::dynamic_pointer_cast<const RGBDData>(data);
+    if (rgbd_data)
+    {
+        // 获取时间戳
+        auto timestamp = rgbd_data->get_timestamp();
+        std::cout << "收到相机数据，时间戳: "
+                  << format_with_milliseconds(timestamp) << std::endl;
+
+        // 获取图像尺寸
+        int width = rgbd_data->get_width();
+        int height = rgbd_data->get_height();
+        std::cout << "图像尺寸: " << width << "x" << height << std::endl;
+
+        // 获取深度数据
+        const auto &depth_data = rgbd_data->get_depth_data();
+        auto color_intrinsic = rgbd_data->get_color_intrinsic();
+        auto depth_intrinsic = rgbd_data->get_depth_intrinsic();
+        if (!depth_data.empty())
+        {
+            // 计算平均深度
+            float sum = 0.0f;
+            int count = 0;
+            for (const auto &d : depth_data)
+            {
+                if (d > 0)
+                { // 忽略无效深度值
+                    sum += d;
+                    count++;
+                }
+            }
+
+            if (count > 0)
+            {
+                float avg_depth = sum / count;
+                std::cout << "平均深度: " << avg_depth << " 米, " << "depth intrinsic: fxfy: " << depth_intrinsic.fx << ", " << depth_intrinsic.fy << ", "
+                                                                                                                                                      "color intrinsic: fxfy: "
+                          << color_intrinsic.fx << ", " << color_intrinsic.fy
+                          << std::endl;
+            }
+        }
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    // 参数检查
+    if (argc < 2)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <配置文件路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/sensor_realsense.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    // 注册信号处理函数
+    signal(SIGINT, signal_handler);
+
+    // 创建RealSense相机实例
+    // 第一个参数是相机名称
+    // 第二个参数是相机序列号（留空则连接第一个可用设备）
+    // 第三个参数设置是否将深度图对齐到彩色图
+    // DepthCamera camera("realsense_camera", "215322076654", true);
+    auto factory = SensorFactory();
+    auto camera = std::dynamic_pointer_cast<DepthCamera>(factory.create_sensor_from_config(config_path));
+
+    // 设置相机参数
+    camera->set_color_resolution(640, 480); // 设置彩色图像分辨率
+    camera->set_depth_resolution(640, 480); // 设置深度图像分辨率
+    camera->set_framerate(30);              // 设置帧率
+
+    // 设置数据回调函数
+    // 设置回调函数（无需修改此行，因为我们已经修改了回调函数的签名）
+    camera->set_data_callback(camera_callback);
+
+    // 连接相机
+    auto status = camera->connect();
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to connect camera!" << std::endl;
+        return -1;
+    }
+    std::cout << "Camera connected successfully." << std::endl;
+
+    // 开始数据流
+    status = camera->start_stream();
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to start stream!" << std::endl;
+        camera->disconnect();
+        return -1;
+    }
+    std::cout << "Stream started successfully." << std::endl;
+
+    // 主循环
+    while (g_running)
+    {
+        // 获取最新的相机数据
+        auto data = camera->get_data();
+
+        // 这里可以添加其他处理逻辑
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    // 停止数据流
+    camera->stop_stream();
+    std::cout << "Stream stopped." << std::endl;
+
+    // 断开相机连接
+    camera->disconnect();
+    std::cout << "Camera disconnected." << std::endl;
+
+    return 0;
+}
+```
+
+### 传感器数据同步使用示例
+
+```cpp
+#include "sensor/sensor_synchronizer.h"
+#include "drivers/sensors/sensor_factory.h"
+#include "drivers/arm/arm_factory.h"
+#include "drivers/sensors/camera_data.h" // 添加这个头文件来引入RGBDData类型
+#include <iostream>
+#include <sstream>
+#include <chrono>
+#include <thread>
+#include <iomanip>
+
+using namespace alphabot;
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point &tp)
+{
+    // 1. 将 time_point 转换为 time_t（秒级精度）
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. 提取毫秒部分
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+                            duration_since_epoch) %
+                        1000000; // 取当前秒内的毫秒数
+
+    // 转换为 tm 结构体（线程安全）
+    std::tm tm;
+#if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0)
+    {
+        return {}; // 错误处理
+    }
+#else
+    if (localtime_r(&time, &tm) == nullptr)
+    {
+        return {}; // 错误处理
+    }
+#endif
+
+    // 4. 使用 stringstream 组合日期时间和毫秒
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // 示例输出：20231023 153045.123
+}
+
+int main(int argc, char **argv)
+{
+    // 参数检查
+    if (argc < 5)
+    {
+        std::cerr << "使用方法: " << argv[0] << " <rs配置文件1路径> <rs配置文件2路径> <rs配置文件3路径> <arm配置文件1路径>" << std::endl;
+        std::cerr << "示例: " << argv[0] << " config/realsense1.json config/realsense2.json config/realsense2.json config/left_arm.json" << std::endl;
+        return 1;
+    }
+    std::string config1_path = argv[1];
+    std::string config2_path = argv[2];
+    std::string config3_path = argv[3];
+    std::string arm1_path = argv[4];
+    SensorFactory sensor_factory;
+    ArmFactory arm_factory;
+    // 创建三个RealSense传感器
+    auto sensor1 = sensor_factory.create_sensor_from_config(config1_path);
+    auto sensor2 = sensor_factory.create_sensor_from_config(config2_path);
+    auto sensor3 = sensor_factory.create_sensor_from_config(config3_path);
+    auto arm1 = arm_factory.create_arm_from_config(arm1_path);
+
+    // 初始化传感器
+    if (!sensor1 || !sensor2 || !sensor3)
+    {
+        std::cerr << "Failed to initialize sensors!" << std::endl;
+        return 1;
+    }
+    if (!arm1)
+    {
+        std::cerr << "Failed to initialize sensors!" << std::endl;
+        return 1;
+    }
+    // 创建同步器，使用NEAREST策略，时间容差10ms
+    SensorSynchronizer sync(SensorSynchronizer::SyncPolicy::NEAREST, 33);
+
+    // 添加传感器到同步器
+    auto status = sync.add_sensor(sensor1->get_name(), sensor1);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to add sensor1!" << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_sensor(sensor2->get_name(), sensor2);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to add sensor2!" << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_sensor(sensor3->get_name(), sensor3);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to add sensor3!" << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_arm(arm1->get_name(), arm1);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to add arm!" << static_cast<int>(status) << std::endl;
+    }
+    // 设置参考传感器为第一个传感器
+    sync.set_sync_mode(SensorSynchronizer::SyncMode::REFERENCE_SENSOR);
+    sync.set_reference_sensor(sensor1->get_name());
+
+    // 设置同步数据回调
+    sync.set_sync_data_callback([](std::shared_ptr<SyncDataPackage> package)
+                                {
+    std::cout << "Got sync package at: " 
+         << format_with_milliseconds(package->get_timestamp())
+         << std::endl;
+  
+    // 处理每个传感器的同步数据
+    for (const auto& [name, data] : package->get_all_sensor_data()) {
+      // 尝试将数据转换为RGBDData类型
+      auto rgbd_data = std::dynamic_pointer_cast<RGBDData>(data);
+      if (rgbd_data) {
+        // 获取深度数据
+        const auto& depth_data = rgbd_data->get_depth_data();
+        if (!depth_data.empty()) {
+          // 计算平均深度
+          float sum = 0.0f;
+          int count = 0;
+          for (const auto& d : depth_data) {
+            if (d > 0) { // 忽略无效深度值
+              sum += d;
+              count++;
+            }
+          }
+          
+          if (count > 0) {
+            float avg_depth = sum / count;
+            std::cout << format_with_milliseconds(rgbd_data->get_timestamp()) << " |Sensor " << name << " depth: " 
+                 << avg_depth << " 米" << std::endl;
+          }
+        }
+      }
+    }
+    // 处理每个机械臂的同步数据
+    for (const auto& [name, data] : package->get_all_arm_data()) {
+      // 尝试将数据转换为RGBDData类型
+      auto joint_position = data->joint_status.joint_position;
+      std::cout << format_with_milliseconds(data->timestamp) << " |Arm " << name << " joint position:"
+           << joint_position[0] << " "
+           << joint_position[1] << " "
+           << joint_position[2] << " "
+           << joint_position[3] << " "
+           << joint_position[4] << " "
+           << joint_position[5] << " "
+           << joint_position[6] << std::endl;
+    } });
+
+    // 启动同步
+    if (sync.start() != AbcErrorCode::SUCCESS)
+    {
+        std::cerr << "Failed to start sync!" << std::endl;
+        return 1;
+    }
+
+    // 运行10秒
+    std::cout << "Running for 10 seconds..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    // 停止同步
+    sync.stop();
+
+    return 0;
+}
+```
+
+### 监控急停按钮示例
+
+```cpp
+#include <iostream>
+#include <thread>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
+#include "sensor/sensor_emergency_stop_monitor.h"
+
+using namespace alphabot;
+
+int estopmonitor_demo(int argc, char *argv[])
+{
+    EStopMonitor esm(true);
+
+    esm.set_pressed_event_callback([]
+                                   { std::cout << "\033[1;31m[ES] Pressed\033[0m" << std::endl; });
+    esm.set_pressed_event_callback([]
+                                   { std::cout << "\033[1;31m[ES] Pressed(02)\033[0m" << std::endl; });
+    esm.set_pressed_event_callback([]
+                                   { std::cout << "\033[1;31m[ES] Pressed(03)\033[0m" << std::endl; });
+    esm.set_released_event_callback([]
+                                    { std::cout << "\033[1;32m[ES] Released\033[0m" << std::endl; });
+    esm.set_released_event_callback([]
+                                    { std::cout << "\033[1;32m[ES] Released(02)\033[0m" << std::endl; });
+    esm.set_released_event_callback([]
+                                    { std::cout << "\033[1;32m[ES] Released(03)\033[0m" << std::endl; });
+
+    bool stop = false;
+    std::thread t(
+        [&esm, &stop]
+        {
+            while (!stop)
+            {
+                int state = (int)esm.get_state();
+                if (state == -1)
+                {
+                    std::cerr << "get state of esm failed!";
+                }
+                else
+                {
+                    std::cout << "esm state : " << state;
+                }
+                std::cout << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        });
+
+    // 暂停-恢复 测试
+    while (0)
+    {
+        std::cout << "10s后 暂停" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        esm.pause();
+        std::cout << "暂停10s后 运行" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        esm.run();
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(600));
+
+    // 避免悬空引用
+    stop = true;
+    t.join();
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    return estopmonitor_demo(argc, argv);
+}
+```
+
+## 运动学算法相关示例
+
+```cpp
+#include "core/algo/arm_kinematics.h"
+
+using namespace alphabot;
+
+int main()
+{
+    std::cout << "RM65_6FB example: " << std::endl;
+    ArmType type = ArmType::RM65_6FB;
+    auto kin = ArmKinematics::create(type);
+
+    // RM65_6FB 有6个自由度
+    // std::vector<AbcType> j0 = {1.04213, 1.2431, 1.4321, 0.8321, 0.6425, 1.0123};
+    std::vector<AbcType> j0 = {0.0, 1.0f / 4 * PI, 0.0, 0.0, 0.0, 0.0};
+    std::cout << "Init Joint: " << std::endl;
+    for (size_t i = 0; i < j0.size(); ++i)
+    {
+        std::cout << j0.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    AbcPose p0;
+    // 计时, 循环N次
+    size_t N = 1;
+    auto start_time = std::chrono::high_resolution_clock::now();
+    AbcErrorCode status;
+    for (size_t i = 0; i < N; ++i)
+    {
+        status = kin->forward_kinematics(j0, p0);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+    std::cout << "Forward kinematics time: " << duration.count() / N << " seconds" << std::endl;
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: "
+              << p0.position.x << " " << p0.position.y << " " << p0.position.z << " "
+              << p0.quaternion.w << " " << p0.quaternion.x << " "
+              << p0.quaternion.y << " " << p0.quaternion.z << std::endl;
+
+    // 确保参考关节与j0长度相同
+    // std::vector<AbcType> j0_ref = {0.9, 1.3, 1.3, 0.9, 0.5, 1.1};
+    std::vector<AbcType> j0_ref = {0.9, 1, 1, 0.1, 0.1, 1};
+    std::vector<AbcType> j0_inv;
+
+    // 计时, 循环N次
+    start_time = std::chrono::high_resolution_clock::now();
+    N = 1;
+    for (size_t i = 0; i < N; ++i)
+    {
+        status = kin->inverse_kinematics(p0, j0_ref, j0_inv, 0);
+    }
+    end_time = std::chrono::high_resolution_clock::now();
+    duration = end_time - start_time;
+    std::cout << "Inverse kinematics time: " << duration.count() / N << " seconds" << std::endl;
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inv Joint: " << std::endl;
+    for (size_t i = 0; i < j0_inv.size(); ++i)
+    {
+        std::cout << j0_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "RM75_6FB example " << std::endl;
+    ArmType type1 = ArmType::RM75_6FB;
+    auto kin1 = ArmKinematics::create(type1);
+
+    // RM75_6FB 有7个自由度
+    std::vector<AbcType> j1 = {1.0, 1.2, 1.4, 0.8, 0.6, 1.0, 2.0};
+    std::cout << "Init Joint: " << std::endl;
+    for (size_t i = 0; i < j1.size(); ++i)
+    {
+        std::cout << j1.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    AbcPose p1;
+    status = kin1->forward_kinematics(j1, p1);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: " << p1.position.x << " "
+              << p1.position.y << " " << p1.position.z << " "
+              << p1.quaternion.w << " " << p1.quaternion.x << " "
+              << p1.quaternion.y << " " << p1.quaternion.z << " " << std::endl;
+
+    // 确保参考关节与j1长度相同
+    std::vector<AbcType> j1_ref = {0.9, 1., 1., 0.9, 0.1, 1.5, 1.};
+    std::vector<AbcType> j1_inv;
+    status = kin1->inverse_kinematics(p1, j1_ref, j1_inv, 0);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inv Joint: " << std::endl;
+    for (size_t i = 0; i < j1_inv.size(); ++i)
+    {
+        std::cout << j1_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    status = kin1->forward_kinematics(j1_inv, p1);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+    std::cout << "Forward Pose: " << p1.position.x << " "
+              << p1.position.y << " " << p1.position.z << " "
+              << p1.quaternion.w << " " << p1.quaternion.x << " "
+              << p1.quaternion.y << " " << p1.quaternion.z << std::endl;
+
+    // ZM机械臂
+    std::cout << "ZM example " << std::endl;
+    ArmType type2 = ArmType::ZM73L_6F;
+    auto kin2 = ArmKinematics::create(type2);
+    std::vector<AbcType> j2 = {
+        0.08355030879064443,
+        0.021789388835488886,
+        -0.21593039291738889,
+        -1.6911874182518334,
+        -0.8637442609501667,
+        0.1572672578973611,
+        -0.8943957337265};
+    std::cout << "Init Joint: " << std::endl;
+    for (size_t i = 0; i < j2.size(); ++i)
+    {
+        std::cout << j2.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    AbcPose p2;
+    status = kin2->forward_kinematics(j2, p2);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: " << p2.position.x << " "
+              << p2.position.y << " " << p2.position.z << " "
+              << p2.quaternion.w << " " << p2.quaternion.x << " "
+              << p2.quaternion.y << " " << p2.quaternion.z << " " << std::endl;
+
+    // 确保参考关节与j1长度相同
+    std::vector<AbcType> j2_ref = {0., 0., -0.3, -0.9, -0.9, 0., -1.};
+    std::vector<AbcType> j2_inv;
+    status = kin2->inverse_kinematics(p2, j2_ref, j2_inv, 0);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inv Joint: " << std::endl;
+    for (size_t i = 0; i < j2_inv.size(); ++i)
+    {
+        std::cout << j2_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    status = kin2->forward_kinematics(j2_inv, p2);
+    if (status != AbcErrorCode::SUCCESS)
+    {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+    std::cout << "Forward Pose: " << p2.position.x << " "
+              << p2.position.y << " " << p2.position.z << " "
+              << p2.quaternion.w << " " << p2.quaternion.x << " "
+              << p2.quaternion.y << " " << p2.quaternion.z << std::endl;
+
+    return 0;
+}
+```

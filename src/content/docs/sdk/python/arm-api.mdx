@@ -1,0 +1,1031 @@
+---
+title: 机械臂相关接口
+description: 机械臂 Python 接口说明
+tableOfContents:
+  maxHeadingLevel: 6
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ArmFactory {#ArmFactory}
+
+`ArmFactory` 类提供了如下方法用于创建机械臂实例。
+
+1. 根据机械臂的厂商和名称，创建机械臂实例
+
+   - 方法原型：
+   
+     ```python
+     create_arm(vendor_type: str, name: str, params: dict[str, str]) -> ArmInterface
+     ```
+
+   - 参数说明：
+
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     `vendor_type`
+     </td>
+     <td>     
+     机械臂厂商，如 `"realman"`。     
+     </td>
+     </tr>
+     <tr>
+     <td>
+     `name`
+     </td>
+     <td>
+     机械臂名称，如 `"left_arm"` 或 `"right_arm"`。
+     </td>
+     </tr>
+     <tr>
+     <td>
+     
+     `params`
+     
+     </td>
+     <td>
+     
+     机械臂其他参数，如 IP 地址、端口等。
+     
+     ```json
+     {
+        'ip':'192.168.1.10',      # TCP IP 地址
+        'port':'5000',            # TCP 端口号
+        'udp_ip':'192.168.1.100', # UDP IP 地址
+        'udp_port':'6000',        # UDP端口号
+        'udp_cycle':'20', # UDP 周期，以 udp_cycle*5 毫秒为周期
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+
+    - 返回值：
+    
+      若创建成功，则返回 [ArmInterface](#ArmInterface) 实例；否则返回 `None`。
+
+2. 根据 ArmFactoryParam 对象，创建机械臂实例
+
+   - 方法原型：
+   
+     ```python
+     create_arm(param: ArmFactoryParam) -> ArmInterface
+     ```
+
+   - 参数说明：
+   
+     | 参数名称 | 说明 |
+     |:---|:---|
+     | `param` | 机械臂相关参数，具体参见 [ArmFactoryParam](#ArmFactoryParam)。 |
+
+   - 返回值：
+   
+     若创建成功，则返回 [ArmInterface](#ArmInterface) 实例；否则返回 `None`。
+
+3. 根据配置文件，创建机械臂实例
+
+   - 方法原型：
+   
+     ```python
+     create_arm_from_config(config_path: str) -> ArmInterface
+     ```
+
+    - 参数说明：
+    
+      <table>
+      <thead>
+      <tr>
+      <th><strong>参数名称</strong></th>
+      <th><strong>说明</strong></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>
+      
+      `config_path`
+      
+      </td>
+      <td>
+      
+      配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+      
+      ```json
+      {
+          "arm_type":"realman", # 机械臂厂商
+          "arm_name":"left_arm", # 机械臂名称
+          "ip": "192.168.1.18", # TCP IP 地址
+          "port": "8080", # TCP 端口号
+          "udp_ip": "192.168.1.102", # UDP IP 地址
+          "udp_port": "8089", # UDP 端口号
+          "udp_cycle": "1", # UDP 周期，以 udp_cycle*5 毫秒为周期
+          "enable_gripper": "false" # 是否启用夹爪
+      }
+      ```     
+      </td>
+      </tr>
+      </tbody>
+      </table>
+        
+    - 返回值：
+    
+      若创建成功，则返回 [ArmInterface](#ArmInterface) 实例；否则返回 `None`。
+
+## ArmFactoryParam {#ArmFactoryParam}
+
+`ArmFactoryParam` 类用于描述创建机械臂时所需的参数，可以通过空构造或传入字典初始化。
+
+### 属性
+
+对于 `ArmFactoryParam` 类，以下属性均可读写。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `arm_type` | str | 机械臂厂商，例如 `"realman"`。 |
+| `arm_name` | str | 机械臂名称，例如 `"left_arm"`。 |
+| `ip` | str | TCP IP 地址。 |
+| `udp_ip` | str | UDP IP 地址。 |
+| `port` | int | TCP 端口号。 |
+| `udp_port` | int | UDP 端口号。 |
+| `udp_cycle` | int | UDP 周期，以 `udp_cycle * 5` 毫秒为周期。 |
+
+### 带参构造函数
+
+- 方法原型：
+
+  ```python
+  __init__(self, arg0: dict[str, str]) -> None
+  ```
+
+- 参数说明：
+
+  <table>
+     <tbody>
+        <tr>
+           <td>**参数名称**</td>
+           <td>**说明**</td>
+        </tr>
+        <tr>
+           <td>`arg0`</td>
+           <td>
+                包含创建机械臂时所有必要参数的字典，必须包含以下示例中的键。<br/>
+                若必需键缺失或格式错误，构造函数会抛出  `RuntimeError` 错误。
+                 ```json
+                 {
+                     'arm_type':'realman',  # 机械臂厂商
+                     'arm_name':'left_arm', # 机械臂名称
+                     'ip':'192.168.1.10',   # TCP IP 地址
+                     'port':'5000',         # TCP 端口号
+                     'udp_ip': '192.168.1.100', # UDP IP 地址
+                     'udp_port':'6000',         # UDP 端口号
+                     'udp_cycle':'20', # UDP 周期，以 udp_cycle*5 毫秒为周期  
+                 }
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>
+
+## ArmInterface {#ArmInterface}
+
+`ArmInterface` 类提供了一系列用于控制机械臂的公共方法，例如移动、抓取和状态查询。在使用前，请确保已创建机械臂实例。
+
+### 属性
+
+| 属性（只读） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `name` | str | 机械臂名称 |
+
+### 连接机械臂
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开机械臂
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> None
+  ```
+
+- 返回值：
+
+  `None`。
+
+### 关节空间运动
+
+- 方法原型：
+
+  ```python
+  move_joint_position(
+      self,
+      joints: list[float],
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置，单位为角度。 |
+  | `v` | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `r` | 轨迹交融半径，默认值为 0。 |
+  | `trajectory_connect` | 轨迹连接标志，取值为 0 或 1。<br/>- `0`：立即规划并执行轨迹，不与后续轨迹连接。<br/>- `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 笛卡尔空间直线运动
+
+- 方法原型：
+
+  ```python
+  move_cartesian_linear(
+      self,
+      pose: alphabot.core.Pose,
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `v` | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `r` | 轨迹交融半径，默认值为 0。 |
+  | `trajectory_connect` | 轨迹连接标志，取值为 0 或 1。<br/>- `0`：立即规划并执行轨迹，不与后续轨迹连接。<br/>- `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 以关节空间运动到目标位姿
+
+在关节空间中规划一条运动轨迹，使机械臂运动至指定位姿。
+
+- 方法原型：
+
+  ```python
+  move_joint_pose(
+      self,
+      pose: alphabot.core.Pose,
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `v` | 规划速度和加速度占关节最大角速度和角加速度的百分比，取值范围为 0~100。 |
+  | `r` | 轨迹交融半径，默认值为 0。 |
+  | `trajectory_connect` | 轨迹连接标志，取值为 0 或 1。<br/>- `0`：立即规划并执行轨迹，不与后续轨迹连接。<br/>- `1`：将当前轨迹与下一条轨迹一起规划，但不立即执行。注意：在阻塞模式下，即使运动轨迹发送成功，函数也会立即返回。 |
+  | `block` | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到机械臂完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 角度透传
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给机械臂，不需控制器规划。若调用正确，机械臂立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保机械臂的稳定运行。
+- I 系列有线网口周期最快可达 2ms，提供了更高的实时性。
+</Aside>
+
+- 方法原型：
+
+  ```python
+  move_joint_position_canfd(
+      self,
+      joints: list[float],
+      follow: bool,
+      trajectory_mode: int = 0,
+      radio: int = 0
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置，单位为角度。 |
+  | `follow` | 设置跟随模式，取值为 `True` 或 `False`。<br/>- `True`：高跟随。<br/>- `False`：低跟随。<br/>若使用高跟随，透传周期要求不超过 10ms。 |
+  | `trajectory_mode` | 在**高跟随模式**下使用，取值为 0、1 或 2。<br/>- `0`：完全透传模式。<br/>- `1`：曲线拟合模式。<br/>- `2`：滤波模式。 |
+  | `radio` | - 曲线拟合模式：radio 是平滑系数，取值范围为 0\~100。<br/>- 滤波模式：radio 是滤波参数，取值范围为 0\~1000。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 位姿透传
+
+位姿通过 CAN FD（Controller Area Network Flexible Data-rate）透传给机械臂，不需控制器规划。
+
+当目标位姿被透传到机械臂控制器时，控制器首先尝试进行逆解计算。若逆解成功且计算出的各关节角度与当前角度差异不大，则直接下发至关节执行，跳过额外的轨迹规划步骤。
+
+这一特性适用于需要周期性调整位姿的场景，如视觉伺服等应用。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保机械臂的稳定运行。
+- I 系列有线网口周期最快可达 2ms，提供了更高的实时性。
+</Aside>
+
+- 方法原型：
+
+  ```python
+  move_cartesian_pose_canfd(
+      self,
+      pose: alphabot.core.Pose,
+      follow: bool,
+      trajectory_mode: int = 0,
+      radio: int = 0
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿。 |
+  | `follow` | 设置跟随模式，取值为 `True` 或 `False`。<br/>- `True`：高跟随。<br/>- `False`：低跟随。<br/>若使用高跟随，透传周期要求不超过 10ms。 |
+  | `trajectory_mode` | 在**高跟随模式**下使用，取值为 0、1 或 2。<br/>- `0`：完全透传模式。<br/>- `1`：曲线拟合模式。<br/>- `2`：滤波模式。 |
+  | `radio` | - 曲线拟合模式：radio 是平滑系数，取值范围为 0\~100。<br/>- 滤波模式：radio 是滤波参数，取值范围为 0\~1000。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 关节空间跟随运动
+
+关节空间跟随运动是指在关节空间内进行实时路径规划，以实现对目标关节位置的动态跟随。
+
+- 方法原型：
+
+  ```python
+  move_joint_follow(self, joints: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 笛卡尔空间跟随运动
+
+笛卡尔空间跟随运动是指在笛卡尔空间内进行实时路径规划，以实现对目标位姿的动态跟随。
+
+- 方法原型：
+
+  ```python
+  move_pose_follow(self, pose: alphabot.core.Pose) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 注册机械臂状态回调函数
+
+- 方法原型：
+
+  ```python
+  realtime_arm_state_call_back(self, callback: typing.Callable) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `callback` | 当机械臂状态更新时，系统会自动调用此回调函数。回调函数接收类型为 [ArmRealtimeState](#ArmRealtimeState) 的参数。 |
+
+- 返回值：
+
+  `None`。
+
+### 缓停
+
+机械臂在当前正在运行的轨迹上缓慢停止。
+
+- 方法原型：
+
+  ```python
+  set_arm_slow_stop(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 急停
+
+机械臂在当前正在运行的轨迹上以关节最快速度停止。此操作为不可恢复的中止，无法从中断点继续执行。
+
+- 方法原型：
+
+  ```python
+  set_arm_stop(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 暂停
+
+机械臂在当前正在运行的轨迹上暂停。此操作为可恢复的中止，支持从中断位置恢复执行。
+
+- 方法原型：
+
+  ```python
+  set_arm_pause(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 继续
+
+机械臂在暂停后，从中断点恢复并继续执行未完成的运动任务。
+
+- 方法原型：
+
+  ```python
+  set_arm_continue(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+
+### 设置末端生态协议模式
+
+- 方法原型：
+
+  ```python
+  set_plus_mode(self, mode: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `mode` | 末端生态协议模式。<br/>- `0`：禁用协议。<br/>- `9600`：开启协议（波特率 9600）。<br/>- `115200`：开启协议（波特率 115200）。 <br/>- `256000`：开启协议（波特率 256000）。<br/>- `460800`：开启协议（波特率 460800）。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 松开夹爪
+
+夹爪以指定的速度运动到开口最大处。
+
+- 方法原型：
+
+  ```python
+  set_gripper_release(
+      self,
+      speed: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `speed` | 夹爪松开速度，取值范围为 1~1000，无单位量纲。 |
+  | `block` | 设置阻塞模式，取值为 `True` 或 `False`。<br/>- `True`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `False`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 力控夹取
+
+夹爪以设定的速度和力夹取，当夹持力超过设定的力阈值后，停止夹取。
+
+- 方法原型：
+
+  ```python
+  set_gripper_pick(
+      self,
+      speed: int,
+      force: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `speed` | 夹爪开合速度，取值范围为 1~1000，无单位量纲。 |
+  | `force` | 力控阈值，取值范围为 50~1000，无单位量纲。 |
+  | `block` | 设置阻塞模式，取值为 `True` 或 `False`。<br/>- `True`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `False`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 持续力控夹取
+
+- 方法原型：
+
+  ```python
+  set_gripper_pick_on(
+      self,
+      speed: int,
+      force: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `speed` | 夹爪开合速度，取值范围为 1~1000，无单位量纲。 |
+  | `force` | 力控阈值，取值范围为 50~1000，无单位量纲。 |
+  | `block` | 设置阻塞模式，取值为 `True` 或 `False`。<br/>- `True`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `False`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 控制开口位置
+
+在夹爪到达指定位置后，若当前开口小于指定开口，夹爪以指定速度松开到指定开口位置；若当前开口大于指定开口时，夹爪以指定速度和力矩往指定开口处闭合，当夹持力超过力矩阈值或者达到指定位置后，夹爪停止。
+
+- 方法原型：
+
+  ```python
+  set_gripper_position(
+      self,
+      position: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `position` | 夹爪开口位置，取值范围为 1~1000，无单位量纲。 |
+  | `block` | 设置阻塞模式，取值为 `True` 或 `False`。<br/>- `True`：阻塞模式，等待控制器返回夹爪到位指令。<br/>- `False`：非阻塞模式，不接收夹爪到位指令。 |
+  | `timeout` | - 阻塞模式：设置等待夹爪到位的超时时间，单位为秒。<br/>- 非阻塞模式：若设置为 0，表示发送后立即返回；若设置为其他值，表示接收设置成功指令后返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取夹爪状态
+
+- 方法原型：
+
+  ```python
+  get_gripper_state(self) -> tuple[alphabot.core.AbcErrorCode, GripperState]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `GripperState` | 夹爪状态，具体参见 [GripperState](#GripperState)。 |
+
+### 设置灵巧手目标手势序列号
+
+- 方法原型：
+
+  ```python
+  set_hand_posture(
+      self, 
+      posture_num: int, 
+      block: bool, 
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `posture_num` | 预先保存在灵巧手内的手势序列号，取值范围为 1~40。|
+  | `block` | - `true` 表示阻塞模式，等待灵巧手运动结束后返回。<br/>- `false` 表示非阻塞模式，发送后立即返回。|
+  | `timeout` | 设置阻塞模式下的超时时间，单位为秒。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置灵巧手各自由度角度
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```python
+  set_hand_angle(
+      self, 
+      hand_angle: list[int]
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `hand_angle` | 手指角度数组，数组长度为 6，每个元素的取值范围为 0~1000。另外，-1 代表该自由度不执行任何操作，保持当前状态。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。  
+
+### 设置灵巧手角度跟随控制
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```python
+  set_hand_follow_angle(
+      self, 
+      hand_angle: list[int], 
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `hand_angle` | 手指角度数组，数组长度为 6，角度范围由灵巧手厂商定义（例如因时的角度范围为 0~2000）。|
+  | `block` | 等待返回超时时间，0 表示非阻塞，单位为毫秒。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 
+
+### 设置灵巧手位置跟随控制
+
+灵巧手有 6 个自由度，从 1~6 分别为小拇指、无名指、中指、食指、大拇指弯曲、大拇指旋转。
+
+- 方法原型：
+
+  ```python
+  set_hand_follow_pos(
+      self, 
+      hand_pos: list[int], 
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `hand_angle` | 手指位置数组，数组长度为 6，位置范围由灵巧手厂商定义（例如因时的位置范围为 0~1000）。|
+  | `block` | 等待返回超时时间，0 表示非阻塞，单位为毫秒。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置灵巧手速度
+
+- 方法原型：
+
+  ```python
+  set_hand_speed(self, speed: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `speed` | 手指速度，取值范围为 1~1000。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。   
+
+### 设置灵巧手力阈值
+
+- 方法原型：
+
+  ```python
+  set_hand_force(self, hand_force: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `hand_force` | 手指力，取值范围为 1~1000。|
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取当前关节角度
+
+- 方法原型：
+
+  ```python
+  get_joint_degree(self) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | list[float] | 当前关节角数据。 |
+
+### 正运动学
+
+- 方法原型：
+
+  ```python
+  forward_kinematics(
+      self,
+      joints: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.Pose]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 关节角数据。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `Pose` | 正解的位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+
+### 逆运动学
+
+- 方法原型：
+
+  ```python
+  inverse_kinematics(
+      self,
+      pose: alphabot.core.Pose,
+      ref_joints: list[float],
+      mode: int = 0
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+  | `ref_joints` | 参考关节角度。 |
+  | `mode` | 求解方式，取值为 0 或 1。<br/>- `0`：单步求解。<br/>- `1`：遍历求解。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | list[float] | 逆解的关节角度。 |
+
+### 配置 Modbus RTU 模式
+
+在机械臂启动后，用户必须先调用如下方法配置 Modbus RTU 模式，才可对通信端口进行操作，否则会返回错误信息。另外，机械臂将会对用户的配置方式进行保存，机械臂重启后会自动恢复到用户断电之前配置的模式。
+
+- 方法原型：
+
+  ```python
+  set_modbus_mode(
+      self,
+      port: int,
+      baudrate: int,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `port` | 指定通信端口，取值为 0、1 或 2。<br/>- `0`：控制器 RS485 端口为 RTU 主站。<br/>- `1`：末端接口板 RS485 接口为 RTU 主站。<br/>- `2`：控制器 RS485 端口为 RTU 从站。 |
+  | `baudrate` | 波特率，支持 9600、115200 和 460800 三种常见波特率。 |
+  | `timeout` | 超时时间，单位百毫秒。对 Modbus 设备所有的读写指令，在规定的超时时间内未返回响应数据，则返回超时错误提示信息。超时时间不能为 0，若设置为 0，则机械臂按通信端口 1 进行配置。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 关闭 Modbus RTU 模式
+
+- 方法原型：
+
+  ```python
+  close_modbus_mode(self, port: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `port` | 指定关闭的通信端口，取值为 0、1 或 2。<br/>- `0`：控制器 RS485 端口为 RTU 主站。<br/>- `1`：末端接口板 RS485 接口为 RTU 主站。<br/>- `2`：控制器 RS485 端口为 RTU 从站。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 写多个寄存器
+
+- 方法原型：
+
+  ```python
+  write_registers(
+      self,
+      params: PeripheralReadWriteParams,
+      values: list[int]
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `params` | 通信配置参数，具体参见 [PeripheralReadWriteParams](#peripheralreadwriteparams)。 |
+  | `values` | 要写入寄存器的数据数组，每个值为 0~65535 的 16 位无符号整数。 |
+
+  <Aside>
+  - 每次最多写入 10 个寄存器，数组长度必须等于寄存器数量。
+  - 该方法自动将 16 位整数转换为高字节在前的字节序列。
+  </Aside>
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取错误信息
+
+- 方法原型：
+
+  ```python
+  get_error_flag(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[int], list[int]]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  <table>
+     <tbody>
+        <tr>
+           <td colspan="2">**元素数据类型**</td>
+           <td>**说明**</td>
+        </tr>
+        <tr>
+           <td colspan="2">`AbcErrorCode`</td>
+           <td>`AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。</td>
+        </tr>
+        <tr>
+           <td rowspan="2">`tuple[list[int], list[int]]`</td>
+           <td>list[int]</td>
+           <td>反馈关节错误码。</td>
+        </tr>
+        <tr>
+           <td>list[int]</td>
+           <td>反馈关节抱闸状态。<br/>- `1`：抱闸未打开。<br/>- `0`：抱闸已打开。</td>
+        </tr>
+     </tbody>
+  </table>
+
+## ArmForceSensor {#ArmForceSensor}
+
+`ArmForceSensor` 是一个机械臂力传感器数据类，用于处理力或力矩传感器数据。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `force` | list[float] | 当前力传感器原始数据，单位为 0.001N 或 0.001N·m。 |
+| `zero_force` | list[float] | 当前力传感器系统外受力数据，单位为 0.001N 或 0.001N·m。 |
+| `coordinate` | int | 系统外受力数据的坐标系。<br/>- `0`：传感器坐标系。<br/>- `1`：当前工作坐标系。<br/>- `2`：当前工具坐标系。 |
+
+## ArmRealtimeState {#ArmRealtimeState}
+
+`ArmRealtimeState` 是一个机械臂实时状态类，用于获取和存储机械臂运行时的完整状态信息。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `name` | str | 机械臂名称 |
+| `timestamp` | typing.Any | 状态时间戳 |
+| `joint_status` | [JointState](#JointState) | 关节状态 |
+| `force_sensor` | [ArmForceSensor](#ArmForceSensor) | 力传感器状态 |
+| `arm_current_status` | [ArmCurrentStatus](/sdk/python/data-structures#ArmCurrentStatus) | 机械臂当前状态 |
+| `gripper_state` | [GripperState](#GripperState) | 夹爪状态 |
+| `ee_pose` | [Pose](/sdk/python/data-structures#Pose) | 末端位姿 |
+
+## JointState {#JointState}
+
+`JointState` 是一个关节状态类，包含如下数据信息。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `joint_position` | list[float] | 当前各关节角度，单位为 °（度）。 |
+| `joint_speed` | list[float] | 当前各关节速度，单位为 RPM（转/分）。 |
+| `joint_current` | list[float] | 当前各关节电流，单位为 mA（毫安）。 |
+| `joint_temperature` | list[float] | 当前各关节温度，单位为 °C（摄氏度）。 |
+| `joint_voltage` | list[float] | 当前各关节电压，单位为 V（伏特）。 |
+| `joint_err_code` | list[int] | 当前各关节错误码。 |
+| `joint_en_flag` | list[bool] | 当前各关节使能标志位。<br/>- `True` 为上使能。<br/>- `False` 为掉使能。 |
+
+## GripperState {#GripperState}
+
+`GripperState` 是一个夹爪状态类，包含如下数据信息。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `status` | int | 夹爪状态。<br/>- `0`：离线。<br/>- `1`：在线。<br/>- `-1`：在线，且处于下使能状态。 |
+| `error` | int | 夹爪错误信息。<br/>- 低 8 位：夹爪内部的错误信息。<br/>- bit 5~7：预留。<br/>- bit 4：内部通信。<br/>- bit 3：驱动。<br/>- bit 2：过流。<br/>- bit 1：过温。<br/>- bit 0：堵转。 |
+| `mode` | int | 当前工作状态。<br/>- `1`：夹爪张开到最大且空闲。<br/>- `2`：夹爪闭合到最小且空闲。<br/>- `3`：夹爪停止且空闲。<br/>- `4`：夹爪正在闭合。<br/>- `5`：夹爪正在张开。<br/>- `6`：夹爪闭合过程中遇到力控停止。 |
+| `current_force` | int | 夹爪当前压力，单位为 g。 |
+| `temperature` | int | 当前温度，单位为 °C。 |
+| `actpos` | int | 夹爪开口度，取值范围为 0~1000。<br/>- `0`：夹爪闭合到最小。<br/>- `1000`：夹爪张开到最大。 |
+
+## PeripheralReadWriteParams {#PeripheralReadWriteParams}
+
+`PeripheralReadWriteParams` 是一个 Modbus 通信参数配置类，用于配置控制器与外设设备之间的通信参数。
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `port` | int | 通信端口。<br/>- `0`：控制器 RS485 端口。<br/>- `1`：末端接口板 RS485 接口。<br/>- `3`：控制器 Modbus TCP 设备。 |
+| `address` | int | 数据起始地址 |
+| `device` | int | 外设设备地址 |
+| `num` | int | 数据的数量 |

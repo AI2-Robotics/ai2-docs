@@ -1,0 +1,954 @@
+---
+title: 传感器相关接口
+description: 传感器 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## SensorFactory {#SensorFactory}
+
+`SensorFactory` 类用于创建传感器和深度相机实例。
+
+### 创建传感器实例
+
+1. 根据传感器参数，创建传感器实例。
+
+   - 方法原型：
+
+     ```python
+     create_sensor(params: dict[str, str]) -> SensorInterface
+     ```
+
+   - 参数说明：
+
+     <table>
+        <tbody>
+           <tr>
+              <td>**参数名称**</td>
+              <td>**说明**</td>
+           </tr>
+           <tr>
+              <td>`params`</td>
+              <td>
+                   传感器相关参数，例如：
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", # 传感器名称
+                        "sensor_type":"realsense", # 传感器厂商
+                        "serial_number":"215322070063", # 序列号
+                        "color_width":"640", #彩色图宽
+                        "color_height":"480", # 彩色图高
+                        "depth_width":"640", # 深度图宽
+                        "depth_height":"480", # 深度图高
+                        "align_to_color":"true", # 是否将深度图对齐到彩色图
+                        "frame_rate":"30" # 帧率
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - 返回值：
+
+     若创建成功，则返回 [SensorInterface](#SensorInterface) 实例；否则返回 `None`。
+
+2. 根据配置文件，创建传感器实例。
+
+   - 方法原型：
+
+     ```python
+     create_sensor_from_config(config_path: str) -> SensorInterface
+     ```
+
+   - 参数说明：
+
+     <table>
+        <tbody>
+           <tr>
+              <td>**参数名称**</td>
+              <td>**说明**</td>
+           </tr>
+           <tr>
+              <td>`config_path`</td>
+              <td>
+                   配置文件路径。配置文件为 JSON 文件，例如：
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", # 传感器名称
+                        "sensor_type":"realsense", # 传感器厂商
+                        "serial_number":"215322070063", # 序列号
+                        "color_width":"640", #彩色图宽
+                        "color_height":"480", # 彩色图高
+                        "depth_width":"640", # 深度图宽
+                        "depth_height":"480", # 深度图高
+                        "align_to_color":"true", # 是否将深度图对齐到彩色图
+                        "frame_rate":"30" # 帧率
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - 返回值：
+
+     若创建成功，则返回 [SensorInterface](#SensorInterface) 实例；否则返回 `None`。
+
+### 创建深度相机实例
+
+1. 根据深度相机参数，创建深度相机实例。
+
+   - 方法原型：
+
+     ```python
+     create_depth_camera(param: DepthSensorParam) -> DepthCamera
+     ```
+
+   - 参数说明：
+
+     | 参数名称 | 说明 |
+     |:---|:---|
+     | `param` | 深度相机相关参数，具体参见 [DepthSensorParam](#DepthSensorParam)。 |
+
+   - 返回值：
+
+     若创建成功，则返回 [DepthCamera](#DepthCamera) 实例；否则返回 `None`。
+
+2. 根据配置文件，创建深度相机实例。
+
+   - 方法原型：
+
+     ```python
+     create_depth_camera_from_config(config_path: str) -> DepthCamera
+     ```
+
+   - 参数说明：
+
+     <table>
+        <tbody>
+           <tr>
+              <td>**参数名称**</td>
+              <td>**说明**</td>
+           </tr>
+           <tr>
+              <td>`config_path`</td>
+              <td>
+                   配置文件路径。配置文件为 JSON 文件，例如：
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", # 传感器名称
+                        "sensor_type":"realsense", # 传感器厂商
+                        "serial_number":"215322070063", # 序列号
+                        "color_width":"640", #彩色图宽
+                        "color_height":"480", # 彩色图高
+                        "depth_width":"640", # 深度图宽
+                        "depth_height":"480", # 深度图高
+                        "align_to_color":"true", # 是否将深度图对齐到彩色图
+                        "frame_rate":"30" # 帧率
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - 返回值：
+
+     若创建成功，则返回 [DepthCamera](#DepthCamera) 实例；否则返回 `None`。
+
+## SensorInterface {#SensorInterface}
+
+`SensorInterface` 类提供了一系列用于控制传感器的公共方法。在使用前，请确保已创建传感器实例。
+
+### 属性
+
+| 属性（只读） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `name` | str | 传感器名称 |
+| `status` | [SensorStatus](/sdk/python/data-structures#SensorStatus) | 传感器状态 |
+| `type` | [SensorType](/sdk/python/data-structures#SensorTypeSensorType) | 传感器类型 |
+
+### 连接传感器
+
+在创建传感器实例后，用户可通过如下方法与传感器建立连接。
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开传感器
+
+用户可通过如下方法断开与传感器的连接。
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+## SyncDataPackage {#SyncDataPackage}
+
+`SyncDataPackage` 类用于同步机械臂和传感器数据，支持添加和查询机械臂实时状态、传感器数据等。
+
+### 获取数据包时间戳
+
+- 方法原型：
+
+  ```python
+  get_timestamp(self) -> typing.Any
+  ```
+
+- 返回值：
+
+  时间戳。
+
+### 添加传感器数据
+
+- 方法原型：
+
+  ```python
+  add_sensor_data(self, arg0: str, arg1: SensorData) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 传感器名称。 |
+  | `arg1` | 传感器数据，具体参见 [SensorData](#SensorData)。 |
+
+- 返回值：
+
+  `None`。
+
+### 添加机械臂实时状态数据
+
+- 方法原型：
+
+  ```python
+  add_arm_state(self, arg0: str, arg1: alphabot.arm.ArmRealtimeState) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 机械臂名称。 |
+  | `arg1` | 机械臂实时状态数据，具体参见 [ArmRealtimeState](/sdk/python/arm-api#ArmRealtimeState)。 |
+
+- 返回值：
+
+  `None`。
+
+### 获取传感器数据
+
+- 方法原型：
+
+  ```python
+  get_sensor_data(self, arg0: str) -> SensorData
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 传感器名称 |
+
+- 返回值：
+
+  传感器数据，具体参见 [SensorData](#SensorData)。
+
+### 获取所有传感器数据
+
+- 方法原型：
+
+  ```python
+  get_all_sensor_data(self) -> dict[str, SensorData]
+  ```
+
+- 返回值：
+
+  键为 `str` 类型、值为 `SensorData` 类型的字典。
+
+  | 类型 | 说明 |
+  |:---|:---|
+  | `str` | 传感器名称。 |
+  | `SensorData` | 传感器数据，具体参见 [SensorData](#SensorData)。 |
+
+### 获取所有机械臂实时状态数据
+
+- 方法原型：
+
+  ```python
+  get_all_arm_data(self) -> dict[str, alphabot.arm.ArmRealtimeState]
+  ```
+
+- 返回值：
+
+  键为 `str` 类型、值为 `ArmRealtimeState` 类型的字典。
+
+  | 类型 | 说明 |
+  |:---|:---|
+  | `str` | 机械臂名称。 |
+  | `ArmRealtimeState` | 机械臂实时状态数据，具体参见 [ArmRealtimeState](/sdk/python/arm-api#ArmRealtimeState)。 |
+
+### 检查是否包含指定传感器的数据
+
+- 方法原型：
+
+  ```python
+  has_sensor_data(self, arg0: str) -> bool
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 传感器名称 |
+
+- 返回值：
+
+  `True` 表示包含，`False` 表示不包含。
+
+### 获取数据包中传感器数量
+
+- 方法原型：
+
+  ```python
+  get_sensor_count(self) -> int
+  ```
+
+- 返回值：
+
+  传感器数量。
+
+### 获取数据包中机械臂数量
+
+- 方法原型：
+
+  ```python
+  get_arm_count(self) -> int
+  ```
+
+- 返回值：
+
+  机械臂数量。
+
+## SensorSynchronizer {#SensorSynchronizer}
+
+`SensorSynchronizer` 类是一个多传感器数据同步管理器，用于协调多个传感器和机械臂的数据同步。
+
+### 构造函数
+
+- 方法原型：
+
+  ```python
+  __init__(self, sync_policy: typing.Any = None, time_tolerance_ms: int = 10) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `sync_policy` | 同步策略，具体参见 [SyncPolicy](#SyncPolicy)。 |
+  | `time_tolerance_ms` | 时间容差，单位为毫秒。 |
+
+- 返回值：
+
+  `None`。
+
+### 添加传感器
+
+- 方法原型：
+
+  ```python
+  add_sensor(self, name: str, sensor: SensorInterface) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `name` | 传感器名称。 |
+  | `sensor` | 传感器接口实例，具体参见 [SensorInterface](#SensorInterface)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 添加机械臂
+
+- 方法原型：
+
+  ```python
+  add_arm(self, name: str, arm: alphabot.arm.ArmInterface) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `name` | 机械臂名称。 |
+  | `arm` | 机械臂接口实例，具体参见 [ArmInterface](/sdk/python/arm-api#ArmInterface)。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 移除传感器
+
+- 方法原型：
+
+  ```python
+  remove_sensor(self, name: str) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `name` | 传感器名称 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 移除机械臂
+
+- 方法原型：
+
+  ```python
+  remove_arm(self, name: str) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `name` | 机械臂名称 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取传感器
+
+- 方法原型：
+
+  ```python
+  get_sensor(self, name: str) -> SensorInterface
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `name` | 传感器名称 |
+
+- 返回值：
+
+  传感器接口实例，具体参见 [SensorInterface](#SensorInterface)。
+
+### 启动同步
+
+- 方法原型：
+
+  ```python
+  start(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 停止同步
+
+- 方法原型：
+
+  ```python
+  stop(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 注册数据同步回调函数
+
+- 方法原型：
+
+  ```python
+  set_sync_data_callback(self, arg0: typing.Callable) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 当传感器数据或机械臂状态数据更新时，系统会自动调用此回调函数。回调函数接收类型为 [SyncDataPackage](#SyncDataPackage) 的参数。 |
+
+- 返回值：
+
+  `None`。
+
+### 设置同步策略
+
+- 方法原型：
+
+  ```python
+  set_sync_policy(self, policy: SyncPolicy) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `policy` | 同步策略，具体参见 [SyncPolicy](#SyncPolicy)。 |
+
+- 返回值：
+
+  `None`。
+
+### 设置时间容差
+
+- 方法原型：
+
+  ```python
+  set_time_tolerance(self, tolerance_ms: int) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `tolerance_ms` | 时间容差，单位为毫秒。 |
+
+- 返回值：
+
+  `None`。
+
+### 获取同步策略
+
+- 方法原型：
+
+  ```python
+  get_sync_policy(self) -> SyncPolicy
+  ```
+
+- 返回值：
+
+  同步策略，具体参见 [SyncPolicy](#SyncPolicy)。
+
+### 获取时间容差
+
+- 方法原型：
+
+  ```python
+  get_time_tolerance(self) -> int
+  ```
+
+- 返回值：
+
+  时间容差，单位为毫秒。
+
+### 设置同步模式
+
+- 方法原型：
+
+  ```python
+  set_sync_mode(self, mode: SyncMode) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `mode` | 同步模式，具体参见 [SyncMode](#SyncMode)。 |
+
+- 返回值：
+
+  `None`。
+
+### 获取同步模式
+
+- 方法原型：
+
+  ```python
+  get_sync_mode(self) -> SyncMode
+  ```
+
+- 返回值：
+
+  同步模式，具体参见 [SyncMode](#SyncMode)。
+
+### 设置参考传感器
+
+- 方法原型：
+
+  ```python
+  set_reference_sensor(self, sensor_name: str) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `sensor_name` | 传感器名称 |
+
+- 返回值：
+
+  `None`。
+
+### 获取参考传感器
+
+- 方法原型：
+
+  ```python
+  get_reference_sensor(self) -> str
+  ```
+
+- 返回值：
+
+  参考传感器名称。
+
+### 是否正在同步
+
+- 方法原型：
+
+  ```python
+  is_syncing(self) -> bool
+  ```
+
+- 返回值：
+
+  `True` 表示正在同步，`False` 表示未同步。
+
+## SyncPolicy {#SyncPolicy}
+
+`SyncPolicy` 类是一个枚举器，用于表示同步策略。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `NEAREST` | 0 | 最近时间戳匹配 |
+| `INTERPOLATE` | 1 | 插值匹配 |
+| `EXTRAPOLATE` | 2 | 外推匹配 |
+
+## SyncMode {#SyncMode}
+
+`SyncMode` 类是一个枚举器，用于表示同步模式。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `LATEST_TIMESTAMP` | 0 | 基于最新时间戳同步（默认模式） |
+| `REFERENCE_SENSOR` | 1 | 基于参考传感器同步 |
+
+## DepthSensorParam {#DepthSensorParam}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `sensor_type` | str | 传感器类型，例如 `"realsense"`。 |
+| `sensor_name` | str | 传感器名称，例如 `"head_camera"`。 |
+| `serial_number` | str | 序列号。 |
+| `color_width` | int | 彩色图的宽。 |
+| `color_height` | int | 彩色图的高。 |
+| `depth_width` | int | 深度图的宽。 |
+| `depth_height` | int | 深度图的高。 |
+| `frame_rate` | int | 帧率。 |
+| `align_to_color` | bool | 是否将深度图对齐到彩色图。 |
+| `enable_depth` | bool | 是否启用深度流。默认为 `true`；设置为 `false` 时，深度流及所有依赖深度数据的相关逻辑将被关闭。|
+| `active_pull` | bool |  是否采用主动拉流模式。默认为 `false`（后台自动拉流）；设置为 `true` 时，仅在调用 `get_data()` 时拉取一帧，且不支持回调机制。|
+
+## SensorData {#SensorData}
+
+| 属性（可读写） | 数据类型 | 说明 |
+|:---|:---|:---|
+| `timestamp` | typing.Any | 时间戳 |
+
+## AbcIntrinsic {#AbcIntrinsic}
+
+`AbcIntrinsic` 类用于表示相机内参数据，包含以下属性。
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `width` | int | 图像宽度，单位为像素。 |
+| `height` | int | 图像高度，单位为像素。 |
+| `ppx` | float | 图像主点的水平坐标，以距左边缘的像素偏移量表示。 |
+| `ppy` | float | 图像主点的垂直坐标，以距上边缘的像素偏移量表示。 |
+| `fx` | float | 水平焦距，以像素宽度倍数表示。 |
+| `fy` | float | 垂直焦距，以像素高度倍数表示。 |
+| `coeffs` | list[float] | 畸变系数，列表长度固定为 5。各模型的参数顺序如下。<br/>- Brown-Conrady 模型：`[k1, k2, p1, p2, k3]`。<br/>- F-Theta 鱼眼镜头模型：`[k1, k2, k3, k4, 0]`。<br/>- 其他模型：参见其具体解释规则。 |
+
+## DepthCamera {#DepthCamera}
+
+`DepthCamera` 是一个深度相机传感器类，继承自 [SensorInterface](#SensorInterface)。本节只讲解 `DepthCamera` 类中重写或新增的方法。
+
+### 连接深度相机
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开深度相机
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> None
+  ```
+
+- 返回值：
+
+  `None`。
+
+### 获取深度图像数据
+
+- 方法原型：
+
+  ```python
+  get_data(self) -> RGBDData
+  ```
+
+- 返回值：
+
+  深度图像数据，具体参见 [RGBDData](#RGBDData)。
+
+### 开始数据流
+
+- 方法原型：
+
+  ```python
+  start_stream(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 停止数据流
+
+- 方法原型：
+
+  ```python
+  stop_stream(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置彩色图像分辨率
+
+- 方法原型：
+
+  ```python
+  set_color_resolution(self, arg0: int, arg1: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 宽度 |
+  | `arg1` | 高度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置深度图像分辨率
+
+- 方法原型：
+
+  ```python
+  set_depth_resolution(self, arg0: int, arg1: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 宽度 |
+  | `arg1` | 高度 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置帧率
+
+- 方法原型：
+
+  ```python
+  set_framerate(self, arg0: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 帧率 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 设置深度图像对齐到彩色图像
+
+- 方法原型：
+
+  ```python
+  set_align_to_color(self, arg0: bool) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 是否将深度图像对齐到彩色图像 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取当前对齐设置
+
+- 方法原型：
+
+  ```python
+  is_aligned_to_color(self) -> bool
+  ```
+
+- 返回值：
+
+  `True` 表示深度图像已对齐到彩色图像，`False` 表示深度图像未对齐到彩色图像。
+
+### 注册深度相机数据处理回调函数
+
+- 方法原型：
+
+  ```python
+  set_data_callback(self, arg0: typing.Callable) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 当深度相机数据更新时，系统会自动调用此回调函数。回调函数接收类型为 [RGBDData](#RGBDData) 的参数。 |
+
+- 返回值：
+
+  `None`。
+
+## RGBData {#RGBData}
+
+`RGBData` 是一个彩色图像数据类，继承自 [SensorData](#SensorData)。它封装了 RGB（红绿蓝）格式的图像数据以及相机内参。
+
+### 属性
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `height`（只读） | int | 彩色图像高度 |
+| `width`（只读） | int | 彩色图像宽度 |
+| `channels`（只读） | int | 彩色图像通道数 |
+| `rgb_data`（可读写） | numpy.ndarray[numpy.uint8] | 彩色图像数据 `(height, width, channels)` |
+
+### 获取彩色相机内参
+
+- 方法原型：
+
+  ```python
+  get_color_intrinsic(self) -> AbcIntrinsic
+  ```
+
+- 返回值：
+
+  彩色相机内参，具体参见 [AbcIntrinsic](#AbcIntrinsic)。
+
+### 设置彩色相机内参
+
+- 方法原型：
+
+  ```python
+  set_color_intrinsic(self, arg0: AbcIntrinsic) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 彩色相机内参，具体参见 [AbcIntrinsic](#AbcIntrinsic)。 |
+
+- 返回值：
+
+  `None`。
+
+## RGBDData {#RGBDData}
+
+`RGBDData` 是一个 RGB-D（彩色+深度）图像数据类，继承自 [RGBData](#RGBData)。它封装了彩色图像、深度图像以及相机内参信息。
+
+### 属性
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `depth_height`（只读） | int | 深度图像高度 |
+| `depth_width`（只读） | int | 深度图像宽度 |
+| `depth_data`（可读写） | numpy.ndarray[numpy.float32] | 深度图像数据 `(depth_height, depth_width)` |
+
+### 获取深度相机内参
+
+- 方法原型：
+
+  ```python
+  get_depth_intrinsic(self) -> AbcIntrinsic
+  ```
+
+- 返回值：
+
+  深度相机内参，具体参见 [AbcIntrinsic](#AbcIntrinsic)。
+
+### 设置深度相机内参
+
+- 方法原型：
+
+  ```python
+  set_depth_intrinsic(self, arg0: AbcIntrinsic) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 深度相机内参，具体参见 [AbcIntrinsic](#AbcIntrinsic)。 |
+
+- 返回值：
+
+  `None`。

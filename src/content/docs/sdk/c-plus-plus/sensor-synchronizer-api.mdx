@@ -5,4 +5,475 @@ description: 传感器同步器 C++ 接口说明
 
 import { Aside } from '@astrojs/starlight/components';
 
+传感器同步器相关的接口由如下类实现。您可以在 `c++\include\sensor` 目录下找到对应的头文件以获取完整 API。
 
+<table>
+   <tbody>
+      <tr>
+         <td>**头文件**</td>
+         <td>**类名**</td>
+         <td>**说明**</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`sensor_synchronizer.h`</td>
+         <td>`SyncDataPackage`</td>
+         <td>同步数据包类，包含同一时间戳附近的多个传感器数据。</td>
+      </tr>
+      <tr>
+         <td>`SensorSynchronizer`</td>
+         <td>使用五次多项式进行轨迹规划，提供平滑的加减速过程，继承自 `TrajectoryPlanner`。</td>
+      </tr>
+   </tbody>
+</table>
+
+## 同步数据包
+
+### 获取数据包时间戳
+
+- 方法原型：
+
+  ```cpp
+  std::chrono::system_clock::time_point get_timestamp() const
+  ```
+
+- 返回值：
+
+  时间戳。
+
+### 添加传感器数据
+
+- 方法原型：
+
+  ```cpp
+  void add_sensor_data(
+      const std::string& sensor_name,
+      std::shared_ptr<SensorData> data)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sensor_name` | 输入参数 | 传感器名称。 |
+  | `data` | 输入参数 | 传感器数据，指向 `SensorData` 类型的共享智能指针。 |
+
+- 返回值：
+
+  无。
+
+### 添加机械臂实时状态数据
+
+- 方法原型：
+
+  ```cpp
+  void add_arm_state(
+      const std::string& arm_name,
+      std::shared_ptr<AbcArmRealtimeState> data)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `arm_name` | 输入参数 | 机械臂名称。 |
+  | `data` | 输入参数 | 机械臂实时状态数据，指向 [AbcArmRealtimeState](/sdk/c-plus-plus/data-structures#AbcArmRealtimeState) 类型的共享智能指针。 |
+
+- 返回值：
+
+  无。
+
+### 获取传感器数据
+
+- 方法原型：
+
+  ```cpp
+  std::shared_ptr<SensorData> get_sensor_data(
+      const std::string& sensor_name) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sensor_name` | 输入参数 | 传感器名称 |
+
+- 返回值：
+
+  指向 `SensorData` 类型的共享智能指针。
+
+### 获取机械臂实时状态数据
+
+- 方法原型：
+
+  ```cpp
+  std::shared_ptr<AbcArmRealtimeState> get_arm_data(
+      const std::string& arm_name) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `arm_name` | 输入参数 | 机械臂名称 |
+
+- 返回值：
+
+  指向 `AbcArmRealtimeState` 类型的共享智能指针。
+
+### 获取所有传感器数据
+
+- 方法原型：
+
+  ```cpp
+  const std::map<std::string, std::shared_ptr<SensorData>>&
+  get_all_sensor_data() const
+  ```
+
+- 返回值：
+
+  传感器数据映射表。
+
+### 获取所有机械臂实时状态数据
+
+- 方法原型：
+
+  ```cpp
+  const std::map<std::string, std::shared_ptr<AbcArmRealtimeState>>&
+  get_all_arm_data() const
+  ```
+
+- 返回值：
+
+  机械臂实时状态数据映射表。
+
+### 检查是否包含指定传感器的数据
+
+- 方法原型：
+
+  ```cpp
+  bool has_sensor_data(const std::string& sensor_name) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sensor_name` | 输入参数 | 传感器名称 |
+
+- 返回值：
+
+  `true` 表示包含，`false` 表示不包含。
+
+### 获取数据包中传感器数量
+
+- 方法原型：
+
+  ```cpp
+  size_t get_sensor_count() const
+  ```
+
+- 返回值：
+
+  传感器数量。
+
+### 获取数据包中机械臂数量
+
+- 方法原型：
+
+  ```cpp
+  size_t get_arm_count() const
+  ```
+
+- 返回值：
+
+  机械臂数量。
+
+## 传感器同步器
+
+### 带参构造函数
+
+- 方法原型：
+
+  ```cpp
+  SensorSynchronizer(
+      SyncPolicy sync_policy = SyncPolicy::NEAREST,
+      int time_tolerance_ms = 10)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sync_policy` | 输入参数（可缺省） | 同步策略，具体参见 [SyncPolicy](/sdk/c-plus-plus/data-structures#SyncPolicy)。 |
+  | `time_tolerance_ms` | 输入参数（可缺省） | 时间容差，单位为毫秒。 |
+
+### 添加传感器
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode add_sensor(
+      const std::string& name,
+      std::shared_ptr<SensorInterface> sensor)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 传感器名称 |
+  | `sensor` | 输入参数 | 指向 `SensorInterface` 类型的共享智能指针 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 添加机械臂
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode add_arm(
+      const std::string& name,
+      std::shared_ptr<ArmInterface> arm)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 机械臂名称 |
+  | `arm` | 输入参数 | 指向 `ArmInterface` 类型的共享智能指针 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 移除传感器
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode remove_sensor(const std::string& name)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 传感器名称 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 移除机械臂
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode remove_arm(const std::string& name)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 机械臂名称 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取传感器
+
+- 方法原型：
+
+  ```cpp
+  std::shared_ptr<SensorInterface> get_sensor(
+      const std::string& name) const
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `name` | 输入参数 | 传感器名称 |
+
+- 返回值：
+
+  指向 `SensorInterface` 类型的共享智能指针。
+
+### 启动同步
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode start()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 停止同步
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode stop()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 注册数据同步回调函数
+
+- 方法原型：
+
+  ```cpp
+  void set_sync_data_callback(const SyncDataCallback& callback)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `callback` | 输入参数 | 当传感器数据或机械臂状态数据更新时，系统会自动调用此回调函数。`SyncDataCallback` 为函数指针类型。其数据类型，请参见 [SyncDataCallback](/sdk/c-plus-plus/data-structures#SyncDataCallback)。 |
+
+- 返回值：
+
+  无。
+
+### 设置同步策略
+
+- 方法原型：
+
+  ```cpp
+  void set_sync_policy(SyncPolicy policy)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `policy` | 输入参数 | 同步策略，具体参见 [SyncPolicy](/sdk/c-plus-plus/data-structures#SyncPolicy)。 |
+
+- 返回值：
+
+  无。
+
+### 获取同步策略
+
+- 方法原型：
+
+  ```cpp
+  SyncPolicy get_sync_policy() const
+  ```
+
+- 返回值：
+
+  同步策略，具体参见 [SyncPolicy](/sdk/c-plus-plus/data-structures#SyncPolicy)。
+
+### 设置时间容差
+
+- 方法原型：
+
+  ```cpp
+  void set_time_tolerance(int tolerance_ms)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `tolerance_ms` | 输入参数 | 时间容差，单位为毫秒。 |
+
+- 返回值：
+
+  无。
+
+### 获取时间容差
+
+- 方法原型：
+
+  ```cpp
+  int get_time_tolerance() const
+  ```
+
+- 返回值：
+
+  时间容差，单位为毫秒。
+
+### 设置同步模式
+
+- 方法原型：
+
+  ```cpp
+  void set_sync_mode(SyncMode mode)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `mode` | 输入参数 | 同步模式，具体参见 [SyncMode](/sdk/c-plus-plus/data-structures#SyncMode)。 |
+
+- 返回值：
+
+  无。
+
+### 获取同步模式
+
+- 方法原型：
+
+  ```cpp
+  SyncMode get_sync_mode() const
+  ```
+
+- 返回值：
+
+  同步模式，具体参见 [SyncMode](/sdk/c-plus-plus/data-structures#SyncMode)。
+
+### 设置参考传感器
+
+- 方法原型：
+
+  ```cpp
+  void set_reference_sensor(const std::string& sensor_name)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `sensor_name` | 输入参数 | 传感器名称 |
+
+- 返回值：
+
+  无。
+
+### 获取参考传感器
+
+- 方法原型：
+
+  ```cpp
+  std::string get_reference_sensor() const
+  ```
+
+- 返回值：
+
+  参考传感器名称。
+
+### 是否正在同步
+
+- 方法原型：
+
+  ```cpp
+  bool is_syncing() const
+  ```
+
+- 返回值：
+
+  `true` 表示正在同步，`false` 表示未同步。

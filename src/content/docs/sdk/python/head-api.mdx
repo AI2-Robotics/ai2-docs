@@ -1,0 +1,225 @@
+---
+title: 头部相关接口
+description: 头部 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## HeadFactory {#HeadFactory}
+
+`HeadFactory` 类用于创建头部实例。
+
+- 方法原型：
+
+  ```python
+  create_head_from_config(config_path: str) -> HeadInterface
+  ```
+
+- 参数说明：
+
+  <table>
+     <tbody>
+        <tr>
+           <td>**参数名称**</td>
+           <td>**说明**</td>
+        </tr>
+        <tr>
+           <td>`config_path`</td>
+           <td>
+                配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+
+                 ```json
+                 {
+                    "head_type":"ti5",      # 头部厂商
+                    "head_name":"ti5_head", # 头部名称
+                    "head_joint_num":2,     # 头部关节数
+                    "can_device":"can0",    # CAN设备名称
+                    "can_id":0,             # CAN 节点 ID（0x00~0xFF）
+                    "motor_params":[        # 电机参数
+                        {
+                            "motor_id":5,         # 电机ID
+                            "reduction_ratio":51, # 减速比
+                            "position_max":90,    # 转动的最大角度
+                            "position_min":-90.0, # 转动的最小角度
+                            "speed_max":30,       # 转动的最大速度
+                            "speed_min":-30,      # 转动的最小速度
+                            "acc_max":10,         # 转动的最大加速度
+                            "acc_min":-10         # 转动的最小加速度
+                        }
+                    ]
+                }
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>  
+
+- 返回值：
+
+  若创建成功，则返回 [HeadInterface](#HeadInterface) 实例；否则返回 `None`。
+
+## HeadInterface {#HeadInterface}
+
+`HeadInterface` 类提供了一系列用于控制头部的公共方法，例如获取头部关节角、控制头部轨迹等。在使用前，请确保已创建头部实例。
+
+### 连接头部
+
+在创建头部实例后，用户可通过如下方法与头部建立连接。
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开头部
+
+用户可通过如下方法断开与头部的连接。
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 关节空间运动
+
+在关节空间中规划一条运动轨迹，使头部各关节运动至指定关节位置。
+
+- 方法原型：
+
+  ```python
+  move_joint_position(
+      self,
+      joints: list[float],
+      v: int,
+      block: bool
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置，单位为角度。 |
+  | `v` | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 设置阻塞模式，取值为 `False` 或 `True`。<br/>- `False`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `True`：阻塞模式。函数将等待，直到头部完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 角度透传
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给头部，不需控制器规划。若调用正确，头部立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保头部的稳定运行。
+</Aside>
+
+- 方法原型：
+
+  ```python
+  move_joint_position_canfd(self, joints: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置，单位为角度。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取头部当前关节角度
+
+- 方法原型：
+
+  ```python
+  get_joint_degree(self) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 当前关节角度。 |
+
+### 获取错误信息
+
+- 方法原型：
+
+  ```python
+  get_error_flag(self) -> tuple[alphabot.core.AbcErrorCode, list[int]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[int]` | 反馈错误码。 |
+
+### 正运动学
+
+- 方法原型：
+
+  ```python
+  forward_kinematics(
+      self,
+      joints: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.Pose]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 关节角数据。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `Pose` | 正解的位姿，具体参见 [Pose](/sdk/python/data-structures#Pose)。 |
+
+### 获取头部名称
+
+- 方法原型：
+
+  ```python
+  get_name(self) -> str
+  ```
+
+- 返回值：
+
+  头部名称。
+
+## AbcHeadState {#AbcHeadState}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `err_code` | list[int] | 各关节错误码 |
+| `joints_current` | list[float] | 各关节电流 |
+| `joints_positions` | list[float] | 各关节角度 |
+| `joints_speed` | list[float] | 各关节速度 |
+| `timestamp` | typing.Any | 时间戳 |

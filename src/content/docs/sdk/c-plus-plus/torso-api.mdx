@@ -6,3 +6,347 @@ description: 躯干 C++ 接口说明
 import { Aside } from '@astrojs/starlight/components';
 
 
+躯干相关的接口由如下两个类实现。您可以在 `c++\include\drivers\torso` 目录下找到对应的头文件以获取完整 API。
+
+| 头文件 | 类名 | 说明 |
+|:---|:---|:---|
+| `torso_factory.h` | `TorsoFactory` | 躯干工厂类，用于创建不同类型的躯干实例。 |
+| `torso_interface.h` | `TorsoInterface` | 躯干接口基类，定义了躯干控制的通用接口。所有特定厂商的躯干驱动都应该继承此类。 |
+
+## 创建躯干
+
+`TorsoFactory` 类提供了两种方式创建躯干实例，具体如下。
+
+1. 根据躯干参数，创建躯干实例
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<TorsoInterface<PoseType>> create_torso(
+         const TorsoFactoryParam& param)
+     ```
+   
+   - 参数说明：
+   
+     | 参数名称 | 类型 | 说明 |
+     |:---|:---|:---|
+     | `param` | 输入参数 | 躯干相关参数。其内部数据结构，请参见 [TorsoFactoryParam](/sdk/c-plus-plus/data-structures#TorsoFactoryParam)。 |
+   
+   - 返回值：
+   
+     若创建成功，则返回 `TorsoInterface<PoseType>` 类型的共享智能指针；否则返回 `nullptr`。`PoseType` 是占位符类型名称，在 `TorsoFactory` 类被实例化的时候进行指定。
+
+2. 根据配置文件，创建躯干实例
+
+   - 方法原型：
+   
+     ```cpp
+     static std::shared_ptr<TorsoInterface<PoseType>> create_torso_from_config(
+         const std::string& config_path)
+     ```
+   
+   - 参数说明：
+
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+     
+     ```json
+     {
+         "torso_type": "ti5",           // 躯干厂商
+         "torso_name": "ti5_torso",     // 躯干名称
+         "torso_joint_num": 4,          // 躯干关节数
+         "can_device": "can0",          // CAN设备名称
+         "can_id": 0,                   // CAN节点ID（0x00~0xFF）
+         "motor_params": [              // 电机参数
+             {
+                 "motor_id": 1,         // 电机ID
+                 "reduction_ratio": 121,// 减速比
+                 "position_max": 1.0,   // 转动的最大角度
+                 "position_min": -68.0, // 转动的最小角度
+                 "speed_max": 30,       // 转动的最大速度
+                 "speed_min": -30,      // 转动的最小速度
+                 "acc_max": 10,         // 转动的最大加速度
+                 "acc_min": -10         // 转动的最小加速度
+             }
+         ]
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table> 
+
+- 返回值：
+
+  若创建成功，则返回 `TorsoInterface<PoseType>` 类型的共享智能指针；否则返回 `nullptr`。`PoseType` 是占位符类型名称，在 `TorsoFactory` 类被实例化的时候进行指定。
+
+## 连接躯干
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 断开躯干
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 控制躯干轨迹
+
+控制躯干轨迹包括控制运动和控制透传。
+
+- 运动：包括关节空间运动、笛卡尔直线运动、笛卡尔空间运动等。
+- 透传：包括角度透传。
+
+### 关节空间运动
+
+在关节空间中规划一条运动轨迹，使躯干各关节运动至指定关节位置。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+      const std::vector<AbcType>& joints,
+      int v,
+      int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 笛卡尔空间直线运动
+
+在笛卡尔空间中规划一条直线运动轨迹，使躯干沿直线运动至指定位姿。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_cartesian_linear(
+      const PoseType& pose,
+      int v,
+      int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。`PoseType` 是占位符类型名称，与 `TorsoFactory` 类被实例化时指定的类型相同。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 以关节空间运动到目标位姿
+
+在关节空间中规划一条运动轨迹，使躯干运动至指定位姿。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_pose(
+      const PoseType& pose,
+      int v,
+      int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 目标位姿。`PoseType` 是占位符类型名称，与 `TorsoFactory` 类被实例化时指定的类型相同。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大角速度和角加速度的百分比，取值范围为 0~100。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 0 或 1。<br/>- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `1`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 角度透传
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给躯干，不需控制器规划。若调用正确，躯干立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保躯干的稳定运行。
+</Aside>
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(
+      const std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取躯干当前关节角度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输出参数 | 当前关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 获取错误信息
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_error_flag(std::vector<int32_t>& error_flag)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `error_flag` | 输出参数 | 反馈关节错误码。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 算法
+
+本软件包提供了一系列与躯干相关的算法接口，包括正逆运动学求解等。
+
+### 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      PoseType& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。`PoseType` 是占位符类型名称，与 `TorsoFactory` 类被实例化时指定的类型相同。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 逆运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const PoseType& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode = 0)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `pose` | 输入参数 | 位姿。`PoseType` 是占位符类型名称，与 `TorsoFactory` 类被实例化时指定的类型相同。 |
+  | `ref_joints` | 输入参数 | 参考关节值。 |
+  | `joints` | 输出参数 | 逆解的关节角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `mode` | 输入参数（可缺省） | 求解方式，取值为 0 或 1。<br/>- `0`：单步求解。<br/>- `1`：遍历求解。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 注册躯干状态回调函数
+
+- 方法原型：
+
+  ```cpp
+  void set_torso_state_callback(
+      AbcTorsoStateCallback realtime_callback)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `realtime_callback` | 输入参数 | 当躯干状态更新时，系统会自动调用此回调函数。`AbcTorsoStateCallback` 为函数指针类型。其数据类型，请参见 [AbcTorsoStateCallback](/sdk/c-plus-plus/data-structures#AbcTorsoStateCallback)。 |
+
+- 返回值：
+
+  无。
+
+## 获取躯干名称
+
+- 方法原型：
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- 返回值：
+
+  躯干名称。

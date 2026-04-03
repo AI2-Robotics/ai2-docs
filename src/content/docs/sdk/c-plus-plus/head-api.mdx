@@ -5,4 +5,240 @@ description: 头部 C++ 接口说明
 
 import { Aside } from '@astrojs/starlight/components';
 
+头部相关的接口由如下两个类实现。您可以在 `c++\include\drivers\head` 目录下找到对应的头文件以获取完整 API。
+
+| 头文件 | 类名 | 说明 |
+|:------|:----|:-------|
+| `head_factory.h` | `HeadFactory` | 头部工厂类，用于创建不同类型的头部实例。 |
+| `head_interface.h` | `HeadInterface` | 头部接口基类，定义了头部控制的通用接口。所有特定厂商的头部驱动都应该继承此类。 |
+
+## 创建头部
+
+创建头部实例有两种方式，具体如下所示。
+
+1. 根据头部参数，创建头部实例。
+
+   - 方法原型：
+   
+      ```cpp
+      static std::shared_ptr<HeadInterface> create_head(
+        const HeadFactoryParam& param)
+      ```
+   
+   - 参数说明：
+   
+     | 参数名称 | 类型 | 说明 |
+     |:---|:---|:---|
+     | `param` | 输入参数 | 头部相关参数。其内部数据结构，请参见 [HeadFactoryParam](/sdk/c-plus-plus/data-structures#HeadFactoryParam)。 |
+   
+   - 返回值：若创建成功，则返回 `HeadInterface` 类型的共享智能指针；否则返回 `nullptr`。 
+
+2. 根据配置文件，创建头部实例。
+
+   - 方法原型：
+   
+      ```cpp
+      static std::shared_ptr<HeadInterface> create_head_from_config(
+        const std::string& config_path)
+      ```
+   
+   - 参数说明：
+   
+     <table>
+     <thead>
+     <tr>
+     <th><strong>参数名称</strong></th>
+     <th><strong>类型</strong></th>
+     <th><strong>说明</strong></th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     输入参数
+     
+     </td>
+     <td>
+     
+     配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+     
+     ```json
+     {
+       "head_type": "ti5",           # 头部厂商
+       "head_name": "ti5_head",      # 头部名称
+       "head_joint_num": 2,          # 头部关节数
+       "can_device": "can0",         # CAN 设备名称
+       "can_id": 0,                  # CAN 节点 ID（0x00~0xFF）
+       "motor_params": [             # 电机参数
+         {
+           "motor_id": 5,            # 电机 ID
+           "reduction_ratio": 51,    # 减速比
+           "position_max": 90,       # 转动的最大角度
+           "position_min": -90.0,    # 转动的最小角度
+           "speed_max": 30,          # 转动的最大速度
+           "speed_min": -30,         # 转动的最小速度
+           "acc_max": 10,            # 转动的最大加速度
+           "acc_min": -10            # 转动的最小加速度
+         }
+       ]
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>   
+   
+   - 返回值：若创建成功，则返回 `HeadInterface` 类型的共享智能指针；否则返回 `nullptr`。
+
+## 连接头部
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 断开头部
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 控制头部轨迹
+
+### 关节空间运动
+
+在关节空间中规划一条运动轨迹，使头部各关节运动至指定关节位置。
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+    const std::vector<AbcType>& joints, 
+    int v, 
+    int block)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `v` | 输入参数 | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 输入参数 | 设置阻塞模式，取值为 0 或 1。<br />- `0`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br />- `1`：阻塞模式。函数将等待，直到头部完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+### 角度透传
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给头部，不需控制器规划。若调用正确，头部立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保头部的稳定运行。
+</Aside>
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(const std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取头部当前关节角度
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输出参数 | 当前关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取错误信息
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode get_error_flag(std::vector<int32_t>& error_flag)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `error_flag` | 输出参数 | 反馈错误码。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 正运动学
+
+- 方法原型：
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+    const std::vector<AbcType>& joints, 
+    AbcPose& pose)
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 关节角数据。其内部数据结构，请参见 [AbcType](/sdk/c-plus-plus/data-structures#AbcType)。 |
+  | `pose` | 输出参数 | 正解的位姿。其内部数据结构，请参见 [AbcPose](/sdk/c-plus-plus/data-structures#AbcPose)。 |
+
+- 返回值：
+
+  `AbcErrorCode::SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/c-plus-plus/data-structures#AbcErrorCode)。
+
+## 获取头部名称
+
+- 方法原型：
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- 返回值：
+
+  头部名称。
 

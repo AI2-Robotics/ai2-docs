@@ -1,0 +1,621 @@
+---
+title: 数据结构
+description: Python 接口涉及的数据结构
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## AbcErrorCode {#AbcErrorCode}
+
+`AbcErrorCode` 类是一个系统级的错误码枚举器，它集中定义了机器人（包含机械臂、头部、躯干、传感器、算法等模块）所有可预见的执行结果状态。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+<table>
+<thead>
+<tr>
+<th><strong>常量成员</strong></th>
+<th><strong>值</strong></th>
+<th colspan="2"><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+`SUCCESS`
+</td>
+<td>
+0
+</td>
+<td colspan="2">
+成功
+</td>
+</tr>
+
+<tr>
+<td>
+`UNKNOWN_ERROR`
+</td>
+<td>
+-1
+</td>
+<td>
+未知错误
+</td>
+<td rowspan="7">
+通用错误
+</td>
+</tr>
+
+<tr>
+<td>
+`TIMEOUT`
+</td>
+<td>
+-2
+</td>
+<td>
+超时
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_HANDLE`
+</td>
+<td>
+-3
+</td>
+<td>
+无效句柄
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_STATE`
+</td>
+<td>
+-4
+</td>
+<td>
+无效状态
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_INITIALIZED`
+</td>
+<td>
+-5
+</td>
+<td>
+未初始化
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_IMPLEMENTED`
+</td>
+<td>
+-6
+</td>
+<td>
+未实现的功能
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_ARGUMENT`
+</td>
+<td>
+-7
+</td>
+<td>
+无效参数
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_ERROR`
+</td>
+<td>
+-50
+</td>
+<td>
+参数错误
+</td>
+<td rowspan="2">
+参数错误
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_OUT_OF_RANGE`
+</td>
+<td>
+-51
+</td>
+<td>
+参数取值超出范围
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_ERROR`
+</td>
+<td>
+-100
+</td>
+<td>
+机械臂通用错误
+</td>
+<td rowspan="8">
+机械臂错误
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CTRL_FALSE`
+</td>
+<td>
+-101
+</td>
+<td>
+控制器返回 False，传递参数错误或机械臂状态发生错误
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_SEND_FAILED`
+</td>
+<td>
+-102
+</td>
+<td>
+数据发送失败，通信过程中出现问题
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_RECEIVE_FAILED`
+</td>
+<td>
+-103
+</td>
+<td>
+数据接收失败，通信过程中出现问题或者控制器超时没有返回
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_RETURN_DATA_ERR`
+</td>
+<td>
+-104
+</td>
+<td>
+返回值解析失败，接收到的数据格式不正确或不完整
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CHECK_FAILED`
+</td>
+<td>
+-105
+</td>
+<td>
+当前到位设备校验失败，即当前到位设备不为关节
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_TIMEOUT`
+</td>
+<td>
+-106
+</td>
+<td>
+超时未接收到返回
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_OUT_OF_RANGE`
+</td>
+<td>
+-107
+</td>
+<td>
+机械臂运动超出范围
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ERROR`
+</td>
+<td>
+-200
+</td>
+<td>
+躯干通用错误
+</td>
+<td rowspan="5">
+躯干错误
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_CANBUS_ERROR`
+</td>
+<td>
+-201
+</td>
+<td>
+躯干 CAN 总线错误
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ACTUATOR_ERROR`
+</td>
+<td>
+-202
+</td>
+<td>
+躯干执行器错误
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_TIMEOUT`
+</td>
+<td>
+-206
+</td>
+<td>
+超时未接收到返回
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_OUT_OF_RANGE`
+</td>
+<td>
+-207
+</td>
+<td>
+躯干运动超出范围
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ERROR`
+</td>
+<td>
+-220
+</td>
+<td>
+头部通用错误
+</td>
+<td rowspan="5">
+头部错误
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_CANBUS_ERROR`
+</td>
+<td>
+-221
+</td>
+<td>
+头部 CAN 总线错误
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ACTUATOR_ERROR`
+</td>
+<td>
+-222
+</td>
+<td>
+头部执行器错误
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_TIMEOUT`
+</td>
+<td>
+-226
+</td>
+<td>
+超时未接收到返回
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_OUT_OF_RANGE`
+</td>
+<td>
+-227
+</td>
+<td>
+头部运动超出范围
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_ERROR`
+</td>
+<td>
+-300
+</td>
+<td>
+传感器通用错误
+</td>
+<td rowspan="3">
+传感器错误
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_NOT_CONNECTED`
+</td>
+<td>
+-301
+</td>
+<td>
+传感器未连接
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_DATA_ERROR`
+</td>
+<td>
+-302
+</td>
+<td>
+传感器数据错误
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_ERROR`
+</td>
+<td>
+-400
+</td>
+<td>
+传感器通用错误
+</td>
+<td rowspan="3">
+底盘通用错误
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_INIT_ERROR`
+</td>
+<td>
+-401
+</td>
+<td>
+底盘初始化错误
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_TIMEOUT`
+</td>
+<td>
+-402
+</td>
+<td>
+底盘超时未接收到返回
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_ERROR`
+</td>
+<td>
+-900
+</td>
+<td>
+算法通用错误
+</td>
+<td rowspan="2">
+算法错误
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_NOT_CONVERGED`
+</td>
+<td>
+-901
+</td>
+<td>
+算法未收敛
+</td>
+</tr>
+
+</tbody>
+</table>
+
+
+## Pose {#Pose}
+
+`Pose` 是一个表示 3D 空间位姿（位置 + 姿态）的数据类，包含以下属性和方法。
+
+### 属性
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `position` | [Position](#Position) | 位置（3D 坐标：x, y, z） |
+| `quaternion` | [Quaternion](#Quaternion) | 姿态（旋转，使用四元数表示：w、x、y、z） |
+
+### 设置位置
+
+- 方法原型：
+
+  ```python
+  set_position(self, arg0: float, arg1: float, arg2: float) -> Pose
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0`、`arg1`、`arg2` | x、y、z 坐标值 |
+
+- 返回值：
+
+  返回 `self`，支持链式调用。
+
+### 设置四元数
+
+- 方法原型：
+
+  ```python
+  set_quaternion(self, arg0: float, arg1: float, arg2: float, arg3: float) -> Pose
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0`、`arg1`、`arg2`、`arg3` | w、x、y、z 四元数值 |
+
+- 返回值：
+
+  返回 `self`，支持链式调用。
+
+## Position {#Position}
+
+`Position` 是一个表示 3D 空间中位置的数据类，包含以下属性。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `x`、`y`、`z` | float | 位置（3D 坐标：x、y、z） |
+
+## Quaternion {#Quaternion}
+
+`Quaternion` 是一个表示四元数的数据类，包含以下属性。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `w`、`x`、`y`、`z` | float | 四元数 |
+
+## Euler {#Euler}
+
+`Euler` 是一个表示欧拉角的数据类，包含以下属性。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `rx`、`ry`、`rz` | float | 欧拉角 |
+
+## ArmCurrentStatus {#ArmCurrentStatus}
+
+`ArmCurrentStatus` 类是一个机械臂当前状态码枚举器，它集中定义了机械臂的各种状态。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `IDLE` | 0 | 使能但空闲状态 |
+| `MOVE` | 1 | 运动中状态 |
+| `MOVE_THROUGH_JOINT` | 2 | 角度透传状态 |
+| `MOVE_THROUGH_POSE` | 3 | 位姿透传状态 |
+| `MOVE_THROUGH_FORCE_POSE` | 4 | 力控透传状态 |
+| `MOVE_THROUGH_CURRENT` | 5 | 电流环透传状态 |
+| `STOP` | 6 | 急停状态 |
+| `SLOW_STOP` | 7 | 缓停状态 |
+| `PAUSE` | 8 | 暂停状态 |
+| `CURRENT_DRAG` | 9 | 电流环拖动状态 |
+| `SENSOR_DRAG` | 10 | 六维力拖动状态 |
+| `TECH_DEMONSTRATION` | 11 | 示教状态 |
+
+## AbcTorsoPose4D {#AbcTorsoPose4D}
+
+`AbcTorsoPose4D` 是一个表示躯干位姿的数据类，包含以下属性。
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `height` | float | 垂直高度，单位为米（m）。 |
+| `forward` | float | 前后方向位移，单位为米（m）。 |
+| `pitch` | float | 俯仰角，单位为弧度（rad）。 |
+| `yaw` | float | 腰部旋转角，单位为弧度（rad）。 |
+
+## SensorStatus {#SensorStatus}
+
+`SensorStatus` 类是一个枚举器，它集中定义了传感器的各种状态。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 值 | 说明 |
+|:---|:---|:---|
+| `DISCONNECTED` | 0 | 未连接 |
+| `CONNECTED` | 1 | 已连接 |
+| `STREAMING` | 2 | 数据流传输中 |
+| `SENSOR_ERROR` | 3 | 错误状态 |
+
+## SensorType {#SensorType}
+
+`SensorType` 类是一个枚举器，它集中定义了传感器的类型。
+
+<Aside>
+此类为枚举类，用户应直接使用类中定义的常量成员，无需自行实例化。
+</Aside>
+
+| 常量成员 | 说明 |
+|:---|:---|
+| `CAMERA` | 相机类传感器 |
+| `DEPTH_CAMERA` | 深度相机 |
+| `LIDAR` | 激光雷达 |
+| `IMU` | 惯性测量单元 |
+| `FORCE_TORQUE` | 力矩传感器 |
+| `PROXIMITY` | 接近传感器 |
+| `OTHER` | 其他类型传感器 |

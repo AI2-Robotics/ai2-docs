@@ -1,0 +1,328 @@
+---
+title: 躯干相关接口
+description: 躯干 Python 接口说明
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## TorsoFactoryPose4D {#TorsoFactoryPose4D}
+
+`TorsoFactoryPose4D` 类用于创建躯干实例。
+
+- 方法原型：
+
+  ```python
+  create_torso_from_config(config_path: str) -> TorsoInterfacePose4D
+  ```
+
+- 参数说明：
+
+  <table>
+     <tbody>
+        <tr>
+           <td>**参数名称**</td>
+           <td>**说明**</td>
+        </tr>
+        <tr>
+           <td>`config_path`</td>
+           <td>
+                配置文件路径。配置文件为 JSON 文件，包含以下键值对。
+
+                 ```json
+                {
+                    "torso_type":"ti5",       # 躯干厂商
+                    "torso_name":"ti5_torso", # 躯干名称
+                    "torso_joint_num":4,      # 躯干关节数
+                    "can_device":"can0",      # CAN设备名称
+                    "can_id":0,               # CAN节点 ID（0x00~0xFF）
+                    "motor_params": [         # 电机参数
+                        {
+                            "motor_id": 1,          # 电机 ID
+                            "reduction_ratio": 121, # 减速比
+                            "position_max": 1.0,    # 转动的最大角度
+                            "position_min":-68.0,   # 转动的最小角度
+                            "speed_max": 30,        # 转动的最大速度
+                            "speed_min":-30,        # 转动的最小速度
+                            "acc_max": 10,          # 转动的最大加速度
+                            "acc_min":-10           # 转动的最小加速度
+                        }
+                    ]
+                }
+
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>  
+
+- 返回值：
+
+  若创建成功，则返回 [TorsoInterfacePose4D](#TorsoInterfacePose4D) 实例；否则返回 `None`。
+
+## TorsoInterfacePose4D {#TorsoInterfacePose4D}
+
+`TorsoInterfacePose4D` 类提供了一系列用于控制躯干的公共方法，例如获取躯干关节角、控制躯干运动等。在使用前，请确保已创建躯干实例。
+
+### 连接躯干
+
+在创建躯干实例后，用户可通过如下方法与躯干建立连接。
+
+- 方法原型：
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 断开躯干
+
+用户可通过如下方法断开与躯干的连接。
+
+- 方法原型：
+
+  ```python
+  disconnect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 关节空间运动
+
+在关节空间中规划一条运动轨迹，使躯干各关节运动至指定关节位置。
+
+- 方法原型：
+
+  ```python
+  move_joint_position(
+      self,
+      joints: list[float],
+      v: int,
+      block: bool
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 目标关节位置，单位为角度。 |
+  | `v` | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 设置阻塞模式，取值为 `False` 或 `True`。<br/>- `False`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `True`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 笛卡尔空间直线运动
+
+在笛卡尔空间中规划一条直线运动轨迹，使躯干沿直线运动至指定位姿。
+
+- 方法原型：
+
+  ```python
+  move_cartesian_linear(
+      self,
+      pose: alphabot.core.AbcTorsoPose4D,
+      v: int,
+      block: bool
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+  | `v` | 规划速度和加速度占关节最大线转速和加速度的百分比，取值范围为 0~100。 |
+  | `block` | 设置阻塞模式，取值为 `False` 或 `True`。<br/>- `False`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `True`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 以关节空间运动到目标位姿
+
+在关节空间中规划一条运动轨迹，使躯干运动至指定位姿。
+
+- 方法原型：
+
+  ```python
+  move_joint_pose(
+      self,
+      pose: alphabot.core.AbcTorsoPose4D,
+      v: int,
+      block: bool
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 目标位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+  | `v` | 规划速度和加速度占关节最大角速度和角加速度的百分比，取值范围为 0~100。 |
+  | `block` | 设置阻塞模式，取值为 `False` 或 `True`。<br/>- `False`：非阻塞模式。函数在成功将运动轨迹发送至控制器后立即返回。<br/>- `True`：阻塞模式。函数将等待，直到躯干完成运动或发生错误后才返回。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 角度透传
+
+角度通过 CAN FD（Controller Area Network Flexible Data-rate）透传给躯干，不需控制器规划。若调用正确，躯干立即执行。
+
+<Aside>
+- 透传效果受通信周期和轨迹平滑度影响，因此要求通信周期稳定，避免大幅波动。
+- 用户在使用此功能时，建议进行良好的轨迹规划，以确保躯干的稳定运行。
+</Aside>
+
+- 方法原型：
+
+  ```python
+  move_joint_position_canfd(self, joints: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 类型 | 说明 |
+  |:---|:---|:---|
+  | `joints` | 输入参数 | 目标关节位置，单位为角度。 |
+
+- 返回值：
+
+  `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。
+
+### 获取躯干当前关节角度
+
+- 方法原型：
+
+  ```python
+  get_joint_degree(self) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 当前关节角度。 |
+
+### 获取错误信息
+
+- 方法原型：
+
+  ```python
+  get_error_flag(self) -> tuple[alphabot.core.AbcErrorCode, list[int]]
+  ```
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[int]` | 反馈错误码。 |
+
+### 正运动学
+
+- 方法原型：
+
+  ```python
+  forward_kinematics(
+      self,
+      joints: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.AbcTorsoPose4D]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `joints` | 关节角数据。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `AbcTorsoPose4D` | 正解的位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+
+### 逆运动学
+
+- 方法原型：
+
+  ```python
+  inverse_kinematics(
+      self,
+      pose: alphabot.core.AbcTorsoPose4D,
+      ref_joints: list[float],
+      mode: int = 0
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `pose` | 位姿，具体参见 [AbcTorsoPose4D](/sdk/python/data-structures#AbcTorsoPose4D)。 |
+  | `ref_joints` | 参考关节角度。 |
+  | `mode` | 求解方式，取值为 0 或 1。<br/>- `0`：单步求解。<br/>- `1`：遍历求解。 |
+
+- 返回值：
+
+  包含两个元素的元组。
+
+  | 元素数据类型 | 说明 |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` 表示成功；其他错误码，请参见 [AbcErrorCode](/sdk/python/data-structures#AbcErrorCode)。 |
+  | `list[float]` | 逆解的关节角度。 |
+
+### 注册躯干状态回调函数
+
+- 方法原型：
+
+  ```python
+  set_torso_state_callback(self, arg0: typing.Callable) -> None
+  ```
+
+- 参数说明：
+
+  | 参数名称 | 说明 |
+  |:---|:---|
+  | `arg0` | 当躯干状态更新时，系统会自动调用此回调函数。回调函数接收类型为 [AbcTorsoState](#AbcTorsoState) 的参数。 |
+
+- 返回值：
+
+  `None`。
+
+### 获取躯干名称
+
+- 方法原型：
+
+  ```python
+  get_name(self) -> str
+  ```
+
+- 返回值：
+
+  躯干名称。
+
+## AbcTorsoState {#AbcTorsoState}
+
+| 属性 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `err_code` | list[int] | 各关节错误码 |
+| `joints_current` | list[float] | 各关节电流 |
+| `joints_positions` | list[float] | 各关节角度 |
+| `joints_speed` | list[float] | 各关节速度 |
+| `timestamp` | typing.Any | 时间戳 |

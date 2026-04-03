@@ -313,6 +313,69 @@ using AbcType = double;
 
 <tr>
 <td>
+`HEAD_ERROR`
+</td>
+<td>
+-220
+</td>
+<td>
+头部通用错误
+</td>
+<td rowspan="5">
+头部错误（-220~-229）
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_CANBUS_ERROR`
+</td>
+<td>
+-221
+</td>
+<td>
+头部 CAN 总线错误
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ACTUATOR_ERROR`
+</td>
+<td>
+-222
+</td>
+<td>
+头部执行器错误
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_TIMEOUT`
+</td>
+<td>
+-226
+</td>
+<td>
+超时未接收到返回
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_OUT_OF_RANGE`
+</td>
+<td>
+-227
+</td>
+<td>
+头部运动超出范围
+</td>
+</tr>
+
+<tr>
+<td>
 `SENSOR_ERROR`
 </td>
 <td>
@@ -1047,3 +1110,240 @@ using AbcArmRealtimeStateCallback =
 | `kNormal` | 0 | 正常 |
 | `kWarn` | 1 | 警告 |
 | `kFault` | 2 | 故障 |
+
+
+## 头部和躯干相关的数据结构
+
+### ABC_TORSO_DOF {#ABC_TORSO_DOF}
+
+```cpp
+#define ABC_TORSO_DOF 4
+```
+
+### ABC_HEAD_DOF {#ABC_HEAD_DOF}
+
+```cpp
+#define ABC_HEAD_DOF  2
+```
+
+### HeadFactoryParam {#HeadFactoryParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `head_type` | string | 头部厂商，例如 `"ti5"`（钛虎头部）。 |
+| `head_name` | string | 头部名称。 |
+| `head_joint_num` | uint8_t | 头部关节数。 |
+| `comm_params` | [CommParamsUnion](#CommParamsUnion) | 通信参数。 |
+| `motor_params` | vector\<[MotorParam](#MotorParam)\> | 电机参数。 |
+
+### CommParamsUnion {#CommParamsUnion}
+
+| 联合体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `can` | [CommParamsCAN](#CommParamsCAN) | CAN 参数。 |
+| `eth` | [CommParamsETH](#CommParamsETH) | ETH 参数（预留）。 |
+
+### CommParamsCAN {#CommParamsCAN}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `device` | string | 设备名称，例如 `"can0"`。 |
+| `baud_rate` | int | 波特率，例如 `500000`。 |
+| `can_id` | uint8_t | CAN 节点 ID（0x00~0xFF）。 |
+
+### CommParamsETH {#CommParamsETH}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `ip` | string | IP 地址。 |
+| `port` | uint16_t | 端口号。 |
+
+### MotorParam {#MotorParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `motor_id` |  uint16_t | 电机 ID。 |
+| `reduction_ratio` |  uint16_t | 减速比。 |
+| `position_max` | [AbcType](#AbcType) | 转动的最大角度。 |
+| `position_min` | [AbcType](#AbcType) | 转动的最小角度。 |
+| `speed_max` | [AbcType](#AbcType) | 转动的最大速度。 |
+| `speed_min` | [AbcType](#AbcType) | 转动的最小速度。 |
+| `acc_max` | [AbcType](#AbcType) | 转动的最大加速度。 |
+| `acc_min` | [AbcType](#AbcType) | 转动的最小加速度。 |
+
+### TorsoFactoryParam {#TorsoFactoryParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `torso_type` | string | 躯干厂商，例如 ti5（钛虎躯干）。 |
+| `torso_name` | string | 躯干名称。 |
+| `torso_joint_num` | uint8_t | 躯干关节数。 |
+| `comm_params` | [CommParamsUnion](#CommParamsUnion) | 通信参数。 |
+| `motor_params` | vector\<[MotorParam](#MotorParam)\> | 电机参数。 |
+
+### AbcTorsoStateCallback {#AbcTorsoStateCallback}
+
+```cpp
+using AbcTorsoStateCallback = std::function<
+    void(std::shared_ptr<const AbcTorsoState>)>;
+```
+
+### AbcTorsoState {#AbcTorsoState}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `timestamp` | std::chrono::system_clock::time_point | 时间戳 |
+| `err_code` | std::array\<uint32_t, [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | 各关节错误码 |
+| `joints_positions` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | 各关节角度 |
+| `joints_speed` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF) | 各关节速度 |
+| `joints_current` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | 各关节电流 |
+
+
+## 传感器相关的数据结构
+
+### DepthSensorParam {#DepthSensorParam}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `sensor_type` | string | 传感器厂商，例如 `"realsense"`。 |
+| `sensor_name` | string | 传感器名称，例如 `"head_camera"`。 |
+| `serial_number` | string | 序列号。 |
+| `color_width` | int | 彩色图的宽。 |
+| `color_height` | int | 彩色图的高。 |
+| `depth_width` | int | 深度图的宽。 |
+| `depth_height` | int | 深度图的高。 |
+| `frame_rate` | int | 帧率。 |
+| `align_to_color` | bool | 是否将深度图对齐到彩色图。 |
+| `enable_depth` | bool | 是否启用深度流。默认为 `true`；设置为 `false` 时，深度流及所有依赖深度数据的相关逻辑将被关闭。|
+| `active_pull` | bool |  是否采用主动拉流模式。默认为 `false`（后台自动拉流）；设置为 `true` 时，仅在调用 `get_data()` 时拉取一帧，且不支持回调机制。|
+
+### SensorCallback {#SensorCallback}
+
+```cpp
+using SensorCallback = std::function<
+    void(std::shared_ptr<const SensorData>)>;
+```
+
+### SensorType {#SensorType}
+
+| 枚举量 | 说明 |
+|:---|:---|
+| `CAMERA` | 相机类传感器 |
+| `DEPTH_CAMERA` | 深度相机 |
+| `LIDAR` | 激光雷达 |
+| `IMU` | 惯性测量单元 |
+| `FORCE_TORQUE` | 力矩传感器 |
+| `PROXIMITY` | 接近传感器 |
+| `OTHER` | 其他类型传感器 |
+
+### SensorStatus {#SensorStatus}
+
+| 枚举量 | 说明 |
+|:---|:---|
+| `DISCONNECTED` | 未连接 |
+| `CONNECTED` | 已连接 |
+| `STREAMING` | 数据流传输中 |
+| `SENSOR_ERROR` | 错误状态 |
+
+### AbcIntrinsic {#AbcIntrinsic}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `width` | int | 图像宽度，单位为像素。 |
+| `height` | int | 图像高度，单位为像素。 |
+| `ppx` | float | 图像主点的水平坐标，以距左边缘的像素偏移量表示。 |
+| `ppy` | float | 图像主点的垂直坐标，以距上边缘的像素偏移量表示。 |
+| `fx` | float | 水平焦距，以像素宽度倍数表示。 |
+| `fy` | float | 垂直焦距，以像素高度倍数表示。 |
+| `coeffs` | float[5] | 畸变系数。各模型的参数顺序如下。<br/>- Brown-Conrady 模型：`[k1, k2, p1, p2, k3]`。<br/>- F-Theta 鱼眼镜头模型：`[k1, k2, k3, k4, 0]`。<br/>- 其他模型：参见其具体解释规则。 |
+
+## 轨迹规划器相关的数据结构
+
+### TrajectoryPoint {#TrajectoryPoint}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `positions` | vector\<[AbcType](#AbcType)\> | 位置 |
+| `velocities` | vector\<[AbcType](#AbcType)\> | 速度 |
+| `accelerations` | vector\<[AbcType](#AbcType)\> | 加速度 |
+| `timestamp` | [AbcType](#AbcType) | 时间戳 |
+
+### TrajectoryEvaluation {#TrajectoryEvaluation}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `is_valid` | bool | 轨迹是否有效 |
+| `issues` | vector\<string\> | 存在的问题 |
+| `score` | double | 轨迹得分（分值越高越好） |
+| `has_collision` | bool | 是否存在碰撞 |
+| `collision_indices` | vector\<size_t\> | 碰撞点索引 |
+
+### TrajectoryStatusCallback {#TrajectoryStatusCallback}
+
+```cpp
+using TrajectoryStatusCallback = std::function<
+    void(bool finished, AbcErrorCode error_code)>;
+```
+
+## 传感器同步器相关的数据结构
+
+### SyncDataCallback {#SyncDataCallback}
+
+```cpp
+using SyncDataCallback = std::function<
+    void(std::shared_ptr<SyncDataPackage>)>;
+```
+
+### SyncPolicy {#SyncPolicy}
+
+| 枚举量 | 说明 |
+|:---|:---|
+| `NEAREST` | 最近时间戳匹配 |
+| `INTERPOLATE` | 插值匹配 |
+| `EXTRAPOLATE` | 外推匹配 |
+
+### SyncMode {#SyncMode}
+
+| 枚举量 | 说明 |
+|:---|:---|
+| `LATEST_TIMESTAMP` | 基于最新时间戳同步（默认模式） |
+| `REFERENCE_SENSOR` | 基于参考传感器同步 |
+
+## 急停检测相关的数据结构
+
+### EStopMConfig {#EStopMConfig}
+
+{/* | `input_chip_name_` | string | 芯片设备名，例如 `"gpiochip1"`。 |
+| `input_line_offset_` | int | 引脚偏移量。 | 
+| `auto_start_` | bool | 是否自动启动。 |
+| `debounce_time_ms_` | const unsigned int | 去抖动时间。 | */}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `pressed_level_` | int | 急停按钮按下时的 GPIO 电平极性。<br/>- `0`：低电平有效（Active-Low），按下时引脚电平为低。<br/>- `1`：高电平有效（Active-High），按下时引脚电平为高。 |
+| `allow_multicb_` | bool | 是否允许多个回调函数。<br/>- `true`：允许设置多个回调函数。<br/>- `false`：仅允许设置一个回调函数。 |
+| `name_` | string | 名称。 |
+| `EStopMConfig` | 构造函数 | 使用成员初始化列表的方式初始化所有数据成员。 |
+| `ApacheOrin` | 静态函数 | 返回配置完成的 `EStopMConfig` 实例（gpiochip0 + 引脚 2 + 低电平有效），与 `EStopMConfig()` 配置相同，适用于搭载 ApacheOrin 芯片的机器人。 |
+| `NvidiaOrin` | 静态函数 | 返回配置完成的 `EStopMConfig` 实例（gpiochip1 + 引脚 9 + 高电平有效），适用于搭载 NvidiaOrin 芯片的机器人。|
+
+### ESState {#ESState}
+
+| 枚举量 | 值 | 说明 |
+|:---|:---|:---|
+| `None` | -1 | 无法获取状态 |
+| `Pressed` | 1 | 急停按钮处于被按下的状态 |
+| `Released` | 0 | 急停按钮处于被释放的状态 |
+
+## 夹爪相关的数据结构
+
+### AbcGripperState {#AbcGripperState}
+
+| 结构体成员 | 数据类型 | 说明 |
+|:---|:---|:---|
+| `status` | int | 夹爪状态。<br/>- `0`：离线。<br/>- `1`：在线。<br/>- `-1`：在线，且处于下使能状态。 |
+| `error` | int | 夹爪错误信息。<br/>- 低 8 位：夹爪内部的错误信息。<br/>- bit 5~7：预留。<br/>- bit 4：内部通信。<br/>- bit 3：驱动。<br/>- bit 2：过流。<br/>- bit 1：过温。<br/>- bit 0：堵转。 |
+| `mode` | int | 当前工作状态。<br/>- `1`：夹爪张开到最大且空闲。<br/>- `2`：夹爪闭合到最小且空闲。<br/>- `3`：夹爪停止且空闲。<br/>- `4`：夹爪正在闭合。<br/>- `5`：夹爪正在张开。<br/>- `6`：夹爪闭合过程中遇到力控停止。 |
+| `current_force` | int | 夹爪当前压力，单位为 g。 |
+| `temperature` | int | 当前温度，单位为 °C。 |
+| `actpos` | int | 夹爪开口度，取值范围为 0~1000。<br/>- `0`：夹爪闭合到最小。<br/>- `1000`：夹爪张开到最大。 |
