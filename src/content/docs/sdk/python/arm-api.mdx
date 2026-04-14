@@ -60,7 +60,7 @@ import { Aside } from '@astrojs/starlight/components';
         'ip':'192.168.1.10',      # TCP IP 地址
         'port':'5000',            # TCP 端口号
         'udp_ip':'192.168.1.100', # UDP IP 地址
-        'udp_port':'6000',        # UDP端口号
+        'udp_port':'6000',        # UDP 端口号
         'udp_cycle':'20', # UDP 周期，以 udp_cycle*5 毫秒为周期
      }
      ```
@@ -672,7 +672,7 @@ import { Aside } from '@astrojs/starlight/components';
   | 参数名称 | 说明 |
   |:---|:---|
   | `posture_num` | 预先保存在灵巧手内的手势序列号，取值范围为 1~40。|
-  | `block` | - `true` 表示阻塞模式，等待灵巧手运动结束后返回。<br/>- `false` 表示非阻塞模式，发送后立即返回。|
+  | `block` | - `True` 表示阻塞模式，等待灵巧手运动结束后返回。<br/>- `False` 表示非阻塞模式，发送后立即返回。|
   | `timeout` | 设置阻塞模式下的超时时间，单位为秒。|
 
 - 返回值：
@@ -883,6 +883,10 @@ import { Aside } from '@astrojs/starlight/components';
   | `port` | 指定通信端口，取值为 0、1 或 2。<br/>- `0`：控制器 RS485 端口为 RTU 主站。<br/>- `1`：末端接口板 RS485 接口为 RTU 主站。<br/>- `2`：控制器 RS485 端口为 RTU 从站。 |
   | `baudrate` | 波特率，支持 9600、115200 和 460800 三种常见波特率。 |
   | `timeout` | 超时时间，单位百毫秒。对 Modbus 设备所有的读写指令，在规定的超时时间内未返回响应数据，则返回超时错误提示信息。超时时间不能为 0，若设置为 0，则机械臂按通信端口 1 进行配置。 |
+
+  <Aside>
+  其他配置默认为：数据位-8，停止位-1，奇偶校验-无。
+  </Aside>
 
 - 返回值：
 

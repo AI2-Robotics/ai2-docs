@@ -1,0 +1,633 @@
+---
+title: Chassis APIs
+description: Chassis C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The chassis APIs are implemented by the following classes. You can find the corresponding header files in the `c++/include/drivers/chassis` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:---|:---|:---|
+| `chassis_factory.h` | `ChassisFactory` | A factory class for creating chassis instances of different types. |
+| `chassis_interface.h` | `ChassisInterface` | The base interface class defining common APIs for chassis control. All vendor-specific drivers should inherit from this class. |
+
+## Create a Chassis Instance
+
+There are two ways to create a chassis instance.
+
+1. Create a chassis instance by chassis parameters.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<ChassisInterface> create_chassis(
+         const ChassisFactoryParam& param)
+     ```
+   
+   - Parameter:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `param` | Input | Parameters related to the chassis. For details, please refer to [ChassisFactoryParam](/en/sdk/c-plus-plus/data-structures#ChassisFactoryParam). |
+   
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `ChassisInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+2. Create a chassis instance from a configuration file.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<ChassisInterface> create_chassis_from_config(
+         const std::string& config_path)
+     ```
+   
+   - Parameter:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+        "chassis_type": "woosh", # Chassis vendor
+        "chassis_name": "chassis", # Chassis name
+        "ip": "127.0.0.1", # IP address
+        "port": 51051 # Port number
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `ChassisInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+## Connect to the Chassis
+
+After creating a chassis instance, you can establish a connection to the chassis using the following method.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Disconnect from the Chassis
+
+You can disconnect from the chassis using the following method.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Pose and Speed
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_pose_speed(alphabot::ChassisPoseSpeed& pose_spd)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose_spd` | Output | The chassis pose and speed. For details, please refer to [ChassisPoseSpeed](/en/sdk/c-plus-plus/data-structures#ChassisPoseSpeed). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Pose
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_pose(alphabot::ChassisPose2D& pose)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Output | The chassis pose. For details, please refer to [ChassisPose2D](/en/sdk/c-plus-plus/data-structures#ChassisPose2D). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Speed
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_speed(alphabot::ChassisTwist& spd)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `spd` | Output | The chassis speed. For details, please refer to [ChassisTwist](/en/sdk/c-plus-plus/data-structures#ChassisTwist). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Mileage
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_mileage(uint32_t& mileage)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `mileage` | Output | Accumulated mileage. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Battery Information
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_battery(alphabot::ChassisBattery& battery)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `battery` | Output | The chassis battery information. For details, please refer to [ChassisBattery](/en/sdk/c-plus-plus/data-structures#ChassisBattery). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Status
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_robot_state(alphabot::ChassisState& robot_state)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `robot_state` | Output | The chassis status. For details, please refer to [ChassisState](/en/sdk/c-plus-plus/data-structures#ChassisState). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Status Code
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_status_code(alphabot::ChassisStatusCode& status_code)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `status_state` | Output | The chassis status code. For details, please refer to [ChassisStatusCode](/en/sdk/c-plus-plus/data-structures#ChassisStatusCode). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Hardware Status
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_hardware_state(alphabot::ChassisHardwareState& hardware_state)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `hardware_state` | Output | The hardware status of the chassis. For details, please refer to [ChassisHardwareState](/en/sdk/c-plus-plus/data-structures#ChassisHardwareState). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Static Transform
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_static_tf(std::vector<alphabot::ChassisTransformStamped>& transforms)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `transforms` | Output | Chassis static transforms. For details, please refer to [ChassisTransformStamped](/en/sdk/c-plus-plus/data-structures#ChassisTransformStamped). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Set Chassis Twist
+
+- Method:
+
+  ```cpp
+  AbcErrorCode twist_control(float linear, float angular)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `linear` | Input | Linear velocity |
+  | `angular` | Input | Angular velocity |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Set Chassis Maximum Speed
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_max_speed(float max_spd)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `max_spd` | Input | Maximum speed |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Initialize Chassis
+
+- Method:
+
+  ```cpp
+  AbcErrorCode init_robot(alphabot::ChassisPose2D pose, uint8_t update_flg)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The chassis pose. For details, please refer to [ChassisPose2D](/en/sdk/c-plus-plus/data-structures#ChassisPose2D). |
+  | `update_flg` | Input | Flag indicating whether to update the chassis pose. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Move to a Target Position
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_to_point_sync(
+      float x,
+      float y,
+      float theta,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      float max_spd = 1.0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `x` | Input | X-axis coordinate of the target position. |
+  | `y` | Input | Y-axis coordinate of the target position. |
+  | `theta` | Input | Orientation of the target position. |
+  | `func_callback` | Input | Callback function. For the function parameter type, please refer to [ChassisTaskResponse](/en/sdk/c-plus-plus/data-structures#ChassisTaskResponse). |
+  | `max_spd` | Input (optional) | Maximum speed. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Charge
+
+- Method:
+
+  ```cpp
+  AbcErrorCode to_charge_sync(float max_spd = 1.0)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `max_spd` | Input (optional) | Maximum speed. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Exit Charging
+
+- Method:
+
+  ```cpp
+  AbcErrorCode exit_charge_sync(float max_spd = 1.0)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `max_spd` | Input (optional) | Maximum speed. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Move Linearly
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_straight_sync(
+      float distance,
+      float speed,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      bool use_avoid = true)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `distance` | Input | Travel distance. |
+  | `speed` | Input | Travel speed. |
+  | `func_callback` | Input | Callback function. For the function parameter type, please refer to [ChassisTaskResponse](/en/sdk/c-plus-plus/data-structures#ChassisTaskResponse). |
+  | `use_avoid` | Input (optional) | Whether to enable obstacle avoidance. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Move Rotationally
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_rotate_sync(
+      float angle,
+      float speed,
+      std::function<void(alphabot::ChassisTaskResponse)> func_callback,
+      bool use_avoid = true)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `angle` | Input | Rotation angle. |
+  | `speed` | Input | Rotation speed. |
+  | `func_callback` | Input | Callback function. For the function parameter type, please refer to [ChassisTaskResponse](/en/sdk/c-plus-plus/data-structures#ChassisTaskResponse). |
+  | `use_avoid` | Input (optional) | Whether to enable obstacle avoidance. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get or Set Footprint
+
+### Get Local Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_local_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Output | Local footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Global Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_global_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Output | Global footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Local and Global Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_all_footprint(
+      std::vector<alphabot::ChassisPoint32>& local_points,
+      std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `local_points` | Output | Local footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+  | `global_points` | Output | Global footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Static Footprint (Based on odom and base_link Frames)
+
+- Method:
+
+  ```cpp
+  AbcErrorCode ai2_get_local_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Output | Footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Static Footprint (Based on map and base_link Frames)
+
+- Method:
+
+  ```cpp
+  AbcErrorCode ai2_get_global_footprint(std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Output | Footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Static Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode ai2_get_all_footprint(
+      std::vector<alphabot::ChassisPoint32>& local_points,
+      std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `local_points` | Output | Footprint points (Based on odom and base_link Frames). For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+  | `global_points` | Output | Footprint points (Based on map and base_link frames). For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Local Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_local_footprint(const std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Input | Local footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Global Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_global_footprint(const std::vector<alphabot::ChassisPoint32>& points)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `points` | Input | Global footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Local and Global Footprint
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_all_footprint(
+      const std::vector<alphabot::ChassisPoint32>& local_points,
+      const std::vector<alphabot::ChassisPoint32>& global_points)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `local_points` | Input | Local footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+  | `global_points` | Input | Global footprint points. For details, please refer to [ChassisPoint32](/en/sdk/c-plus-plus/data-structures#ChassisPoint32). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Chassis Name
+
+- Method:
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- Return Value:
+
+  The name of the chassis instance.

@@ -1,0 +1,464 @@
+---
+title: Sensor Synchronizer APIs
+description: Sensor Synchronizer C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The sensor synchronizer APIs are implemented by the following classes. You can find the corresponding header file in the `c++/include/sensor` directory to access the complete set of APIs.
+
+<table>
+   <tbody>
+      <tr>
+         <td>Header File</td>
+         <td>Class Name</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`sensor_synchronizer.h`</td>
+         <td>`SyncDataPackage`</td>
+         <td>Encapsulates sensor data from multiple sensors with similar timestamps.</td>
+      </tr>
+      <tr>
+         <td>`SensorSynchronizer`</td>
+         <td>Implements software-based synchronization for data from multiple sensors.</td>
+      </tr>
+   </tbody>
+</table>
+
+## Synchronized Data Package
+
+### Get Package Timestamp
+
+- Method:
+
+  ```cpp
+  std::chrono::system_clock::time_point get_timestamp() const
+  ```
+
+- Return Value:
+
+  Timestamp.
+
+### Add Sensor Data
+
+- Method:
+
+  ```cpp
+  void add_sensor_data(const std::string& sensor_name, std::shared_ptr<SensorData> data)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sensor_name` | Input | Sensor name. |
+  | `data` | Input | Sensor data, a shared pointer to a `SensorData` object. |
+
+- Return Value:
+
+  None (void).
+
+### Add Robotic Arm Real-time State Data
+
+- Method:
+
+  ```cpp
+  void add_arm_state(const std::string& arm_name, std::shared_ptr<AbcArmRealtimeState> data)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `arm_name` | Input | Robotic arm name. |
+  | `data` | Input | Robotic arm real-time state data, a shared pointer to an [AbcArmRealtimeState](/en/sdk/c-plus-plus/data-structures#AbcArmRealtimeState) object. |
+
+- Return Value:
+
+  None (void).
+
+### Get Sensor Data
+
+- Method:
+
+  ```cpp
+  std::shared_ptr<SensorData> get_sensor_data(const std::string& sensor_name) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sensor_name` | Input | Sensor name. |
+
+- Return Value:
+
+  A shared pointer to a `SensorData` object.
+
+### Get Robotic Arm Real-time State Data
+
+- Method:
+
+  ```cpp
+  std::shared_ptr<AbcArmRealtimeState> get_arm_data(const std::string& arm_name) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `arm_name` | Input | Robotic arm name. |
+
+- Return Value:
+
+  A shared pointer to an [AbcArmRealtimeState](/en/sdk/c-plus-plus/data-structures#AbcArmRealtimeState) object.
+
+### Get All Sensor Data
+
+- Method:
+
+  ```cpp
+  const std::map<std::string, std::shared_ptr<SensorData>>& get_all_sensor_data() const
+  ```
+
+- Return Value:
+
+  Map of sensor names to their data.
+
+### Get All Robotic Arm Real-time State Data
+
+- Method:
+
+  ```cpp
+  const std::map<std::string, std::shared_ptr<AbcArmRealtimeState>>& get_all_arm_data() const
+  ```
+
+- Return Value:
+
+  Map of arm names to their real-time state data.
+
+### Check If Contains Data for Specified Sensor
+
+- Method:
+
+  ```cpp
+  bool has_sensor_data(const std::string& sensor_name) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sensor_name` | Input | Sensor name. |
+
+- Return Value:
+
+  `true` if data exists, `false` otherwise.
+
+### Get Sensor Count in Data Package
+
+- Method:
+
+  ```cpp
+  size_t get_sensor_count() const
+  ```
+
+- Return Value:
+
+  Number of sensors.
+
+### Get Arm Count in Data Package
+
+- Method:
+
+  ```cpp
+  size_t get_arm_count() const
+  ```
+
+- Return Value:
+
+  Number of arms.
+
+## Sensor Synchronizer
+
+### Parameterized Constructor
+
+- Method:
+
+  ```cpp
+  SensorSynchronizer(SyncPolicy sync_policy = SyncPolicy::NEAREST, int time_tolerance_ms = 10)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sync_policy` | Input (optional) | Synchronization policy. For details, please refer to [SyncPolicy](/en/sdk/c-plus-plus/data-structures#SyncPolicy). |
+  | `time_tolerance_ms` | Input (optional) | Time tolerance, in milliseconds. |
+
+### Add Sensor
+
+- Method:
+
+  ```cpp
+  AbcErrorCode add_sensor(const std::string& name, std::shared_ptr<SensorInterface> sensor)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Sensor name. |
+  | `sensor` | Input | A shared pointer to a `SensorInterface` object. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Add Robotic Arm
+
+- Method:
+
+  ```cpp
+  AbcErrorCode add_arm(const std::string& name, std::shared_ptr<ArmInterface> arm)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Robotic arm name. |
+  | `arm` | Input | A shared pointer to an `ArmInterface` object. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Remove Sensor
+
+- Method:
+
+  ```cpp
+  AbcErrorCode remove_sensor(const std::string& name)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Sensor name. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Remove Robotic Arm
+
+- Method:
+
+  ```cpp
+  AbcErrorCode remove_arm(const std::string& name)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Robotic arm name. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Sensor
+
+- Method:
+
+  ```cpp
+  std::shared_ptr<SensorInterface> get_sensor(const std::string& name) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Sensor name. |
+
+- Return Value:
+
+  A shared pointer to a `SensorInterface` object.
+
+### Start Synchronization
+
+- Method:
+
+  ```cpp
+  AbcErrorCode start()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Stop Synchronization
+
+- Method:
+
+  ```cpp
+  AbcErrorCode stop()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Register Data Synchronization Callback Function
+
+- Method:
+
+  ```cpp
+  void set_sync_data_callback(const SyncDataCallback& callback)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `callback` | Input | `SyncDataCallback` is a function pointer type. For details, please refer to [SyncDataCallback](/en/sdk/c-plus-plus/data-structures#SyncDataCallback). The callback function is called whenever sensor data or robotic arm state data is updated. |
+
+- Return Value:
+
+  None (void).
+
+### Set Synchronization Policy
+
+- Method:
+
+  ```cpp
+  void set_sync_policy(SyncPolicy policy)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `policy` | Input | Synchronization policy. For details, please refer to [SyncPolicy](/en/sdk/c-plus-plus/data-structures#SyncPolicy). |
+
+- Return Value:
+
+  None (void).
+
+### Get Synchronization Policy
+
+- Method:
+
+  ```cpp
+  SyncPolicy get_sync_policy() const
+  ```
+
+- Return Value:
+
+  The current synchronization policy. For details, please refer to [SyncPolicy](/en/sdk/c-plus-plus/data-structures#SyncPolicy).
+
+### Set Time Tolerance
+
+- Method:
+
+  ```cpp
+  void set_time_tolerance(int tolerance_ms)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `tolerance_ms` | Input | Time tolerance, in milliseconds. |
+
+- Return Value:
+
+  None (void).
+
+### Get Time Tolerance
+
+- Method:
+
+  ```cpp
+  int get_time_tolerance() const
+  ```
+
+- Return Value:
+
+  Time tolerance, in milliseconds.
+
+### Set Synchronization Mode
+
+- Method:
+
+  ```cpp
+  void set_sync_mode(SyncMode mode)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `mode` | Input | Synchronization mode. For details, please refer to [SyncMode](/en/sdk/c-plus-plus/data-structures#SyncMode). |
+
+- Return Value:
+
+  None (void).
+
+### Get Synchronization Mode
+
+- Method:
+
+  ```cpp
+  SyncMode get_sync_mode() const
+  ```
+
+- Return Value:
+
+  The current synchronization mode. For details, please refer to [SyncMode](/en/sdk/c-plus-plus/data-structures#SyncMode).
+
+### Set Reference Sensor
+
+- Method:
+
+  ```cpp
+  void set_reference_sensor(const std::string& sensor_name)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sensor_name` | Input | Sensor name. |
+
+- Return Value:
+
+  None (void).
+
+### Get Reference Sensor
+
+- Method:
+
+  ```cpp
+  std::string get_reference_sensor() const
+  ```
+
+- Return Value:
+
+  The name of the reference sensor.
+
+### Check If Data Is Synchronizing
+
+- Method:
+
+  ```cpp
+  bool is_syncing() const
+  ```
+
+- Return Value:
+
+  `true` if data is synchronizing, `false` otherwise.

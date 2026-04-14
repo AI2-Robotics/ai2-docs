@@ -1,0 +1,1895 @@
+---
+title: Examples
+description: C++ Examples
+---
+
+To help you get started quickly, this SDK provides a complete set of example programs in the `c++\examples` directory. Each example focuses on demonstrating the use of a specific set of APIs. It is recommended to reference them when necessary.
+
+## Robotic Arm Examples
+
+### ArmFactory Class
+
+   
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Check parameter
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <config_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== ArmFactory Example Program =====" << std::endl;
+    
+    try {
+        // Create a robotic arm factory instance
+        ArmFactory factory;
+        
+        std::cout << "\n----- Method 1: Create a Robotic Arm Using Parameters -----" << std::endl;
+        // Configure robotic arm parameters
+        std::unordered_map<std::string, std::string> params = {
+            {"ip", "192.168.1.18"},
+            {"port", "8080"},
+            {"udp_ip", "192.168.1.102"},
+            {"udp_port", "8089"},
+            {"udp_cycle", "5"}
+        };
+
+        // Create a Realman robotic arm instance
+        auto arm1 = factory.create_arm("realman", "right_arm", params);
+        if (!arm1) {
+            std::cerr << "Failed to create robotic arm instance" << std::endl;
+            return 1;
+        }
+
+        // Connect to the robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm1->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+        
+        std::cout << "\n----- Method 2: Create a Robotic Arm Using Configuration File -----" << std::endl;
+        // Create a robotic arm instance from configuration file
+        auto arm2 = factory.create_arm_from_config(config_path);
+        if (!arm2) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to the robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm2->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+        
+        // Disconnect
+        arm1->disconnect();
+        std::cout << "Robotic arm disconnected" << std::endl;
+        // Disconnect
+        arm2->disconnect();
+        std::cout << "Robotic arm disconnected" << std::endl;
+
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+### Algorithm
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <random>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Robotic Arm Algorithm Example =====" << std::endl;
+
+    try {
+        // Create robotic arm factory instance
+        ArmFactory factory;
+
+        // Create robotic arm instance from configuration file
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+        
+        // Get current joint angles
+        std::cout << "Getting current joint angles..." << std::endl;
+        std::vector<AbcType> joints;
+        auto status = arm->get_joint_degree(joints);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to get joint angles, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Joint angles retrieved successfully" << std::endl;
+            for (int i = 0; i < 7; ++i){
+                std::cout << "Joint " << i << ": " << joints.at(i) << std::endl;
+            }
+        }
+        
+        // Forward kinematics
+        std::cout << "Forward kinematics..." << std::endl;
+        AbcPose pose;
+        status = arm->forward_kinematics(joints, pose);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Forward kinematics failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Forward kinematics succeeded" << std::endl;
+            std::cout << "position: " << pose.position.x << " " << pose.position.y << " " << pose.position.z << std::endl;
+            std::cout << "quaternion: " << pose.quaternion.w << " " << pose.quaternion.x << " " << pose.quaternion.y << " " << pose.quaternion.z << std::endl;
+        }
+        
+        // Inverse kinematics
+        std::cout << "Inverse kinematics..." << std::endl;
+        std::vector<AbcType> j2;
+        std::vector<AbcType> ref_j;
+        ref_j.resize(7);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        for (int i = 0; i < 7; ++i){
+            std::uniform_real_distribution<> dis(-3.0, 3.0);
+            AbcType randomNumber = dis(gen);
+            ref_j.at(i) += randomNumber;
+        }
+        
+        // Iterative solution (multi-step)
+        status = arm->inverse_kinematics(pose, ref_j, j2, 1);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Iterative inverse kinematics failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Iterative inverse kinematics succeeded" << std::endl;
+            for (int i = 0; i < 7; ++i){
+                std::cout << "Joint " << i << ": " << j2.at(i) << std::endl;
+            }
+            AbcPose p2;
+            arm->forward_kinematics(j2, p2);
+            std::cout << "Forward kinematics after inverse solution:" << std::endl;
+            std::cout << "position: " << p2.position.x << " " << p2.position.y << " " << p2.position.z << std::endl;
+            std::cout << "quaternion: " << p2.quaternion.w << " " << p2.quaternion.x << " " << p2.quaternion.y << " " << p2.quaternion.z << std::endl;
+        }
+        
+        // Single-step solution
+        for (int i = 0; i < 7; ++i){
+            std::uniform_real_distribution<> dis(-1.0, 1.0);
+            AbcType randomNumber = dis(gen);
+            ref_j.at(i) = 0;
+            ref_j.at(i) += (randomNumber + joints.at(i));
+        }
+        status = arm->inverse_kinematics(pose, ref_j, j2, 0);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Single-step inverse kinematics failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Single-step inverse kinematics succeeded" << std::endl;
+            for (int i = 0; i < 7; ++i){
+                std::cout << "Joint " << i << ": " << j2.at(i) << std::endl;
+            }
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+### Gripper
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+void arm_callback(std::shared_ptr<const AbcArmRealtimeState> state) {
+    std::cout << "[Callback] Gripper status updated:"
+    << " Aperture: " << state->gripper_state.actpos
+    << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Robotic Arm Gripper Example =====" << std::endl;
+
+    try {
+        // Create robotic arm factory instance
+        ArmFactory factory;
+
+        // Create robotic arm instance from configuration file
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+        arm->realtime_arm_state_call_back(arm_callback);
+        
+        // Execute gripper grasp operation
+        std::cout << "Executing gripper grasp operation..." << std::endl;
+        auto status = arm->set_gripper_pick_on(500, 500, true, 5);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Gripper operation failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Gripper operation succeeded" << std::endl;
+        }
+
+        // Execute gripper release operation
+        std::cout << "Executing gripper release operation..." << std::endl;
+        status = arm->set_gripper_release(500, true, 5);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Gripper operation failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Gripper operation succeeded" << std::endl;
+        }
+
+        // Get gripper status
+        std::cout << "Getting gripper status..." << std::endl;
+        AbcGripperState s;
+        status = arm->get_gripper_state(&s);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to get gripper status, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Gripper status retrieved successfully" << std::endl;
+            std::cout << "Temperature: " << s.temperature
+                << ", Aperture: " << s.actpos
+                << ", Current force: " << s.current_force
+                << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+### Motion
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== Robotic Arm Motion Example =====" << std::endl;
+
+    try {
+        // Create robotic arm factory instance
+        ArmFactory factory;
+
+        // Create robotic arm instance from configuration file
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+
+        // Execute joint space motion
+        std::cout << "Executing joint space motion..." << std::endl;
+        std::vector<AbcType> joints = {20.3f, 20.3f, 20.3f, 20.3f, 20.3f, 20.f, 20.f};
+        auto status = arm->move_joint_position(joints, 10, 0, 0, 1);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Joint motion failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Joint motion succeeded" << std::endl;
+        }
+
+        // Execute Cartesian space linear motion
+        std::cout << "Executing Cartesian space linear motion..." << std::endl;
+        AbcPose target_pose = {
+            .position = {0.3f, 0.2f, 0.5f},
+            .quaternion = {1.0f, 0.0f, 0.0f, 0.0f}
+        };
+        status = arm->move_cartesian_linear(target_pose, 10, 0, 0, 1);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Cartesian linear motion failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Cartesian linear motion succeeded" << std::endl;
+        }
+
+        // Execute joint-Cartesian space motion
+        std::cout << "Executing joint-Cartesian space motion..." << std::endl;
+        AbcPose target_pose1 = {
+            .position = {0.3f, 0.2f, 0.4f},
+            .quaternion = {1.0f, 0.0f, 0.0f, 0.0f}
+        };
+        status = arm->move_joint_pose(target_pose1, 10, 0, 0, 0);
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Joint-Cartesian motion failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Joint-Cartesian motion succeeded" << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        std::cout << "After 100 ms of operation, pause for 1 second" << std::endl;
+        status = arm->set_arm_pause();
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Pause failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Pause succeeded" << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::cout << "Resume motion" << std::endl;
+        status = arm->set_arm_continue();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        status = arm->move_joint_pose(target_pose, 10, 0, 0, 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        std::cout << "After 500 ms of operation, execute slow stop" << std::endl;
+        status = arm->set_arm_slow_stop();
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Slow stop failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Slow stop succeeded" << std::endl;
+        }
+
+        status = arm->move_joint_pose(target_pose1, 10, 0, 0, 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        std::cout << "After 500 ms of operation, execute emergency stop" << std::endl;
+        status = arm->set_arm_stop();
+        if (status != AbcErrorCode::SUCCESS) {
+            std::cerr << "Emergency stop failed, error code: " << static_cast<int>(status) << std::endl;
+        } else {
+            std::cout << "Emergency stop succeeded" << std::endl;
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+### Pass-Through
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+// Status callback function
+void arm_state_callback(std::shared_ptr<const AbcArmRealtimeState> state) {
+    std::cout << "[Callback] Robotic arm status updated:"
+        << " Joint1 angle: " << state->joint_status.joint_position[0]
+        << ", Joint2 angle: " << state->joint_status.joint_position[1]
+        << ", Joint3 angle: " << state->joint_status.joint_position[2]
+        << ", Joint4 angle: " << state->joint_status.joint_position[3]
+        << ", Joint5 angle: " << state->joint_status.joint_position[4]
+        << ", Joint6 angle: " << state->joint_status.joint_position[5]
+        << ", Joint7 angle: " << state->joint_status.joint_position[6]
+        << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    std::cout << "===== Robotic Arm Pass-through Example =====" << std::endl;
+
+    try {
+        // Create robotic arm factory instance
+        ArmFactory factory;
+        
+        // Create robotic arm instance from configuration file
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+
+        // Register status callback function
+        arm->realtime_arm_state_call_back(arm_state_callback);
+
+        // Get joint angles
+        AbcErrorCode ret;
+        std::vector<AbcType> joints;
+        arm->get_joint_degree(joints);
+
+        // Pass-through control loop - forward motion
+        for (int i=0; i < 200; i++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            joints[6] += 0.1;
+            ret = arm->move_joint_position_canfd(joints, true);
+            if (ret != AbcErrorCode::SUCCESS) {
+                std::cerr << "Pass-through failed, error code: " << static_cast<int>(ret) << std::endl;
+                break;
+            }
+        }
+        
+        // Pass-through control loop - reverse motion
+        for (int i=0; i < 200; i++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            joints[6] -= 0.1;
+            ret = arm->move_joint_position_canfd(joints, true);
+            if (ret != AbcErrorCode::SUCCESS) {
+                std::cerr << "Pass-through failed, error code: " << static_cast<int>(ret) << std::endl;
+                break;
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+### Status Callback Function
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/arm/arm_factory.h"
+
+using namespace alphabot;
+
+// State callback function for left arm
+void arm_left_callback(std::shared_ptr<const AbcArmRealtimeState> state) {
+    std::cout << "[Callback] Left arm state updated:"
+        << " Joint1 angle: " << state->joint_status.joint_position[0]
+        << ", Joint2 angle: " << state->joint_status.joint_position[1]
+        << ", Joint3 angle: " << state->joint_status.joint_position[2]
+        << ", Joint4 angle: " << state->joint_status.joint_position[3]
+        << ", Joint5 angle: " << state->joint_status.joint_position[4]
+        << ", Joint6 angle: " << state->joint_status.joint_position[5]
+        << ", Joint7 angle: " << state->joint_status.joint_position[6]
+        << std::endl;
+}
+
+// State callback function for right arm
+void arm_right_callback(std::shared_ptr<const AbcArmRealtimeState> state) {
+    std::cout << "[Callback] Right arm state updated:"
+        << " Joint1 angle: " << state->joint_status.joint_position[0]
+        << ", Joint2 angle: " << state->joint_status.joint_position[1]
+        << ", Joint3 angle: " << state->joint_status.joint_position[2]
+        << ", Joint4 angle: " << state->joint_status.joint_position[3]
+        << ", Joint5 angle: " << state->joint_status.joint_position[4]
+        << ", Joint6 angle: " << state->joint_status.joint_position[5]
+        << ", Joint7 angle: " << state->joint_status.joint_position[6]
+        << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <config_file_path_left> <config_file_path_right>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json config/right_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path_left = argv[1];
+    const std::string config_path_right = argv[2];
+
+    std::cout << "===== Arm State Callback Example Program =====" << std::endl;
+
+    try {
+        // Create arm factory instance
+        ArmFactory factory;
+        
+        // Create left arm instance from config file
+        auto left_arm = factory.create_arm_from_config(config_path_left);
+        if (!left_arm) {
+            std::cerr << "Failed to create left arm instance from config file" << std::endl;
+            return 1;
+        }
+
+        // Connect to the left arm
+        std::cout << "Connecting to left arm..." << std::endl;
+        if (left_arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to left arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Left arm connected successfully" << std::endl;
+
+        // Register state callback function for left arm
+        left_arm->realtime_arm_state_call_back(arm_left_callback);
+
+        // Create right arm instance from config file
+        auto right_arm = factory.create_arm_from_config(config_path_right);
+        if (!right_arm) {
+            std::cerr << "Failed to create right arm instance from config file" << std::endl;
+            return 1;
+        }
+
+        // Connect to the right arm
+        std::cout << "Connecting to right arm..." << std::endl;
+        if (right_arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to right arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Right arm connected successfully" << std::endl;
+
+        // Register state callback function for right arm
+        right_arm->realtime_arm_state_call_back(arm_right_callback);
+        
+        // Keep program running for 20 seconds to receive callback updates
+        for (int i = 0; i < 20; i++) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Finished =====" << std::endl;
+    return 0;
+}
+```
+
+### Modbus
+
+```cpp
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include "drivers/arm/arm_factory.h"
+
+// Byte manipulation macros
+#define L_BYTE(v)  static_cast<uint8_t>((v) & 0xFF)
+#define H_BYTE(v)  static_cast<uint8_t>(((v) >> 8) & 0xFF)
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/left_arm.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    std::cout << "===== Robotic Arm Modbus Example =====" << std::endl;
+
+    try {
+        // Create robotic arm factory instance
+        ArmFactory factory;
+
+        // Create robotic arm instance from configuration file
+        auto arm = factory.create_arm_from_config(config_path);
+        if (!arm) {
+            std::cerr << "Failed to create robotic arm instance from configuration file" << std::endl;
+            return 1;
+        }
+
+        // Connect to robotic arm
+        std::cout << "Connecting to robotic arm..." << std::endl;
+        if (arm->connect() != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to robotic arm" << std::endl;
+            return 1;
+        }
+        std::cout << "Robotic arm connected successfully" << std::endl;
+        
+        // Set Modbus mode
+        auto ret = arm->set_modbus_mode(1, 115200, 10);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to set Modbus mode: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+
+        // Configure Modbus parameters
+        PeripheralReadWriteParams params {
+            .port = 1,
+            .address = 1135,
+            .device = 2,
+            .num = 6,
+        };
+        std::vector<uint16_t> pose = {0, 0, 0, 0, 0, 0}; // Each element corresponds to one joint
+
+        // Prepare first write data
+        std::vector<uint8_t> write_data = {
+            H_BYTE(pose[0]), L_BYTE(pose[0]),
+            H_BYTE(pose[1]), L_BYTE(pose[1]),
+            H_BYTE(pose[2]), L_BYTE(pose[2]),
+            H_BYTE(pose[3]), L_BYTE(pose[3]),
+            H_BYTE(pose[4]), L_BYTE(pose[4]),
+            H_BYTE(pose[5]), L_BYTE(pose[5])
+        };
+        
+        // Write first register values
+        ret = arm->write_registers(params, write_data);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Register write failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        // Update pose values and prepare second write
+        pose = {30000, 65535, 65535, 65535, 65535, 0};
+        write_data = {
+            H_BYTE(pose[0]), L_BYTE(pose[0]),
+            H_BYTE(pose[1]), L_BYTE(pose[1]),
+            H_BYTE(pose[2]), L_BYTE(pose[2]),
+            H_BYTE(pose[3]), L_BYTE(pose[3]),
+            H_BYTE(pose[4]), L_BYTE(pose[4]),
+            H_BYTE(pose[5]), L_BYTE(pose[5])
+        };
+        
+        // Write second register values
+        ret = arm->write_registers(params, write_data);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Register write failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+## Chassis Examples
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/chassis/chassis_factory.h"
+
+using namespace alphabot;
+
+int chassis_interface_test(std::shared_ptr<alphabot::ChassisInterface> inter_face)
+{
+    while(1){
+        printf("Please input a command: ");
+        std::string cmd;
+        getline(std::cin, cmd);
+        
+        if(cmd == "quit"){
+            printf("Exiting chassis APIs test!\n");
+            return 0;
+        }else if(cmd == "get_pose_speed"){
+            alphabot::ChassisPoseSpeed pose_spd;
+            inter_face->get_pose_speed(pose_spd);
+        }else if(cmd == "get_pose"){
+            alphabot::ChassisPose2D pose;
+            inter_face->get_pose(pose);
+        }else if(cmd == "get_speed"){
+            alphabot::ChassisTwist spd;
+            inter_face->get_speed(spd);
+        }else if(cmd == "get_mileage"){
+            uint32_t mileage;
+            inter_face->get_mileage(mileage);
+        }else if(cmd == "get_battery"){
+            alphabot::ChassisBattery battery;
+            inter_face->get_battery(battery);
+        }else if(cmd == "get_robot_state"){
+            alphabot::ChassisState robot_state;
+            inter_face->get_robot_state(robot_state);
+        }else if(cmd == "get_status_code"){
+            alphabot::ChassisStatusCode status_code;
+            inter_face->get_status_code(status_code);
+        }else if(cmd == "get_static_tf"){
+            std::vector<alphabot::ChassisTransformStamped> transforms;
+            inter_face->get_static_tf(transforms);
+        }else if(cmd == "twist_control"){
+            // virtual AbcErrorCode twist_control(float linear, float angular) = 0;
+        }else if(cmd == "init_robot"){
+            // alphabot::ChassisPose2D pose;
+            // uint8_t update_flg;
+            // inter_face->init_robot(pose, update_flg);
+        }else if(cmd == "point1"){
+            // Target point A
+            inter_face->move_to_point_sync(3.44, -1.8, -1.77,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                });
+        }else if(cmd == "point2"){
+            // Target point B
+            inter_face->move_to_point_sync(5.45, -6.4, -0.24,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                });
+        }else if(cmd == "to_charge"){
+            printf("Received to_charge command!\n");
+            inter_face->to_charge_sync();
+        }else if(cmd == "exit_charge"){
+            printf("Received exit_charge command!\n");
+            inter_face->exit_charge_sync();
+        }else if(cmd == "MF"){
+            inter_face->move_straight_sync(1.0, 0.25,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                }, false);
+        }else if(cmd == "MB"){
+            inter_face->move_straight_sync(-1.0, 0.25,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                }, false);
+        }else if(cmd == "TL"){
+            inter_face->move_rotate_sync(1.57, 0.2,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                }, false);
+        }else if(cmd == "TR"){
+            inter_face->move_rotate_sync(-1.57, 0.2,
+                [](const alphabot::ChassisTaskResponse &res) {
+                    printf("STA[%d] TYPE[%d] MSG[%s] P-XYA[%0.2f][%0.2f][%0.2f]\n",
+                        res.task_state,
+                        res.msg_type,
+                        res.msg.c_str(),
+                        res.current_pose.x,
+                        res.current_pose.y,
+                        res.current_pose.theta);
+                }, false);
+        }else if(cmd == "get_local_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->get_local_footprint(points);
+        }else if(cmd == "get_global_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->get_global_footprint(points);
+        }else if(cmd == "get_all_footprint"){
+            std::vector<alphabot::ChassisPoint32> local_points, global_points;
+            inter_face->get_all_footprint(local_points, global_points);
+        }else if(cmd == "ai2_get_local_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->ai2_get_local_footprint(points);
+        }else if(cmd == "ai2_get_global_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            inter_face->ai2_get_global_footprint(points);
+        }else if(cmd == "ai2_get_all_footprint"){
+            std::vector<alphabot::ChassisPoint32> local_points, global_points;
+            inter_face->ai2_get_all_footprint(local_points, global_points);
+        }else if(cmd == "set_local_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            alphabot::ChassisPoint32 point;
+
+            point.x = 0.217;
+            point.y = 0.15;
+            points.push_back(point);
+
+            point.x = 0.171;
+            point.y = 0.167;
+            points.push_back(point);
+
+            point.x = -0.171;
+            point.y = 0.167;
+            points.push_back(point);
+        
+            point.x = -0.217;
+            point.y = 0.121;
+            points.push_back(point);
+        
+            point.x = -0.217;
+            point.y = -0.121;
+            points.push_back(point);
+
+            point.x = -0.171;
+            point.y = -0.167;
+            points.push_back(point);
+
+            point.x = 0.171;
+            point.y = -0.167;
+            points.push_back(point);
+
+            point.x = 0.217;
+            point.y = -0.122;
+            points.push_back(point);
+
+            inter_face->set_local_footprint(points);
+        }else if(cmd == "set_global_footprint"){
+            std::vector<alphabot::ChassisPoint32> points;
+            alphabot::ChassisPoint32 point;
+
+            point.x = 0.32;
+            point.y = 0.272;
+            points.push_back(point);
+
+            point.x = 0.321;
+            point.y = 0.318;
+            points.push_back(point);
+
+            point.x = -0.321;
+            point.y = 0.318;
+            points.push_back(point);
+
+            point.x = -0.367;
+            point.y = 0.272;
+            points.push_back(point);
+
+            point.x = -0.367;
+            point.y = -0.270;
+            points.push_back(point);
+
+            point.x = -0.321;
+            point.y = -0.316;
+            points.push_back(point);
+
+            point.x = 0.321;
+            point.y = -0.316;
+            points.push_back(point);
+            
+            point.x = 0.360;
+            point.y = -0.271;
+            points.push_back(point);
+
+            inter_face->set_global_footprint(points);
+        }else if(cmd == "set_all_footprint"){
+            std::vector<alphabot::ChassisPoint32> local_points;
+            alphabot::ChassisPoint32 point;
+
+            point.x = 0.217;
+            point.y = 0.15;
+            local_points.push_back(point);
+
+            point.x = 0.171;
+            point.y = 0.167;
+            local_points.push_back(point);
+
+            point.x = -0.171;
+            point.y = 0.167;
+            local_points.push_back(point);
+        
+            point.x = -0.217;
+            point.y = 0.121;
+            local_points.push_back(point);
+        
+            point.x = -0.217;
+            point.y = -0.121;
+            local_points.push_back(point);
+
+            point.x = -0.171;
+            point.y = -0.167;
+            local_points.push_back(point);
+
+            point.x = 0.171;
+            point.y = -0.167;
+            local_points.push_back(point);
+
+            point.x = 0.217;
+            point.y = -0.122;
+            local_points.push_back(point);
+            
+            /**********************************************/
+            std::vector<alphabot::ChassisPoint32> global_points;
+            point.x = 0.32;
+            point.y = 0.272;
+            global_points.push_back(point);
+
+            point.x = 0.321;
+            point.y = 0.318;
+            global_points.push_back(point);
+
+            point.x = -0.321;
+            point.y = 0.318;
+            global_points.push_back(point);
+
+            point.x = -0.367;
+            point.y = 0.272;
+            global_points.push_back(point);
+
+            point.x = -0.367;
+            point.y = -0.270;
+            global_points.push_back(point);
+
+            point.x = -0.321;
+            point.y = -0.316;
+            global_points.push_back(point);
+
+            point.x = 0.321;
+            point.y = -0.316;
+            global_points.push_back(point);
+            
+            point.x = 0.360;
+            point.y = -0.271;
+            global_points.push_back(point);
+
+            inter_face->set_all_footprint(local_points, global_points);
+        }else if(cmd == "get_hardware_state"){
+            alphabot::ChassisHardwareState hardware_state;
+            inter_face->get_hardware_state(hardware_state);
+        }else{
+            // Invalid command - do nothing
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/woosh_chassis.json" << std::endl;    
+        return 1;
+    }
+    std::string config_path = argv[1];
+    ChassisFactory factory;
+    auto chassis = factory.create_chassis_from_config(config_path);
+    auto ret = chassis->connect();
+    if (ret != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to connect to chassis: " << static_cast<int>(ret) << std::endl;
+        return 1;
+    }
+    ChassisPose2D pose;
+    ret = chassis->get_pose(pose);
+    if (ret != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to get pose: " << static_cast<int>(ret) << std::endl;
+        return 1;
+    }
+    std::cout << "Pose: " << pose.x << ", " << pose.y << ", " << pose.theta << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    chassis_interface_test(chassis);
+    
+    chassis->disconnect();
+    return 0;
+}
+```
+
+## Head Examples
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/head/head_factory.h"
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/ti5_head.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    try {
+        // Create head factory instance
+        HeadFactory factory;
+        auto head = factory.create_head_from_config(config_path);
+        auto ret = head->connect();
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to head: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        
+        // Get current joint angles
+        std::vector<AbcType> joints;
+        head->get_joint_degree(joints);
+        std::cout << "Head joints: " << joints[0] << ", " << joints[1] << std::endl;
+        
+        // Move to first target position
+        joints[0] = -45;
+        joints[1] = -10;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Head movement failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        
+        // Wait and verify position
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        head->get_joint_degree(joints);
+        std::cout << "Head joints: " << joints[0] << ", " << joints[1] << std::endl;
+        
+        // Move to second target position
+        joints[0] = 45;
+        joints[1] = 10;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Head movement failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        
+        // Return to home position
+        joints[0] = 0;
+        joints[1] = 0;
+        ret = head->move_joint_position(joints, 50, true);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Head movement failed: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+## Torso Examples
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include "drivers/torso/torso_factory.h"
+
+using namespace alphabot;
+
+void torso_callback(std::shared_ptr<const AbcTorsoState> torso_state) {
+    std::cout << "Joints position: "
+    << torso_state->joints_positions[0] << ", "
+    << torso_state->joints_positions[1] << ", "
+    << torso_state->joints_positions[2] << ", "
+    << torso_state->joints_positions[3] << ", speed: "
+    << torso_state->joints_speed[0] << ", "
+    << torso_state->joints_speed[1] << ", "
+    << torso_state->joints_speed[2] << ", "
+    << torso_state->joints_speed[3] << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/ti5_torso.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+
+    try {
+        // Create torso factory instance
+        TorsoFactory<AbcTorsoPose4D> factory;
+        auto torso = factory.create_torso_from_config(config_path);
+        auto ret = torso->connect();
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to connect to torso: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        
+        // Register torso state callback
+        torso->set_torso_state_callback(torso_callback);
+        
+        // Define target pose
+        AbcTorsoPose4D pose {
+            .height = 0.6,
+            .forward = -0.2,
+            .pitch = 0,
+            .yaw = 0,
+        };
+        
+        // Execute Cartesian linear motion
+        ret = torso->move_cartesian_linear(pose, 40, true);
+        if (ret != AbcErrorCode::SUCCESS) {
+            std::cerr << "Failed to move torso: " << static_cast<int>(ret) << std::endl;
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "\n===== Example Program Ended =====" << std::endl;
+    return 0;
+}
+```
+
+## Sensor Examples
+
+### SensorFactory Class
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <iomanip>
+
+#include "drivers/sensors/depth_camera_interface.h"
+#include "drivers/sensors/sensor_factory.h"
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point& tp) {
+    // 1. Convert time_point to time_t (second precision)
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. Extract microsecond portion
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+        duration_since_epoch
+    ) % 1000000; // Get microseconds within current second
+
+    // Convert to tm struct (thread-safe)
+    std::tm tm;
+    #if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0) {
+        return {}; // Error handling
+    }
+    #else
+    if (localtime_r(&time, &tm) == nullptr) {
+        return {}; // Error handling
+    }
+    #endif
+
+    // 4. Combine date-time and microseconds using stringstream
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") 
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // Example output: 2023-10-23 15:30:45.123456
+}
+
+using namespace alphabot;
+
+int main(int argc, char* argv[]) {
+    // Parameter check
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <config_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/sensor_realsense.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    
+    std::cout << "===== SensorFactory Example Program =====" << std::endl;
+    
+    try {
+        SensorFactory factory;
+        auto sensor = factory.create_depth_camera_from_config(config_path);
+        
+        if (!sensor) {
+            std::cerr << "Failed to create sensor" << std::endl;
+            return -1;
+        }
+        
+        // Connect to sensor
+        if (!sensor->connect()) {
+            std::cerr << "Failed to connect to sensor" << std::endl;
+            return -1;
+        }
+        std::cout << "Connected successfully" << std::endl;
+        
+        // Start data streaming
+        if (!sensor->start_stream()) {
+            std::cerr << "Failed to start stream" << std::endl;
+            sensor->disconnect();
+            return -1;
+        }
+        std::cout << "Stream started" << std::endl;
+        
+        // Get and display data for 50 frames
+        for (int i = 0; i < 50; ++i) {
+            auto data = sensor->get_data();
+            if (!data) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                continue;
+            }
+            auto ts = data->get_timestamp();
+            std::cout << "Timestamp: " << format_with_milliseconds(ts) 
+                      << " (Frame " << i + 1 << ")" << std::endl;
+        }
+        
+        // Clean up
+        sensor->disconnect();
+        std::cout << "Sensor disconnected" << std::endl;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    std::cout << "\n===== Example Program Finished =====" << std::endl;
+    return 0;
+}
+```
+
+### RealSense Camera
+
+```cpp
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <csignal>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+#include "drivers/sensors/sensor_factory.h"
+#include "drivers/sensors/depth_camera_interface.h"
+
+using namespace alphabot;
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point& tp) {
+    // 1. Convert time_point to time_t (second precision)
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. Extract millisecond component
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+        duration_since_epoch
+    ) % 1000000; // Get microseconds within current second
+
+    // Convert to tm structure (thread-safe)
+    std::tm tm;
+    #if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0) {
+        return {}; // Error handling
+    }
+    #else
+    if (localtime_r(&time, &tm) == nullptr) {
+        return {}; // Error handling
+    }
+    #endif
+
+    // 4. Combine datetime and microseconds using stringstream
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") 
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // Example output: 2023-10-23 15:30:45.123456
+}
+
+// Global variable for program exit control
+static bool g_running = true;
+
+// Signal handler function
+void signal_handler(int signum) {
+    if (signum == SIGINT) {
+        g_running = false;
+    }
+}
+
+// Camera data callback function
+void camera_callback(std::shared_ptr<const SensorData> data) {
+    // Convert SensorData to RGBDData
+    auto rgbd_data = std::dynamic_pointer_cast<const RGBDData>(data);
+    if (rgbd_data) {
+        // Get timestamp
+        auto timestamp = rgbd_data->get_timestamp();
+        std::cout << "Received camera data, timestamp: " 
+                  << format_with_milliseconds(timestamp) << std::endl;
+
+        // Get image dimensions
+        int width = rgbd_data->get_width();
+        int height = rgbd_data->get_height();
+        std::cout << "Image dimensions: " << width << "x" << height << std::endl;
+        
+        // Get depth data
+        const auto& depth_data = rgbd_data->get_depth_data();
+        auto color_intrinsic = rgbd_data->get_color_intrinsic();
+        auto depth_intrinsic = rgbd_data->get_depth_intrinsic();
+        
+        if (!depth_data.empty()) {
+            // Calculate average depth
+            float sum = 0.0f;
+            int count = 0;
+            for (const auto& d : depth_data) {
+                if (d > 0) {  // Ignore invalid depth values
+                    sum += d;
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                float avg_depth = sum / count;
+                std::cout << "Average depth: " << avg_depth << " meters, "
+                          << "Depth intrinsic fx/fy: " << depth_intrinsic.fx << ", " << depth_intrinsic.fy << ", "
+                          << "Color intrinsic fx/fy: " << color_intrinsic.fx << ", " << color_intrinsic.fy 
+                          << std::endl;
+            }
+        }
+    }
+}
+
+int main(int argc, char* argv[]) {
+    // Parameter validation
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <configuration_file_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/sensor_realsense.json" << std::endl;
+        return 1;
+    }
+    const std::string config_path = argv[1];
+    
+    // Register signal handler
+    signal(SIGINT, signal_handler);
+
+    // Create RealSense camera instance
+    auto factory = SensorFactory();
+    auto camera = std::dynamic_pointer_cast<DepthCamera>(factory.create_sensor_from_config(config_path));
+
+    if (!camera) {
+        std::cerr << "Failed to create camera instance from configuration file!" << std::endl;
+        return -1;
+    }
+
+    // Set camera parameters
+    camera->set_color_resolution(640, 480);  // Set color image resolution
+    camera->set_depth_resolution(640, 480);  // Set depth image resolution
+    camera->set_framerate(30);               // Set frame rate
+
+    // Register data processing callback function
+    camera->set_data_callback(camera_callback);
+
+    // Connect camera
+    auto status = camera->connect();
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to connect camera!" << std::endl;
+        return -1;
+    }
+    std::cout << "Camera connected successfully." << std::endl;
+
+    // Start data stream
+    status = camera->start_stream();
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to start stream!" << std::endl;
+        camera->disconnect();
+        return -1;
+    }
+    std::cout << "Stream started successfully." << std::endl;
+
+    // Main loop
+    while (g_running) {
+        // Get latest camera data
+        auto data = camera->get_data();
+        
+        // Add other processing logic here
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    // Stop data stream
+    camera->stop_stream();
+    std::cout << "Stream stopped." << std::endl;
+
+    // Disconnect camera
+    camera->disconnect();
+    std::cout << "Camera disconnected." << std::endl;
+
+    return 0;
+}
+```
+
+### Sensor Synchronizer
+
+```cpp
+#include "sensor/sensor_synchronizer.h"
+#include "drivers/sensors/sensor_factory.h"
+#include "drivers/arm/arm_factory.h"
+#include "drivers/sensors/camera_data.h"  // Include this header for RGBDData type
+#include <iostream>
+#include <sstream>
+#include <chrono>
+#include <thread>
+#include <iomanip>
+
+using namespace alphabot;
+
+std::string format_with_milliseconds(const std::chrono::system_clock::time_point& tp) {
+    // 1. Convert time_point to time_t (second precision)
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+
+    // 2. Extract millisecond component
+    auto duration_since_epoch = tp.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(
+        duration_since_epoch
+    ) % 1000000; // Get microseconds within current second
+
+    // Convert to tm structure (thread-safe)
+    std::tm tm;
+    #if defined(_WIN32)
+    if (localtime_s(&tm, &time) != 0) {
+        return {}; // Error handling
+    }
+    #else
+    if (localtime_r(&time, &tm) == nullptr) {
+        return {}; // Error handling
+    }
+    #endif
+
+    // 4. Combine datetime and microseconds using stringstream
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") 
+       << '.' << std::setfill('0') << std::setw(6) << microseconds.count();
+
+    return ss.str(); // Example output: 2023-10-23 15:30:45.123456
+}
+
+int main(int argc, char** argv) {
+    // Parameter validation
+    if (argc < 5) {
+        std::cerr << "Usage: " << argv[0] << " <rs_config_file1_path> <rs_config_file2_path> <rs_config_file3_path> <arm_config_file1_path>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " config/realsense1.json config/realsense2.json config/realsense3.json config/left_arm.json" << std::endl;
+        return 1;
+    }
+    std::string config1_path = argv[1];
+    std::string config2_path = argv[2];
+    std::string config3_path = argv[3];
+    std::string arm1_path = argv[4];
+    
+    SensorFactory sensor_factory;
+    ArmFactory arm_factory;
+
+    // Create three RealSense sensors
+    auto sensor1 = sensor_factory.create_sensor_from_config(config1_path);
+    auto sensor2 = sensor_factory.create_sensor_from_config(config2_path);
+    auto sensor3 = sensor_factory.create_sensor_from_config(config3_path);
+    auto arm1 = arm_factory.create_arm_from_config(arm1_path);
+
+    // Initialize sensors
+    if (!sensor1 || !sensor2 || !sensor3) {
+        std::cerr << "Failed to initialize sensors!" << std::endl;
+        return 1;
+    }
+    if (!arm1) {
+        std::cerr << "Failed to initialize robotic arm!" << std::endl;
+        return 1;
+    }
+    
+    // Create synchronizer with NEAREST policy, 33ms time tolerance
+    SensorSynchronizer sync(SensorSynchronizer::SyncPolicy::NEAREST, 33);
+
+    // Add sensors to synchronizer
+    auto status = sync.add_sensor(sensor1->get_name(), sensor1);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to add sensor1! Error: " << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_sensor(sensor2->get_name(), sensor2);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to add sensor2! Error: " << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_sensor(sensor3->get_name(), sensor3);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to add sensor3! Error: " << static_cast<int>(status) << std::endl;
+    }
+    status = sync.add_arm(arm1->get_name(), arm1);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to add arm! Error: " << static_cast<int>(status) << std::endl;
+    }
+    
+    // Set reference sensor as first sensor
+    sync.set_sync_mode(SensorSynchronizer::SyncMode::REFERENCE_SENSOR);
+    sync.set_reference_sensor(sensor1->get_name());
+
+    // Set synchronized data callback
+    sync.set_sync_data_callback([](std::shared_ptr<SyncDataPackage> package) {
+        std::cout << "Received synchronized package at: " 
+                  << format_with_milliseconds(package->get_timestamp())
+                  << std::endl;
+    
+        // Process synchronized data for each sensor
+        for (const auto& [name, data] : package->get_all_sensor_data()) {
+            // Attempt to cast data to RGBDData type
+            auto rgbd_data = std::dynamic_pointer_cast<RGBDData>(data);
+            if (rgbd_data) {
+                // Get depth data
+                const auto& depth_data = rgbd_data->get_depth_data();
+                if (!depth_data.empty()) {
+                    // Calculate average depth
+                    float sum = 0.0f;
+                    int count = 0;
+                    for (const auto& d : depth_data) {
+                        if (d > 0) {  // Ignore invalid depth values
+                            sum += d;
+                            count++;
+                        }
+                    }
+                    
+                    if (count > 0) {
+                        float avg_depth = sum / count;
+                        std::cout << format_with_milliseconds(rgbd_data->get_timestamp()) 
+                                  << " | Sensor " << name << " depth: " 
+                                  << avg_depth << " meters" << std::endl;
+                    }
+                }
+            }
+        }
+        
+        // Process synchronized data for each robotic arm
+        for (const auto& [name, data] : package->get_all_arm_data()) {
+            auto joint_position = data->joint_status.joint_position;
+            std::cout << format_with_milliseconds(data->timestamp) 
+                      << " | Arm " << name << " joint positions: "
+                      << joint_position[0] << " "
+                      << joint_position[1] << " "
+                      << joint_position[2] << " "
+                      << joint_position[3] << " "
+                      << joint_position[4] << " "
+                      << joint_position[5] << " "
+                      << joint_position[6] << std::endl;
+        }
+    });
+
+    // Start synchronization
+    if (sync.start() != AbcErrorCode::SUCCESS) {
+        std::cerr << "Failed to start synchronization!" << std::endl;
+        return 1;
+    }
+
+    // Run for 10 seconds
+    std::cout << "Running for 10 seconds..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    // Stop synchronization
+    sync.stop();
+
+    return 0;
+}
+```
+
+### Emergency Stop Button Monitoring
+
+```cpp
+#include <iostream>
+#include <thread>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
+#include "sensor/sensor_emergency_stop_monitor.h"
+
+using namespace alphabot;
+
+int estopmonitor_demo(int argc, char* argv[]) {
+    // Create emergency stop monitor with auto-start enabled
+    EStopMonitor esm(true);
+
+    // Set multiple pressed event callbacks
+    esm.set_pressed_event_callback([]{
+        std::cout << "\033[1;31m[ES] Pressed\033[0m" << std::endl;
+    });
+    esm.set_pressed_event_callback([]{
+        std::cout << "\033[1;31m[ES] Pressed(02)\033[0m" << std::endl;
+    });
+    esm.set_pressed_event_callback([]{
+        std::cout << "\033[1;31m[ES] Pressed(03)\033[0m" << std::endl;
+    });
+    
+    // Set multiple released event callbacks
+    esm.set_released_event_callback([]{
+        std::cout << "\033[1;32m[ES] Released\033[0m" << std::endl;
+    });
+    esm.set_released_event_callback([]{
+        std::cout << "\033[1;32m[ES] Released(02)\033[0m" << std::endl;
+    });
+    esm.set_released_event_callback([]{
+        std::cout << "\033[1;32m[ES] Released(03)\033[0m" << std::endl;
+    });
+
+    // Create a thread for periodic state monitoring
+    bool stop = false;
+    std::thread monitoring_thread(
+        [&esm, &stop]{
+            while (!stop)
+            {
+                int state = (int)esm.get_state();
+                if (state == -1) {
+                    std::cerr << "Failed to get EStopMonitor state!";
+                } else {
+                    std::cout << "EStopMonitor state: " << state;
+                }
+                std::cout << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        }
+    );
+
+    // Pause-resume test (currently disabled by while(0))
+    while (0)
+    {
+        std::cout << "Pausing after 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        esm.pause();
+        std::cout << "Paused! Resuming after 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        esm.run();
+    }
+
+    // Run for 10 minutes (600 seconds)
+    std::this_thread::sleep_for(std::chrono::seconds(600));
+    
+    // Stop the monitoring thread
+    stop = true;
+    monitoring_thread.join();
+
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
+    return estopmonitor_demo(argc, argv);
+}
+```
+
+## Kinematics Algorithm
+
+```cpp
+#include <iostream>
+#include <chrono>
+#include "core/algo/arm_kinematics.h"
+
+using namespace alphabot;
+
+int main(){
+    std::cout << "RM65_6FB example: " << std::endl;
+    ArmType type = ArmType::RM65_6FB;
+    auto kin = ArmKinematics::create(type);
+
+    // RM65_6FB has 6 degrees of freedom
+    // std::vector<AbcType> j0 = {1.04213, 1.2431, 1.4321, 0.8321, 0.6425, 1.0123};
+    std::vector<AbcType> j0 = {0.0, PI/4, 0.0, 0.0, 0.0, 0.0};
+    std::cout << "Initial Joint Values: " << std::endl;
+    for(size_t i = 0; i < j0.size(); ++i){
+        std::cout << j0.at(i) << " ";
+    }
+    std::cout << std::endl;
+    
+    AbcPose p0;
+    // Timing: loop N times
+    size_t N = 1;
+    auto start_time = std::chrono::high_resolution_clock::now();
+    AbcErrorCode status;
+    for (size_t i = 0; i < N; ++i) {
+        status = kin->forward_kinematics(j0, p0);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+    std::cout << "Forward kinematics execution time: " << duration.count() / N << " seconds" << std::endl;
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: " 
+              << p0.position.x << " " << p0.position.y << " " << p0.position.z << " " 
+              << p0.quaternion.w << " " << p0.quaternion.x << " " 
+              << p0.quaternion.y << " " << p0.quaternion.z << std::endl;
+
+    // Ensure reference joint vector has same length as j0
+    // std::vector<AbcType> j0_ref = {0.9, 1.3, 1.3, 0.9, 0.5, 1.1};
+    std::vector<AbcType> j0_ref = {0.9, 1, 1, 0.1, 0.1, 1};
+    std::vector<AbcType> j0_inv;
+
+    // Timing: loop N times
+    start_time = std::chrono::high_resolution_clock::now();
+    N = 1;
+    for (size_t i = 0; i < N; ++i) {
+        status = kin->inverse_kinematics(p0, j0_ref, j0_inv, 0);
+    }
+    end_time = std::chrono::high_resolution_clock::now();
+    duration = end_time - start_time;
+    std::cout << "Inverse kinematics execution time: " << duration.count() / N << " seconds" << std::endl;
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inverse Joint Values: " << std::endl;
+    for(size_t i = 0; i < j0_inv.size(); ++i){
+        std::cout << j0_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "RM75_6FB example " << std::endl;
+    ArmType type1 = ArmType::RM75_6FB;
+    auto kin1 = ArmKinematics::create(type1);
+
+    // RM75_6FB has 7 degrees of freedom
+    std::vector<AbcType> j1 = {1.0, 1.2, 1.4, 0.8, 0.6, 1.0, 2.0};
+    std::cout << "Initial Joint Values: " << std::endl;
+    for(size_t i = 0; i < j1.size(); ++i){
+        std::cout << j1.at(i) << " ";
+    }
+    std::cout << std::endl;
+    
+    AbcPose p1;
+    status = kin1->forward_kinematics(j1, p1);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: " << p1.position.x << " " 
+                        << p1.position.y << " " << p1.position.z << " " 
+                        << p1.quaternion.w <<  " " << p1.quaternion.x <<  " " 
+                        << p1.quaternion.y <<  " " << p1.quaternion.z << std::endl;
+
+    // Ensure reference joint vector has same length as j1
+    std::vector<AbcType> j1_ref = {0.9, 1., 1., 0.9, 0.1, 1.5, 1.};
+    std::vector<AbcType> j1_inv;
+    status = kin1->inverse_kinematics(p1, j1_ref, j1_inv, 0);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inverse Joint Values: " << std::endl;
+    for(size_t i = 0; i < j1_inv.size(); ++i){
+        std::cout << j1_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    status = kin1->forward_kinematics(j1_inv, p1);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+    std::cout << "Forward Pose (from inverse solution): " << p1.position.x << " " 
+                                << p1.position.y << " " << p1.position.z << " " 
+                                << p1.quaternion.w << " " << p1.quaternion.x << " " 
+                                << p1.quaternion.y << " " << p1.quaternion.z << std::endl;
+
+    // ZM robotic arm
+    std::cout << "ZM example " << std::endl;
+    ArmType type2 = ArmType::ZM73L_6F;
+    auto kin2 = ArmKinematics::create(type2);
+    std::vector<AbcType> j2 = {
+        0.08355030879064443,
+        0.021789388835488886,
+        -0.21593039291738889,
+        -1.6911874182518334,
+        -0.8637442609501667,
+        0.1572672578973611,
+        -0.8943957337265};
+    std::cout << "Initial Joint Values: " << std::endl;
+    for(size_t i = 0; i < j2.size(); ++i){
+        std::cout << j2.at(i) << " ";
+    }
+    std::cout << std::endl;
+    
+    AbcPose p2;
+    status = kin2->forward_kinematics(j2, p2);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Forward Pose: " << p2.position.x << " " 
+                        << p2.position.y << " " << p2.position.z << " " 
+                        << p2.quaternion.w <<  " " << p2.quaternion.x <<  " " 
+                        << p2.quaternion.y <<  " " << p2.quaternion.z << std::endl;
+
+    // Ensure reference joint vector has same length as j1
+    std::vector<AbcType> j2_ref = {0., 0., -0.3, -0.9, -0.9, 0., -1.};
+    std::vector<AbcType> j2_inv;
+    status = kin2->inverse_kinematics(p2, j2_ref, j2_inv, 0);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Inverse kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Inverse Joint Values: " << std::endl;
+    for(size_t i = 0; i < j2_inv.size(); ++i){
+        std::cout << j2_inv.at(i) << " ";
+    }
+    std::cout << std::endl;
+
+    status = kin2->forward_kinematics(j2_inv, p2);
+    if (status != AbcErrorCode::SUCCESS) {
+        std::cout << "Forward kinematics failed with error code: " << static_cast<int>(status) << std::endl;
+        return -1;
+    }
+    std::cout << "Forward Pose (from inverse solution): " << p2.position.x << " " 
+                                << p2.position.y << " " << p2.position.z << " " 
+                                << p2.quaternion.w << " " << p2.quaternion.x << " " 
+                                << p2.quaternion.y << " " << p2.quaternion.z << std::endl;
+
+    return 0;
+}
+```

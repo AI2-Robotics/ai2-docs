@@ -1,0 +1,547 @@
+---
+title: Kinematics APIs
+description: Kinematics C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The kinematics APIs are implemented by the following classes. You can find the corresponding header files in the `c++\include\core\algo\kinematics` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:---|:---|:---|
+| `kinematics.h` | `Kinematics` | Base class for kinematics algorithms. |
+| `arm_kinematics.h` | `ArmKinematics` | Arm kinematics class, derived from `Kinematics`. |
+| `torso_kinematics.h` | `TorsoKinematics` | Torso kinematics class, derived from `Kinematics`. |
+| `collision.h` | `AbcCollisionEntity` | Collision entity class used for collision modeling. |
+
+## Basic Kinematics APIs
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(const std::vector<AbcType>& joints, PoseType& pose)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. `PoseType` is a placeholder type name. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const PoseType& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The target pose. `PoseType` is a placeholder type name. |
+  | `ref_joints` | Input | Reference joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints` | Output | Joint angles computed by inverse kinematics. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `mode` | Input | - `0`: Numerical solution, single-step mode. Suitable when the current pose is close to the target pose; recommended for continuous motion.<br/>- `1`: Numerical solution, multi-step mode. Suitable for larger differences between current and target poses; requires more computation time.<br/>- `2`: Analytical solution. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints_v` | Input | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_pose` | Output | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `end_effector_v` | Output | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_v` | Input | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+  | `joints_v` | Output | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Check Joint Limits
+
+- Method:
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `j` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates all joint values are within limits. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Robotic Arm Kinematics APIs
+
+### Create Robotic Arm Kinematics
+
+- Method:
+
+  ```cpp
+  static std::unique_ptr<ArmKinematics> create(ArmType type)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `type` | Input | Robotic arm type. For details, please refer to [ArmType](/en/sdk/c-plus-plus/data-structures#ArmType). |
+
+- Return Value:
+
+  A `std::unique_ptr<ArmKinematics>` on success, otherwise returns `nullptr`.
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(const std::vector<AbcType>& joints, AbcPose& pose)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcPose& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `ref_joints` | Input | Reference joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints` | Output | Joint angles computed by inverse kinematics. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `mode` | Input | - `0`: Numerical solution, single-step mode. Suitable when the current pose is close to the target pose; recommended for continuous motion.<br/>- `1`: Numerical solution, multi-step mode. Suitable for larger differences between current and target poses; requires more computation time.<br/>- `2`: Analytical solution. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Search Redundant Parameters for Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics_parameter_search(
+      const AbcPose& pose,
+      const size_t& select,
+      const std::function<AbcType(std::vector<AbcType>& joints)>& cost,
+      std::vector<AbcType>& joints,
+      AbcType& param)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `select` | Input | Index of the inverse kinematics solution set. It is recommended to use 0. Important: During continuous end-effector motion, do not change this value; keeping the selected solution fixed ensures motion continuity. |
+  | `cost` | Input | Cost callback function. |
+  | `joints` | Output | Joint values of the inverse kinematics solution. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `param` | Output | Redundancy parameter. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Analytical Inverse Kinematics (Single Solution)
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics_analytical(
+      const AbcPose& pose,
+      const AbcType& parameter,
+      const size_t& select,
+      std::vector<AbcType>& joints)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `parameter` | Input | Redundancy parameter. |
+  | `select` | Input | Index of the inverse kinematics solution set. It is recommended to use 0. Important: During continuous end-effector motion, do not change this value; keeping the selected solution fixed ensures motion continuity. |
+  | `joints` | Output | Joint angles of the inverse kinematics solution. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Check Collision Between the Robotic Arm and the Environment
+
+- Method:
+
+  ```cpp
+  AbcErrorCode arm_environment_collision(
+      const std::vector<AbcType>& joints,
+      const std::vector<AbcCollisionEntity>& environment,
+      const std::vector<AbcPose>& environment_entities_pose,
+      const std::vector<std::vector<bool>>& collision_bypass,
+      std::vector<std::vector<AbcType>>& collision_matrix)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `environment` | Input | Environment obstacles. The `AbcCollisionEntity` class defines the geometry and dimensions of obstacles. |
+  | `environment_entities_pose` | Input | Poses of the environment obstacles. |
+  | `collision_bypass` | Input | Collision bypass matrix used to skip specific collision checks. |
+  | `collision_matrix` | Output | Collision detection results matrix. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Check Collision Between the Robotic Arm and the Torso
+
+- Method:
+
+  ```cpp
+  AbcErrorCode arm_body_collision(
+      const std::vector<AbcType>& arm_joints,
+      const std::vector<AbcType>& torso_joints,
+      std::vector<std::vector<AbcType>>& collision_matrix)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `arm_joints` | Input | Robotic arm joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `torso_joints` | Input | Torso joint angles. |
+  | `collision_matrix` | Output | Collision detection results (7×7 matrix). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints_v` | Input | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_pose` | Output | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `end_effector_v` | Output | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_v` | Input | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+  | `joints_v` | Output | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Check Joint Limits
+
+- Method:
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `j` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates all joint values are within limits. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Numerical Precision
+
+- Method:
+
+  ```cpp
+  void set_numerical_precision(AbcType precision)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `precision` | Input | Desired precision. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  None (void).
+
+## Admittance Control Law
+
+The admittance control law is defined in the `c++\include\core\algo\control\admittance_control.h` header file. It computes the joint angles for the next time step based on the current end-effector pose, the desired pose, external forces, and the stiffness and damping parameters.
+
+<Aside>
+- The stiffness and damping parameters should be tuned according to the specific application scenario.
+- This function should be called within the robot control loop. Given the current end-effector pose, translational stiffness, and rotational stiffness as inputs, it outputs the joint positions for the next time step.
+</Aside>
+
+- Method:
+
+  ```cpp
+  AbcErrorCode addmittance_control_law(
+      std::unique_ptr<alphabot::ArmKinematics> arm,
+      const AbcPose pose,
+      const AbcType p_stiffness,
+      const AbcType r_stiffness,
+      const std::array<AbcType, 6> force,
+      const AbcType t,
+      const std::vector<AbcType> q,
+      std::vector<AbcType> next_q)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `arm` | Input | A unique pointer to an `ArmKinematics` instance. |
+  | `pose` | Input | Current end-effector pose. |
+  | `p_stiffness` | Input | Translational stiffness. |
+  | `r_stiffness` | Input | Rotational stiffness. |
+  | `force` | Input | Six-dimensional spatial force applied at the end-effector, ordered as `[Mx, My, Mz, Fx, Fy, Fz]`. |
+  | `t` | Input | Integration time, which must be less than or equal to the duration of one control loop. |
+  | `q` | Input | Current joint angles. |
+  | `next_q` | Output | Joint angles at the next time step. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Torso Kinematics APIs
+
+### Create Torso Kinematics
+
+- Method:
+
+  ```cpp
+  static std::unique_ptr<TorsoKinematics> create(RobotType type)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `type` | Input | Robot type. For details, please refer to [RobotType](/en/sdk/c-plus-plus/data-structures#RobotType). |
+
+- Return Value:
+
+  A `std::unique_ptr<TorsoKinematics>` on success, otherwise returns `nullptr`.
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(const std::vector<AbcType>& joints, AbcTorsoPose4D& pose)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. For details, please refer to [AbcTorsoPose4D](/en/sdk/c-plus-plus/data-structures#AbcTorsoPose4D). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcTorsoPose4D& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The target pose. For details, please refer to [AbcTorsoPose4D](/en/sdk/c-plus-plus/data-structures#AbcTorsoPose4D). |
+  | `ref_joints` | Input | Reference joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints` | Output | Joint angles computed by inverse kinematics. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `mode` | Input | - `0`: Numerical solution, single-step mode. Suitable when the current pose is close to the target pose; recommended for continuous motion.<br/>- `1`: Numerical solution, multi-step mode. Suitable for larger differences between current and target poses; requires more computation time.<br/>- `2`: Analytical solution. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_velocity(
+      const std::vector<AbcType>& joint,
+      const std::vector<AbcType>& joints_v,
+      AbcPose& end_effector_pose,
+      AbcPoseVelocity& end_effector_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints_v` | Input | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_pose` | Output | End-effector pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `end_effector_v` | Output | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Differential Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_velocity(
+      const std::vector<AbcType>& joint,
+      const AbcPoseVelocity& end_effector_v,
+      std::vector<AbcType>& joints_v)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joint` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_effector_v` | Input | End-effector velocity. For details, please refer to [AbcPoseVelocity](/en/sdk/c-plus-plus/data-structures#AbcPoseVelocity). |
+  | `joints_v` | Output | Joint velocities. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Check Joint Limits
+
+- Method:
+
+  ```cpp
+  AbcErrorCode check_range(const std::vector<AbcType>& j)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `j` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates all joint values are within limits. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).

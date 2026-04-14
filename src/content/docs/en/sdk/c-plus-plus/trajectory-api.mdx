@@ -1,0 +1,584 @@
+---
+title: Trajectory Planner APIs
+description: Trajectory Planner C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+
+The trajectory planner APIs are implemented by the following classes. You can find the corresponding header files in the `c++/include/drivers/traj` directory to access the complete set of APIs.
+
+<table>
+   <tbody>
+      <tr>
+         <td>Header File</td>
+         <td>Class Name</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`trajectory.h`</td>
+         <td>`Trajectory`</td>
+         <td>Trajectory class that provides interfaces for managing trajectories and trajectory points.</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`trajectory_planner.h`</td>
+         <td>`TrajectoryPlanner`</td>
+         <td>Defines the generic interface for trajectory planners, supporting different planning algorithms.</td>
+      </tr>
+      <tr>
+         <td>`CollisionChecker`</td>
+         <td>Interface for collision-avoidance constraints.</td>
+      </tr>
+      <tr>
+         <td>`poly5_planner.h`</td>
+         <td>`Poly5Planner`</td>
+         <td>Trajectory planner based on fifth-order polynomials, providing smooth acceleration and deceleration. Inherits from `TrajectoryPlanner` class.</td>
+      </tr>
+   </tbody>
+</table>
+
+## Trajectory
+
+### Add a Trajectory Point
+
+- Method:
+
+  ```cpp
+  void addPoint(const TrajectoryPoint& point)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `point` | Input | Trajectory point. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint). |
+
+- Return Value:
+
+  None (void).
+
+### Get a Trajectory Point
+
+- Method:
+
+  ```cpp
+  const TrajectoryPoint& getPoint(size_t index) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `index` | Input | Index of the trajectory point. |
+
+- Return Value:
+
+  Trajectory point. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint).
+
+### Get a Trajectory Point at a Specified Time
+
+- Method:
+
+  ```cpp
+  TrajectoryPoint getPointAtTime(AbcType time, bool interpolate = true) const
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `time` | Input | Timestamp. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `interpolate` | Input (optional) | Whether to perform interpolation. |
+
+- Return Value:
+
+  Trajectory point. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint).
+
+### Get the Number of Trajectory Points
+
+- Method:
+
+  ```cpp
+  size_t size() const
+  ```
+
+- Return Value:
+
+  Number of trajectory points.
+
+### Get Total Trajectory Duration
+
+- Method:
+
+  ```cpp
+  AbcType getDuration() const
+  ```
+
+- Return Value:
+
+  Total trajectory duration. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType).
+
+### Get Joint Count
+
+- Method:
+
+  ```cpp
+  size_t getJointCount() const
+  ```
+
+- Return Value:
+
+  Number of joints.
+
+### Check if Trajectory is Empty
+
+- Method:
+
+  ```cpp
+  bool empty() const
+  ```
+
+- Return Value:
+
+  `true` if empty, `false` otherwise.
+
+### Clear Trajectory
+
+- Method:
+
+  ```cpp
+  void clear()
+  ```
+
+- Return Value:
+
+  None (void).
+
+### Set Trajectory Name
+
+- Method:
+
+  ```cpp
+  void setName(const std::string& name)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `name` | Input | Trajectory name. |
+
+- Return Value:
+
+  None (void).
+
+### Get Trajectory Name
+
+- Method:
+
+  ```cpp
+  const std::string& getName() const
+  ```
+
+- Return Value:
+
+  The trajectory name.
+
+### Save Trajectory to a File
+
+- Method:
+
+  ```cpp
+  bool saveToFile(const std::string& filename) const
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `filename` | Input | File path and name. |
+
+- Return Value:
+
+  `true` if saved successfully, `false` otherwise.
+
+### Load Trajectory from a File
+
+- Method:
+
+  ```cpp
+  bool loadFromFile(const std::string& filename)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `filename` | Input | File path and name. |
+
+- Return Value:
+
+  `true` if loaded successfully, `false` otherwise.
+
+### Get All Trajectory Points
+
+- Method:
+
+  ```cpp
+  const std::vector<TrajectoryPoint>& getPoints() const
+  ```
+
+- Return Value:
+
+  The container of all trajectory points. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint).
+
+### Trim Trajectory
+
+- Method:
+
+  ```cpp
+  Trajectory trim(AbcType start_time, AbcType end_time) const
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `start_time` | Input | Start time. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `end_time` | Input | End time. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  The trimmed trajectory.
+
+### Append Trajectory
+
+- Method:
+
+  ```cpp
+  Trajectory append(const Trajectory& other, AbcType blend_time = 0.0) const
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `other` | Input | Trajectory to be appended. |
+  | `blend_time` | Input (optional) | Blend time. |
+
+- Return Value:
+
+  The appended trajectory.
+
+## Trajectory Planner
+
+### Initialize Trajectory Planner
+
+The trajectory planner can be initialized in two ways, as described below.
+
+1. Initialize using start and end positions
+
+   - Method:
+   
+     ```cpp
+     bool init(
+         const std::vector<AbcType>& start_positions,
+         const std::vector<AbcType>& end_positions,
+         AbcType duration = 0,
+         int velocity_scale = 100)
+     ```
+   
+   - Parameters:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `start_positions` | Input | Start positions. |
+     | `end_positions` | Input | End positions. |
+     | `duration` | Input (optional) | Planning duration. A value of 0 indicates that the duration is computed automatically. |
+     | `velocity_scale` | Input (optional) | Velocity scaling factor. Valid range: 0–100. |
+   
+   - Return Value:
+   
+     `true` if initialization succeeds, `false` otherwise.
+
+2. Initialize using start/end positions, velocities, and accelerations
+
+   - Method:
+   
+     ```cpp
+     bool initWithVelAcc(
+         const std::vector<AbcType>& start_positions,
+         const std::vector<AbcType>& start_velocities,
+         const std::vector<AbcType>& start_accelerations,
+         const std::vector<AbcType>& end_positions,
+         const std::vector<AbcType>& end_velocities,
+         const std::vector<AbcType>& end_accelerations,
+         AbcType duration = 0,
+         int velocity_scale = 100)
+     ```
+   
+   - Parameters:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `start_positions` | Input | Start positions. |
+     | `start_velocities` | Input | Start velocities. |
+     | `start_accelerations` | Input | Start accelerations. |
+     | `end_positions` | Input | End positions. |
+     | `end_velocities` | Input | End velocities. |
+     | `end_accelerations` | Input | End accelerations. |
+     | `duration` | Input (optional) | Planning duration. A value of 0 indicates that the duration is computed automatically. |
+     | `velocity_scale` | Input (optional) | Velocity scaling factor. Valid range: 0–100. |
+   
+   - Return Value:
+   
+     `true` if initialization succeeds, `false` otherwise.
+
+### Compute a Trajectory Point at a Specified Time
+
+- Method:
+
+  ```cpp
+  bool computeTrajectoryPoint(AbcType time, TrajectoryPoint& point)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `time` | Input | Time relative to the start time. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `point` | Output | Trajectory point corresponding to the specified time. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint). |
+
+- Return Value:
+
+  `true` if computation succeeds, `false` otherwise.
+
+### Generate Trajectory
+
+- Method:
+
+  ```cpp
+  Trajectory generateTrajectory(int sample_rate = 100)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `sample_rate` | Input (optional) | Sampling frequency, in Hz. |
+
+- Return Value:
+
+  The generated trajectory.
+
+### Evaluate Trajectory
+
+- Method:
+
+  ```cpp
+  TrajectoryEvaluation evaluateTrajectory(const Trajectory& trajectory)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `trajectory` | Input | The trajectory to be evaluated. |
+
+- Return Value:
+
+  Evaluation results. For details, please refer to [TrajectoryEvaluation](/en/sdk/c-plus-plus/data-structures#TrajectoryEvaluation).
+
+### Set Collision Checker
+
+- Method:
+
+  ```cpp
+  void setCollisionChecker(std::shared_ptr<CollisionChecker> checker)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `checker` | Input | Collision checker. A shared pointer to a `CollisionChecker` object. |
+
+- Return Value:
+
+  None (void).
+
+### Get Total Planned Duration
+
+- Method:
+
+  ```cpp
+  AbcType getTotalDuration() const
+  ```
+
+- Return Value:
+
+  Total planned duration.
+
+### Register Trajectory Status Callback Function
+
+- Method:
+
+  ```cpp
+  void setStatusCallback(TrajectoryStatusCallback callback)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `callback` | Input | `TrajectoryStatusCallback` is a function pointer type. For details, please refer to [TrajectoryStatusCallback](/en/sdk/c-plus-plus/data-structures#TrajectoryStatusCallback). The callback function is called whenever a trajectory status update is received. |
+
+- Return Value:
+
+  None (void).
+
+### Set Maximum Velocity and Acceleration Constraints
+
+- Method:
+
+  ```cpp
+  void setConstraints(
+      const std::vector<AbcType>& max_velocities,
+      const std::vector<AbcType>& max_accelerations)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `max_velocities` | Input | Maximum velocities. |
+  | `max_accelerations` | Input | Maximum accelerations. |
+
+- Return Value:
+
+  None (void).
+
+### Check a Trajectory Point for Collision
+
+- Method:
+
+  ```cpp
+  bool checkCollision(const TrajectoryPoint& point)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `point` | Input | Trajectory point. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint). |
+
+- Return Value:
+
+  `true` if a collision is detected, `false` otherwise.
+
+### Get Minimum Distance
+
+- Method:
+
+  ```cpp
+  double getMinDistance(const TrajectoryPoint& point)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `point` | Input | Trajectory point. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint). |
+
+- Return Value:
+
+  Minimum distance.
+
+## Poly5 (Fifth-Order Polynomial) Trajectory Planner
+
+The `Poly5Planner` class inherits from the `TrajectoryPlanner` class. The `initWithVelAcc()` method is newly added, while the other methods are overrides of those in the base `TrajectoryPlanner` class.
+
+### Initialize Trajectory Planner
+
+- Method:
+
+  ```cpp
+  bool initWithVelAcc(
+      const std::vector<AbcType>& start_positions,
+      const std::vector<AbcType>& start_velocities,
+      const std::vector<AbcType>& start_accelerations,
+      const std::vector<AbcType>& end_positions,
+      const std::vector<AbcType>& end_velocities,
+      const std::vector<AbcType>& end_accelerations,
+      AbcType duration = 0,
+      int velocity_scale = 100)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `start_positions` | Input | Start positions. |
+  | `start_velocities` | Input | Start velocities. |
+  | `start_accelerations` | Input | Start accelerations. |
+  | `end_positions` | Input | End positions. |
+  | `end_velocities` | Input | End velocities. |
+  | `end_accelerations` | Input | End accelerations. |
+  | `duration` | Input (optional) | Planning duration. A value of 0 indicates that the duration is computed automatically. |
+  | `velocity_scale` | Input (optional) | Velocity scaling factor. Valid range: 0–100. |
+
+- Return Value:
+
+  `true` if initialization succeeds, `false` otherwise.
+
+### Compute a Trajectory Point at a Specified Time
+
+- Method:
+
+  ```cpp
+  bool computeTrajectoryPoint(AbcType time, TrajectoryPoint& point)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `time` | Input | Time relative to the start. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `point` | Output | Trajectory point corresponding to the specified time. For details, please refer to [TrajectoryPoint](/en/sdk/c-plus-plus/data-structures#TrajectoryPoint). |
+
+- Return Value:
+
+  `true` if computation succeeds, `false` otherwise.
+
+### Get Total Planned Duration
+
+- Method:
+
+  ```cpp
+  AbcType getTotalDuration() const
+  ```
+
+- Return Value:
+
+  Total planned duration.
+
+### Set Maximum Velocity and Acceleration Constraints
+
+- Method:
+
+  ```cpp
+  void setConstraints(
+      const std::vector<AbcType>& max_velocities,
+      const std::vector<AbcType>& max_accelerations)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `max_velocities` | Input | Maximum velocities. |
+  | `max_accelerations` | Input | Maximum accelerations. |
+
+- Return Value:
+
+  None (void).

@@ -1,0 +1,120 @@
+---
+title: Emergency Stop Button Monitoring APIs
+description: Emergency Stop Button Monitoring C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The emergency stop button monitoring APIs are implemented by the following class. You can find the corresponding header file in the `c++/include/sensor` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:---|:---|:---|
+| `sensor_emergency_stop_monitor.h` | `EStopMonitor` | Emergency stop button monitor that provides active querying of the emergency stop button state and supports setting event callbacks. |
+
+## Constructor
+
+- Method:
+
+  ```cpp
+  EStopMonitor(const EStopMConfig& cfg = EStopMConfig())
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `cfg` | Input | Configuration parameter. For details, please refer to [EStopMConfig](/en/sdk/c-plus-plus/data-structures#EStopMConfig). |
+
+## Start Monitoring
+
+If `EStopMConfig::auto_start_` is set to `true` (default), the monitoring process will start automatically, and there is no need to manually call `run()`.
+
+Calling `run()` multiple times has no effect.
+
+Once monitoring is started, the registered event callback functions may be triggered.
+
+- Method:
+
+  ```cpp
+  bool run()
+  ```
+
+- Return Value:
+
+  `true` if started successfully, `false` otherwise.
+
+## Pause Monitoring
+
+After monitoring is paused, the registered event callback functions will not be triggered.
+
+Calling `pause()` multiple times has no effect.
+
+- Method:
+
+  ```cpp
+  bool pause()
+  ```
+
+- Return Value:
+
+  `true` if paused successfully, `false` otherwise.
+
+## Check if Monitoring Is Running
+
+- Method:
+
+  ```cpp
+  bool is_running()
+  ```
+
+- Return Value:
+
+  `true` if monitoring is running, `false` otherwise.
+
+## Get Current Emergency Stop Button State
+
+- Method:
+
+  ```cpp
+  ESState get_state()
+  ```
+
+- Return Value:
+
+  The emergency stop button state. For details, please refer to [ESState](/en/sdk/c-plus-plus/data-structures#ESState).
+
+## Register Emergency Stop Button Pressed Callback Function
+
+- Method:
+
+  ```cpp
+  int set_pressed_event_callback(std::function<void()> f)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `f` | Input | Callback function triggered when the emergency stop button is pressed. Multiple callback functions are allowed if `EStopMConfig::allow_multicb_` is `true`. |
+
+- Return Value:
+
+  `0` or `1` indicates success (where `1` means an existing callback was replaced, which only occurs when only one callback is allowed). `-1` indicates failure.
+
+## Register Emergency Stop Button Released Callback Function
+
+- Method:
+
+  ```cpp
+  int set_released_event_callback(std::function<void()> f)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `f` | Input | Callback function triggered when the emergency stop button is released. Multiple callback functions are allowed if `EStopMConfig::allow_multicb_` is `true`. |
+
+- Return Value:
+
+  `0` or `1` indicates success (where `1` means an existing callback was replaced, which only occurs when only one callback is allowed). `-1` indicates failure.

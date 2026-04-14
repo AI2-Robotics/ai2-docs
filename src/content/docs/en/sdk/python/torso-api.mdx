@@ -1,0 +1,331 @@
+---
+title: Torso APIs
+description: Torso Python APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## TorsoFactoryPose4D {#TorsoFactoryPose4D}
+
+The `TorsoFactoryPose4D` class provides the following method for creating a torso instance.
+
+- Method:
+
+    ```python
+    create_torso_from_config(config_path: str) -> TorsoInterfacePose4D
+    ```
+
+- Parameter:
+
+  <table>
+     <thead>
+       <tr>
+         <th>Parameter</th>
+         <th>Description</th>
+       </tr>
+     </thead>  
+     <tbody>
+        <tr>
+           <td>`config_path`</td>
+           <td>
+                Path to the configuration file. The configuration file must be a JSON file.
+
+                 ```json
+                {
+                    "torso_type":"ti5",       # Torso vendor
+                    "torso_name":"ti5_torso", # Torso name
+                    "torso_joint_num":4,      # Number of Torso joints
+                    "can_device":"can0",      # CAN device name
+                    "can_id":0,               # CAN node ID (0x00~0xFF)
+                    "motor_params": [         # Motor parameters
+                        {
+                            "motor_id": 1,          # Motor ID
+                            "reduction_ratio": 121, # Reduction ratio
+                            "position_max": 1.0,    # Maximum rotation angle
+                            "position_min":-68.0,   # Minimum rotation angle
+                            "speed_max": 30,        # Maximum rotation speed
+                            "speed_min":-30,        # Minimum rotation speed
+                            "acc_max": 10,          # Maximum rotation acceleration
+                            "acc_min":-10           # Minimum rotation acceleration
+                        }
+                    ]
+                }
+
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>  
+
+- Return value:
+
+    An [TorsoInterfacePose4D](#TorsoInterfacePose4D) instance if creation succeeds, otherwise `None`.
+
+## TorsoInterfacePose4D {#TorsoInterfacePose4D}
+
+The `TorsoInterfacePose4D` class provides a series of public methods for controlling the torso, such as obtaining torso joint angles and controlling torso motion. Ensure a torso instance has been created before using these methods.
+
+### Connect to the Torso
+
+After creating a torso instance, you can establish a connection to the torso using the following method.
+
+- Method:
+
+    ```python
+    connect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Disconnect from the Torso
+
+You can disconnect from the torso using the following method.
+
+- Method:
+
+    ```python
+    disconnect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Joint Motion
+
+In joint space, a motion trajectory is planned to drive each joint of the torso to the specified target joint positions.
+
+- Method:
+
+    ```python
+    move_joint_position(
+        self, 
+        joints: list[float], 
+        v: int, 
+        block: bool
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `joints` | Target joint positions, in degrees. |
+    | `v` | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0-100. |
+    | `block` | Blocking mode flag. Accepts `False` or `True`.<br/>- `False`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `True`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Cartesian Linear Motion
+
+In Cartesian space, a linear motion trajectory is planned to move the torso along a straight line to the specified target pose.
+
+- Method:
+
+    ```python
+    move_cartesian_linear(
+        self, 
+        pose: alphabot.core.AbcTorsoPose4D, 
+        v: int, 
+        block: bool
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `pose` | Target pose. For details, please refer to [AbcTorsoPose4D](#AbcTorsoPose4D). |
+    | `v` | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0-100. |
+    | `block` | Blocking mode flag. Accepts `False` or `True`.<br/>- `False`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `True`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Move to Target Pose in Joint Space
+
+In joint space, a motion trajectory is planned to move the torso to the specified target pose.
+
+- Method:
+
+    ```python
+    move_joint_pose(
+        self, 
+        pose: alphabot.core.AbcTorsoPose4D, 
+        v: int, 
+        block: bool
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `pose` | Target pose. For details, please refer to [AbcTorsoPose4D](#AbcTorsoPose4D). |
+    | `v` | Percentage of the maximum joint angular velocity and joint angular acceleration used for planning. Valid range: 0-100. |
+    | `block` | Blocking mode flag. Accepts `False` or `True`.<br/>- `False`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `True`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Angle Pass-through
+
+Joint angles are sent to the torso via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller. If the method is called correctly, the torso executes the motion immediately.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the torso.
+</Aside>
+
+- Method:
+
+    ```python
+    move_joint_position_canfd(self, joints: list[float]) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `joints` | Target joint positions, in degrees. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Current Joint Angles
+
+- Method:
+
+    ```python
+    get_joint_degree(self) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[float]` | Current joint angles. |
+
+### Get Error Information
+
+- Method:
+
+    ```python
+    get_error_flag(self) -> tuple[alphabot.core.AbcErrorCode, list[int]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[int]` | Error codes. |
+
+### Compute Forward Kinematics
+
+- Method:
+
+    ```python
+    forward_kinematics(
+        self, 
+        joints: list[float]
+    ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.AbcTorsoPose4D]
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `joints` | Joint angles. |
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `AbcTorsoPose4D` | Pose computed by forward kinematics. For details, please refer to [AbcTorsoPose4D](#AbcTorsoPose4D). |
+
+### Compute Inverse Kinematics
+
+- Method:
+
+    ```python
+    inverse_kinematics(
+        self, 
+        pose: alphabot.core.AbcTorsoPose4D, 
+        ref_joints: list[float], 
+        mode: int = 0
+    ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `pose` | The target pose. For details, please refer to [AbcTorsoPose4D](#AbcTorsoPose4D). |
+    | `ref_joints` | Reference joint angles. |
+    | `mode` | Solution mode. Accepts 0 or 1. Default is 0.<br/>- `0`: Single-step solution.<br/>- `1`: Iterative search solution. |
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[float]` | Joint angles computed by inverse kinematics. |
+
+### Register Torso State Callback Function
+
+- Method:
+
+    ```python
+    set_torso_state_callback(self, arg0: typing.Callable) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | The callback function is called whenever a torso state update is received. The callback function receives a parameter of type [AbcTorsoState](#AbcTorsoState). |
+
+- Return Value:
+
+    `None`.
+
+### Get Torso Name
+
+- Method:
+
+    ```python
+    get_name(self) -> str
+    ```
+
+- Return Value:
+
+    The name of the torso instance.
+
+## AbcTorsoState {#AbcTorsoState}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `err_code` | list[int] | Error codes for each joint |
+| `joints_current` | list[float] | Current for each joint |
+| `joints_positions` | list[float] | Angle for each joint |
+| `joints_speed` | list[float] | Speed for each joint |
+| `timestamp` | typing.Any | Timestamp |
+

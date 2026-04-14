@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
 
 ```python
 from alphabot import AbcErrorCode, ArmKinematics, ArmType, Pose
-from alphabot import addmittance_control_law
+from alphabot import admittance_control_law
 
 
 def main() -> None:
@@ -1170,7 +1170,7 @@ def main() -> None:
     # 长度不是 6 时，pybind11 类型转换会抛出 TypeError。
     force = [0.0, 0.0, 0.0, 3.5, 0.0, -1.0]
 
-    ret, next_q = addmittance_control_law(
+    ret, next_q = admittance_control_law(
         arm=arm,
         pose=pose,
         p_stiffness=200.0,
@@ -1181,7 +1181,7 @@ def main() -> None:
     )
 
     if ret != AbcErrorCode.SUCCESS:
-        raise RuntimeError(f"addmittance_control_law failed: {ret}")
+        raise RuntimeError(f"admittance_control_law failed: {ret}")
 
     print("next_q =", next_q)
 

@@ -1,0 +1,567 @@
+---
+title: Hardware Introduction
+description: AlphaBot 2 Hardware Introduction
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+
+
+AlphaBot 2 is a wheeled dual-arm humanoid robot from AI² Robotics' AlphaBot series, powered by the embodied foundation model — Alpha Brain. It features exceptional spatial intelligence and strong learning capabilities, enabling it to quickly adapt to new environments and flexibly perform a wide range of human-like tasks.
+
+## Overall Structure and Parameters
+
+AlphaBot 2 has a total of 22 degrees of freedom (excluding end effectors). The legs adopt a three-joint folding lifting structure with waist yaw, each robotic arm has 7 degrees of freedom, the neck supports 2 degrees of freedom (pitch and yaw), and the chassis is driven by two-wheel differential drive.
+
+import architecture_1 from 'img/architecture-1.png';
+
+<Image src={architecture_1} alt="" />
+
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Name</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="12">
+Basic Parameters
+</td>
+<td>
+Height
+</td>
+<td>
+1800mm
+</td>
+</tr>
+
+<tr>
+<td>
+Weight
+</td>
+<td>
+135kg (standard configuration)
+</td>
+</tr>
+
+<tr>
+<td>
+Computing Module
+</td>
+<td>
+NVIDIA Orin AGX 64G
+</td>
+</tr>
+
+<tr>
+<td>
+Battery Life
+</td>
+<td>
+4~6h
+</td>
+</tr>
+
+<tr>
+<td>
+Battery
+</td>
+<td>
+48V 30Ah
+</td>
+</tr>
+
+<tr>
+<td>
+Full Body DOF
+</td>
+<td>
+22 (excluding end effectors)
+</td>
+</tr>
+
+<tr>
+<td>
+Robotic Arm DOF
+</td>
+<td>
+7 (single arm)
+</td>
+</tr>
+
+<tr>
+<td>
+Single Arm Span
+</td>
+<td>
+723mm (excluding end effectors)
+</td>
+</tr>
+
+<tr>
+<td>
+Rated Payload
+</td>
+<td>
+4kg (single arm)
+</td>
+</tr>
+
+<tr>
+<td>
+Working Space
+</td>
+<td>
+0~2.3m
+</td>
+</tr>
+
+<tr>
+<td>
+Moving Speed
+</td>
+<td>
+0.1m/s~1.5m/s
+</td>
+</tr>
+
+<tr>
+<td>
+Slope
+</td>
+<td>
+5°
+</td>
+</tr>
+
+<tr>
+<td rowspan="8">
+Hardware Parameters
+</td>
+<td>
+Head, Chest, Back Cameras
+</td>
+<td>
+Realsense D435
+</td>
+</tr>
+
+<tr>
+<td>
+Hand Cameras
+</td>
+<td>
+Realsense D405
+</td>
+</tr>
+
+<tr>
+<td>
+Chassis Drive Method
+</td>
+<td>
+Two-wheel differential
+</td>
+</tr>
+
+<tr>
+<td>
+End Effectors
+</td>
+<td>
+Dexterous hand / Gripper / Other tools
+</td>
+</tr>
+
+<tr>
+<td>
+Voice Module
+</td>
+<td>
+MIC array: linear MIC*4
+</td>
+</tr>
+
+<tr>
+<td>
+Screen
+</td>
+<td>
+Interactive display screen
+</td>
+</tr>
+
+<tr>
+<td>
+Debugging Ports
+</td>
+<td>
+USB3.0\*1; HDMI\*1; RJ45\*1
+</td>
+</tr>
+
+<tr>
+<td>
+Emergency Stop Device
+</td>
+<td>
+Emergency stop on the back
+</td>
+</tr>
+
+<tr>
+<td rowspan="2">
+Operating Environment
+</td>
+<td>
+Temperature
+</td>
+<td>
+5℃~40℃
+</td>
+</tr>
+
+<tr>
+<td>
+Humidity
+</td>
+<td>
+10~80%RH
+</td>
+</tr>
+
+</tbody>
+</table>
+
+## Component Functions and Specifications
+
+This section provides detailed descriptions of the main hardware components of AlphaBot 2.
+
+### Vision System
+
+import architecture_2 from 'img/architecture-2.png';
+import architecture_3 from 'img/architecture-3.png';
+
+1. The head, chest, and back of AlphaBot 2 are each equipped with a Realsense D435 camera, providing comprehensive visual perception. The Realsense D435 is an RGB-D camera capable of capturing real-time color and depth information (distance between objects and the camera), delivering critical data for functions such as object recognition and human-robot collaboration.
+
+   <Image src={architecture_2} alt="" width="500"/>
+ 
+   |Name|Specification|
+   |---|---|
+   |Stereo Baseline|50mm|
+   |Depth Sensor Technology|Global Shutter|
+   |Depth Field of View|87°×58° |
+   |Max Depth Resolution|1280×720 @ 30fps|
+   |Z-axis Accuracy Error|\<2% (at 2m)|
+   |RGB Sensor Technology|Rolling Shutter|
+   |Maximum RGB Resolution|1920×1080 @ 30fps|
+   |RGB Field of View|69°×42° |
+   |Z-axis Minimum Distance|Approx. 28cm|
+   |Ideal Working Range|0.3~3m|
+   |Size, Weight |90×25×25mm, 72g|
+
+2. The ends of the left and right robotic arms are each equipped with a Realsense D405 camera, specifically used for close-range object recognition. The Realsense D405 captures real-time color details and spatial attitude information of target objects at close range, providing real-time visual guidance for end operations.
+   
+   <Image src={architecture_3} alt="" width="500"/>
+ 
+   |Name|Specification|
+   |---|---|
+   |Binocular Baseline|18mm|
+   |Depth Sensor Technology|Global Shutter|
+   |Depth Field of View|87°×58° |
+   |Maximum Depth Resolution|1280×720 @ 30fps|
+   |Z-axis Accuracy Error|\<2% (at 500mm)|
+   |RGB Sensor Technology|Global Shutter|
+   |Maximum RGB Resolution|1280×720 @ 30fps|
+   |RGB Field of View|87°×58° |
+   |Z-axis Minimum Distance|Approx. 70mm|
+   |Ideal Working Range|Approx. 70~500mm|
+   |Size, Weight |42×42×22mm, 58g|
+
+
+### Joint Motors
+
+The zero position of the robot is shown in the figure below, where the rotation angle direction of the torso joint motor is shown in the figure.
+
+import architecture_8 from 'img/architecture-8.png';
+
+<Image src={architecture_8} alt="" width="600"/>
+
+Key joint parameters are provided in the following table.
+
+<table>
+   <thead>
+      <tr>
+         <th>Component</th>
+         <th>Name</th>
+         <th>Range of Motion</th>
+         <th>Reduction Ratio</th>
+         <th>2000rpm/Rated Torque</th>
+         <th>Peak Torque</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td rowspan="2">Head</td>
+         <td>Neck Pitch Motor</td>
+         <td>-16°~13°</td>
+         <td>51</td>
+         <td>1.8Nm</td>
+         <td>3.3Nm</td>
+      </tr>
+      <tr>
+         <td>Neck Yaw Motor</td>
+         <td>-90°~90°</td>
+         <td>51</td>
+         <td>1.8Nm</td>
+         <td>3.3Nm</td>
+      </tr>
+      <tr>
+         <td rowspan="2">Waist</td>
+         <td>Waist Yaw Motor</td>
+         <td>-90°~90°</td>
+         <td>101</td>
+         <td>30Nm</td>
+         <td>66Nm</td>
+      </tr>
+      <tr>
+         <td>Waist Pitch Motor</td>
+         <td>-90°~30°</td>
+         <td>121</td>
+         <td>84Nm</td>
+         <td>207Nm</td>
+      </tr>
+      <tr>
+         <td rowspan="2">Leg</td>
+         <td>Knee Joint Motor</td>
+         <td>0°~148°</td>
+         <td>121</td>
+         <td>169Nm</td>
+         <td>436Nm</td>
+      </tr>
+      <tr>
+         <td>Ankle Joint Motor</td>
+         <td>-58°~0°</td>
+         <td>121</td>
+         <td>169Nm</td>
+         <td>436Nm</td>
+      </tr>           
+   </tbody>
+</table>
+
+
+### Robotic Arms
+
+AlphaBot 2 is equipped with a dual robotic arm system, each with 7 degrees of freedom, enabling flexible operation and diverse task execution. The robotic arms adopt high-precision servo motors and joint designs to ensure stability and reliability in various operating environments. The end effectors of the robotic arms can be replaced with dexterous hands, grippers, or other tools according to task requirements to adapt to different operating scenarios.
+
+#### Specifications
+
+The following table lists the main specifications for a single robotic arm.
+
+|Name|Specification|
+|---|---|
+|Degrees of Freedom|7|
+|Joint Ranges|J1：-178°\~178° <br/> J2：-25°\~178°<br/>J3：-178°\~178°<br/>J4：-130°\~0°<br/>J5：-178°\~178°<br/>J6：-70°\~70°<br/>J7：-26°\~120°|
+|Effective Rated Load|4kg|
+|Working Radius|723mm (excluding end effector)|
+|Repeat Positioning Accuracy|±0.1mm|
+|Six-Axis Force Range |200N/7Nm|
+|Supply Voltage| DC 20~30V|
+|Supply Current |20A|
+|External Hardware Interfaces| Ethernet / RS485 / CAN|
+|External Software Interfaces |Python, C, and C++|
+
+#### Function Description
+
+import architecture_4 from 'img/architecture-4.png';
+
+<Image src={architecture_4} alt="" width="800"/>
+
+|Name|Description|
+|---|---|
+|Green Button|Drag teaching; press and hold to enter drag teaching mode.|
+|Blue Button|Reproduce/zero; click to reproduce the drag teaching trajectory, press and hold to return to zero position.|
+|Aviation Connector|Connects end effectors, such as grippers, dexterous hands, or suction cups.|
+
+Pin definitions for the aviation connector are as follows:
+
+import architecture_5 from 'img/architecture-5.png';
+
+<Image src={architecture_5} alt="" width="200"/>
+
+|Pin Number|Wire color|Description|
+|---|---|---|
+|1|Yellow|RS485_A|
+|2|White|RS485_B|
+|3|Red|Digital interface 1 (DI1/DO1)|
+|4|Black|Digital interface 2 (DI2/DO2)|
+|5|Green|Power GND|
+|6|Blue|Power output: 0 V/12 V/24 V, controllable by program|
+
+### Chassis
+
+The chassis adopts a two-wheel differential drive, enabling flexible movement and steering. The differential drive system controls the speed of the left and right wheels, allowing the robot to perform various motion modes such as forward/backward movement, turning, and in-place rotation, thereby meeting navigation requirements in complex environments.
+
+#### Specifications
+
+The following table lists the main specifications for the chassis.
+
+|Name|Specification|
+|---|---|
+|Drive Method|Two-wheel differential|
+|Global Positioning Accuracy|±5cm|
+|Width|505mm|
+|Length|650mm|
+|Payload|≤100kg|
+|Speed| 0.1m/s~1.5m/s|
+|Auto-recharging|Supported|
+|Battery Capacity|48V 30Ah|
+|LiDAR|2D LiDAR, measuring range up to 25 m|
+|RGBD Camera|1|
+|Debugging Ports|RJ45, USB, HDMI|
+|Software Interface| API||
+
+#### Functional Description
+
+import architecture_6 from 'img/architecture-6.png';
+import architecture_7 from 'img/architecture-7.png';
+
+1. Chassis buttons or knobs.
+
+   <Image src={architecture_6} alt="" width="500"/>
+
+   |Name|Description|
+   |---|---|
+   |Auto|Mode for autonomous robot movement. In this mode, tasks or task groups can be sent to the robot, which will automatically execute the pre-programmed combined commands. In this mode, the chassis status light is white.|
+   |Manual|Mode for manually controlling robot movement. In this mode, the robot can be pushed, and the chassis status light is yellow.|
+   |Maintenance|In this mode, the power of the overall motion module is cut off, the robot and integrated mechanism cannot be controlled to move, and the chassis status light is red.|
+   |Power switch|Press and hold for 1.5s to power on or off the robot.|
+   |Pause/Continue|When an abnormality occurs, press the `Pause/Continue` button, the robot will pause the current task, and the chassis status light will be white trailing flowing. When connected to the LAN Wi-Fi, press and hold this button, and the robot will broadcast the current IP address by voice.|
+   |Reset|Short press to reset the robot to the previously recorded coordinate point. Long press to reset the robot to the preset initial reset point.|
+   |Combination Button|Simultaneously long press the Pause/Resume and Reset buttons for 5 seconds to activate the robot's hotspot (for connection by [the chassis host PC software](../operation-guide#use_chassis_software)), accompanied by a voice prompt.|
+
+2. Chassis external interfaces.
+
+   <Image src={architecture_7} alt="" width="500"/>
+
+   |Name|Description|
+   |---|---|
+   |Charging Interface|Connects the power adapter to charge the robot.|
+   |CAN Debugging Interface|When motor anomalies require inspection, remove the external CAN interface cover. Use a CAN cable and CAN analyzer to view and adjust the status parameters of joint motors.|
+
+   <Aside class="warning">
+   The CAN debugging interface is for maintenance and debugging purposes only. Operation is permitted only under the guidance of our company's engineers. Do not attempt debugging without authorization.
+   </Aside>
+
+### Computing Module
+
+AlphaBot 2 is equipped with an NVIDIA AGX Orin 64G as its computing module, providing substantial computational power to support intelligent decision-making and task execution in complex environments.
+
+|Name|Description|
+|---|---|
+|Control Board|NVIDIA AGX Orin 64GB|
+|Operating System|Ubuntu 22.04 LTS|
+
+### Rear Back
+
+import architecture_11 from 'img/architecture-11.png';
+import architecture_12 from 'img/architecture-12.png';
+
+The rear back of AlphaBot 2 integrates external interfaces and an emergency stop device.
+
+1. External Interfaces: Remove the cover to access interfaces for expanding external devices.
+
+   <Image src={architecture_11} alt=""/>
+
+   |Name|Quantity|Description|
+   |---|---|---|
+   |HDMI Interface|1|Connects to a monitor or other video output device for convenient debugging and monitoring.|
+   |USB 3.0 Interface|1|Connects external devices such as cameras or sensors, supporting high-speed data transfer.|
+   |RJ45 Interface|1|Enables direct communication with the robot controller via an Ethernet cable.|
+
+2. Emergency Stop Device: Press the emergency stop button, the chassis will brake, and the robotic arm will stop moving; turn clockwise to release the emergency stop.
+
+   <Image src={architecture_12} alt="" width="400"/>
+
+### Power Adapter
+
+AlphaBot 2 is equipped with a dedicated power adapter to provide stable power supply for the robot, ensuring its continuous operation in various operating environments.
+
+import architecture_9 from 'img/architecture-9.png';
+import architecture_10 from 'img/architecture-10.png';
+
+1. Power adapter specifications:
+
+   <Image src={architecture_9} alt="" width="500"/>
+
+   |Name|Specification|
+   |---|---|
+   |Size|235×120×70mm|
+   |Weight|3.5kg|
+   |Input Cable Length|1500mm|
+   |Output Cable Length|1000mm|
+   |Input|200\~240V，50\~60HZ|
+   |Output|29.4±0.2V，20A±3%，700W|
+
+2. LED indicator status:
+
+   <Image src={architecture_10} alt="" width="500"/>
+
+   <table>
+      <thead>
+         <tr>
+            <th><strong>LED</strong></th>
+            <th><strong>Color</strong></th>
+            <th><strong>Status</strong></th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td>LED1</td>
+            <td>Red</td>
+            <td>Powered on</td>
+         </tr>
+         <tr>
+            <td rowspan="2">LED2</td>
+            <td>Red</td>
+            <td>Charging</td>
+         </tr>
+         <tr>
+            <td>Green</td>
+            <td>Fully charged</td>
+         </tr>         
+      </tbody>
+   </table>
+
+### Charging Box
+
+import architecture_13 from 'img/architecture-13.png';
+
+AlphaBot 2 is equipped with a dedicated charging box, providing a safe and convenient charging solution for the robot, ensuring its continuous operation in various operating environments.
+
+<Image src={architecture_13} alt="" width="500"/>
+
+|Name|Specification|
+|---|---|
+|Size|180×530×460mm|
+|Input Format|Single-phase three-wire (L/N/PE)|
+|Input Voltage|220V|
+|Frequency|45Hz\~65Hz|
+|Maximum Input Current|≤18A (depending on actual power)|
+|Input Power Factor|≥0.99 (full load)|
+|Output Voltage|48V|
+|Output Current|0~50A|
+|Voltage Regulation Accuracy|≤±0.6%|
+|Measured Noise Voltage|\<2mV|
+|Peak-to-Peak Noise Voltage|≤150mV (20 MHz bandwidth)|
+|Efficiency|≥90% (rated input, full load)|
+|Working Temperature|-20°C\~ 65°C (recommended 15°C\~25°C)|
+|Storage Temperature|-40℃\~70℃|
+|Relative Humidity|10%\~90% (recommended 40%\~60%)|
+|Atmospheric Pressure|70kPa\~106kPa|
+|Site Requirements|No serious dust, explosive dangerous media, harmful gases that corrode metals and damage insulation, conductive particles and serious mold, and no strong electromagnetic interference around|
+
+

@@ -1,0 +1,911 @@
+---
+title: Robotic Arm APIs
+description: Robotic Arm C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The robotic arm APIs are implemented by the following classes. You can find the corresponding header files in the `c++\include\drivers\arm` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:------|:----|:-------|
+| `arm_factory.h` | `ArmFactory` | A factory class for creating robotic arm instances of different types. |
+| `arm_interface.h` | `ArmInterface` | The base interface class defining common APIs for robotic arm control. All vendor-specific drivers should inherit from this class. |
+
+## Create a Robotic Arm Instance
+
+There are three ways to create a robotic arm instance.
+
+1. Create a robotic arm instance by specifying the type and name.
+   - Method:
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm(
+        const std::string& arm_type,
+        const std::string& name,
+        const std::unordered_map<std::string, std::string>& params);
+       ```
+
+   - Parameters:
+
+     | Parameter | Type | Description |
+     |:-------|:---|:-|
+     | `arm_type` | Input | The manufacturer or type of the robotic arm (e.g., `"realman"`). |
+     | `name` | Input | The instance identifier for the arm (e.g., `"left_arm"`, `"right_arm"`). |
+     | `params` | Input | A key-value map for additional configuration parameters (e.g., `{{"ip", "192.168.1.18"}, {"port", "8080"}}`). |
+
+   - Return Value:
+
+     Returns a shared pointer to an object of a class derived from `ArmInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+2. Create a robotic arm instance by arm parameters.
+
+   - Method:
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm(const ArmFactoryParam& param)
+       ```
+
+   - Parameter:
+
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `param` | Input | Parameters related to the robotic arm. For details, please refer to [ArmFactoryParam](/en/sdk/c-plus-plus/data-structures#ArmFactoryParam). |
+
+   - Return Value:
+
+     Returns a shared pointer to an object of a class derived from `ArmInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+3. Create a robotic arm instance from a configuration file.
+
+   - Method:
+
+      ```cpp
+      static std::shared_ptr<ArmInterface> create_arm_from_config(
+        const std::string& config_path)
+       ```
+
+   - Parameters:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+         "arm_type":"realman", # Robotic arm vendor
+         "arm_name":"left_arm", # Robotic arm name
+         "ip": "192.168.1.18", # TCP IP address
+         "port": "8080", # TCP port number
+         "udp_ip": "192.168.1.102", # UDP IP address
+         "udp_port": "8089", # UDP port number
+         "udp_cycle": "1", # UDP cycle (period = udp_cycle * 5 ms)
+         "enable_gripper": "false" # Enable gripper
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+   - Return Value:
+
+     Returns a shared pointer to an object of a class derived from `ArmInterface` if the instance is created successfully; otherwise, returns `nullptr`. 
+
+## Connect to the Robotic Arm
+
+After creating a robotic arm instance, you can establish a connection to the robotic arm using the following method.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates that the connection was established successfully. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Disconnect from the Robotic Arm
+
+You can disconnect from the robotic arm using the following method.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control Robotic Arm Trajectories
+
+Robotic arm trajectory control includes motion control and pass-through control.
+
+- Motion Control: This includes joint motion, Cartesian linear motion, and Cartesian space motion.
+- Pass-through Control: This involves angle pass-through and pose pass-through.
+
+### Joint Motion
+
+In joint space, a motion trajectory is planned to drive each joint of the robotic arm to the specified target joint positions.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+      const std::vector<AbcType>& joints,
+      int v,
+      int r,
+      int trajectory_connect,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `v` | Input | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0–100. |
+  | `r` | Input | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Input | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Cartesian Linear Motion
+
+In Cartesian space, a linear motion trajectory is planned to move the robotic arm along a straight line to the specified target pose.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_cartesian_linear(
+      const AbcPose& pose,
+      int v,
+      int r,
+      int trajectory_connect,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `v` | Input | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0–100. |
+  | `r` | Input | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Input | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Move to Target Pose in Joint Space
+
+In joint space, a motion trajectory is planned to move the robotic arm to the specified target pose.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_pose(
+      const AbcPose& pose,
+      int v,
+      int r,
+      int trajectory_connect,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `v` | Input | Percentage of the maximum joint angular velocity and joint angular acceleration used for planning. Valid range: 0–100. |
+  | `r` | Input | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Input | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Angle Pass-through {#movejointpositioncanfd}
+
+Joint angles are sent to the robotic arm via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller. If the method is called correctly, the robotic arm executes the motion immediately.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the robotic arm.
+- The I-series wired Ethernet interface supports a minimum cycle time of 2 ms, providing higher real-time performance.
+</Aside>
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(
+      const std::vector<AbcType>& joints,
+      bool follow,
+      int trajectory_mode = 0,
+      int radio = 0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `follow` | Input | Follow mode flag. Accepts `true` or `false`.<br/>- `true`: High-follow mode.<br/>- `false`: Low-follow mode.<br/>Note: High-follow mode requires a pass-through cycle of 10ms or less. |
+  | `trajectory_mode` | Input (optional) | Used in high-follow mode. Accepts 0, 1, or 2.<br/>- `0`: Full pass-through mode.<br/>- `1`: Curve-fitting mode.<br/>- `2`: Filtering mode. |
+  | `radio` | Input (optional) | - In curve-fitting mode: `radio` is the smoothing coefficient, range 0–100.<br/>- In filtering mode: `radio` is the filter parameter, range 0–1000. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Angle Pass-through with Collision Avoidance
+
+This method extends [move_joint_position_canfd()](#movejointpositioncanfd) by adding collision avoidance functionality. If the robotic arm is at risk of colliding with the robot body, the motion will not be executed.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd_collision_avoid(
+      const std::vector<AbcType>& arm_joints,
+      const std::vector<AbcType>& torso_head_joints,
+      bool follow,
+      int trajectory_mode = 0,
+      int radio = 0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `arm_joints` | Input | Target joint positions for the robotic arm, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `torso_head_joints` | Input | Joint angles for the torso and head, in degrees. |
+  | `follow` | Input | Follow mode flag. Accepts `true` or `false`.<br/>- `true`: High-follow mode.<br/>- `false`: Low-follow mode.<br/>Note: High-follow mode requires a pass-through cycle of 10ms or less. |
+  | `trajectory_mode` | Input (optional) | Used in high-follow mode. Accepts 0, 1, or 2.<br/>- `0`: Full pass-through mode.<br/>- `1`: Curve-fitting mode.<br/>- `2`: Filtering mode. |
+  | `radio` | Input (optional) | - In curve-fitting mode: `radio` is the smoothing coefficient, range 0–100.<br/>- In filtering mode: `radio` is the filter parameter, range 0–1000. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Pose Pass-through
+
+The target pose is sent to the robotic arm via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller.
+
+When the target pose is received by the arm controller, the controller first attempts inverse kinematics calculation. If the inverse kinematics solution succeeds and the calculated joint angles do not differ significantly from the current joint positions, the angles are sent directly to the joints for execution, skipping additional trajectory planning.
+
+This feature is suitable for scenarios that require periodic pose adjustments, such as visual servoing applications.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the robotic arm.
+- The I-series wired Ethernet interface supports a minimum cycle time of 2 ms, providing higher real-time performance.
+</Aside>
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_cartesian_pose_canfd(
+      const AbcPose& pose,
+      bool follow,
+      int trajectory_mode = 0,
+      int radio = 0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `follow` | Input | Follow mode flag. Accepts `true` or `false`.<br/>- `true`: High-follow mode.<br/>- `false`: Low-follow mode.<br/>Note: High-follow mode requires a pass-through cycle of 10ms or less. |
+  | `trajectory_mode` | Input (optional) | Used in high-follow mode. Accepts 0, 1, or 2.<br/>- `0`: Full pass-through mode.<br/>- `1`: Curve-fitting mode.<br/>- `2`: Filtering mode. |
+  | `radio` | Input (optional) | - In curve-fitting mode: `radio` is the smoothing coefficient, range 0–100.<br/>- In filtering mode: `radio` is the filter parameter, range 0–1000. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Joint Space Following Motion
+
+Joint space following motion refers to real-time trajectory planning in joint space to achieve dynamic following of target joint positions.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_follow(std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Cartesian Space Following Motion
+
+Cartesian space following motion refers to real-time trajectory planning in Cartesian space to achieve dynamic following of the target pose.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_pose_follow(const AbcPose& pose)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Current Joint Angles
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Output | Current joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Algorithms
+
+This SDK provides a set of algorithm-related APIs for the robotic arm, including forward kinematics and inverse kinematics.
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      AbcPose& pose)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const AbcPose& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode = 0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The target pose. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+  | `ref_joints` | Input | Reference joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `joints` | Output | Joint angles computed by inverse kinematics. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `mode` | Input (optional) | Solution mode. Accepts 0 or 1. Default is 0.<br/>- `0`: Single-step solution.<br/>- `1`: Iterative search solution. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control Robotic Arm Motion
+
+This SDK supports basic motion control operations for the robotic arm, including slow stop, emergency stop, pause, and resume.
+
+### Slow Stop
+
+The robotic arm decelerates and stops smoothly along the currently executing trajectory.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_arm_slow_stop()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Emergency Stop
+
+The robotic arm stops immediately at the maximum joint speed along the currently executing trajectory. This operation is an irreversible abort; motion cannot be resumed from the interruption point.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_arm_stop()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Pause
+
+The robotic arm pauses execution along the currently running trajectory. This operation is a recoverable interruption; motion can be resumed from the point of interruption.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_arm_pause()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Resume
+
+After being paused, the robotic arm resumes execution from the interruption point and continues the unfinished motion task.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_arm_continue()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Set End-Effector Ecosystem Protocol Mode
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_plus_mode(int mode)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `mode` | Input | The end-effector ecosystem protocol mode. <br/>- `0`: Disable protocol.<br/>- `9600`: Enable protocol (baud rate 9600). <br/>- `115200`: Enable protocol (baud rate 115200). <br/>- `256000`: Enable protocol (baud rate 256000). <br/>- `460800`: Enable protocol (baud rate 460800). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control the Gripper
+
+### Release Gripper
+
+The gripper moves to its fully open position at the specified speed.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_gripper_release(int speed, bool block, int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `speed` | Input | Gripper release speed. Valid range: 1–1000 (dimensionless). |
+  | `block` | Input | Blocking mode flag.<br/>- `true`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `false`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Input | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Force-Controlled Grasp
+
+The gripper grasps at the specified speed and force. Grasping stops automatically when the gripping force exceeds the configured force threshold.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_gripper_pick(int speed, int force, bool block, int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `speed` | Input | Gripper closing speed. Valid range: 1–1000 (dimensionless). |
+  | `force` | Input | Force-control threshold. Valid range: 50–1000 (dimensionless). |
+  | `block` | Input | Blocking mode flag.<br/>- `true`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `false`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Input | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Continuous Force-Controlled Grasp
+
+The gripper performs continuous force-controlled grasping, maintaining the gripping force at the specified level during operation.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_gripper_pick_on(int speed, int force, bool block, int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `speed` | Input | Gripper closing speed. Valid range: 1–1000 (dimensionless). |
+  | `force` | Input | Force-control threshold. Valid range: 50–1000 (dimensionless). |
+  | `block` | Input | Blocking mode flag.<br/>- `true`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `false`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Input | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Gripper Aperture Position
+
+After the gripper reaches the target position, the following behavior applies:
+
+- If the current aperture is smaller than the target, the gripper opens to the target position at the default speed.
+- If the current aperture is larger than the target, the gripper closes towards the target position at the specified speed and torque limit. The gripper stops when either the torque threshold is exceeded or the target position is reached.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_gripper_position(int position, bool block, int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `position` | Input | Target gripper aperture position. Valid range: 1–1000 (dimensionless). |
+  | `block` | Input | Blocking mode flag.<br/>- `true`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `false`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Input | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Gripper Status
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_gripper_state(AbcGripperState* state)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `state` | Output | The current gripper status. For details, please refer to [AbcGripperState](/en/sdk/c-plus-plus/data-structures#AbcGripperState). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control Five-Fingered Dexterous Hand
+
+### Set Target Gesture Sequence Number of the Dexterous Hand
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_posture(
+    int posture_num, bool block, 
+    int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `posture_num` | Input | Gesture sequence number pre-stored in the dexterous hand, range: 1-40. |
+  | `block` | Input | - `true` indicates blocking mode, which waits until the dexterous hand motion completes before returning. <br/>- `false` indicates non-blocking mode, which returns immediately after the command is sent.|
+  | `timeout` | Input | Timeout value in blocking mode, in seconds. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Each DOF Angle of the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_angle(const std::vector<int>& hand_angle)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `hand_angle` | Input | Array of finger angles. The array length is 6. The angle range is 0–1000. Additionally, `-1` indicates that no action will be performed for this degree of freedom, and the current state will be maintained. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).  
+
+### Set Angle Following Control for the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_follow_angle(
+    const std::vector<int>& hand_angle, 
+    int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `hand_angle` | Input | Array of finger angles. The array length is 6. The angle range is defined by the dexterous hand manufacturer (e.g., for INSPIRE-ROBOTS, the range is 0–2000).|
+  | `block` | Input | Timeout value before returning, in milliseconds. A value of `0` means non-blocking mode. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode). 
+
+### Set Position Following Control for the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_follow_pos(
+    const std::vector<int>& hand_pos, 
+    int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `hand_angle` | Input | Array of finger positions. The array length is 6. The position range is defined by the dexterous hand manufacturer (e.g., for INSPIRE-ROBOTS, the range is 0–1000). |
+  | `block` | Input | Timeout value before returning, in milliseconds. A value of `0` means non-blocking mode. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode). 
+
+### Set Speed of the Dexterous Hand
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_speed(int speed)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `speed` | Input | Finger speed. Valid range: 1–1000. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).   
+
+### Set Force Threshold of the Dexterous Hand
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_hand_force(int hand_force)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `hand_force` | Input | Finger force. Valid range: 1–1000. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).  
+
+
+## Configure Modbus
+
+### Configure Modbus RTU Mode
+
+After the robotic arm is started, you must first call the following method to configure Modbus RTU mode before performing any operation on the communication port. Otherwise, an error will be returned.
+
+The robotic arm persists the Modbus configuration. After a reboot, the arm automatically restores the mode that was configured before power-off.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_modbus_mode(int port, int baudrate, int timeout)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `port` | Input | Specifies the communication port. Valid values: 0, 1, or 2.<br/>- `0`: Controller RS485 port as RTU master.<br/>- `1`: End interface board RS485 port as RTU master.<br/>- `2`: Controller RS485 port as RTU slave. |
+  | `baudrate` | Input | Baud rate, supporting three common baud rates, namely 9600, 115200, and 460800. |
+  | `timeout` | Input | Timeout period, in 100 ms. For all read and write commands to the Modbus device, if no response data is returned within the specified timeout period, a timeout error will be returned. The timeout period cannot be set to 0; if set to 0, the robotic arm will take it as 1 for configuration. |
+
+  <Aside>
+  Other configurations are as follows by default: data bit - 8, stop bit - 1, parity check - no.
+  </Aside>
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Close Modbus RTU Mode
+
+- Method:
+
+  ```cpp
+  AbcErrorCode close_modbus_mode(int port)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `port` | Input | Specifies the communication port. Valid values: 0, 1, or 2.<br/>- `0`: Controller RS485 port as RTU master.<br/>- `1`: End interface board RS485 port as RTU master.<br/>- `2`: Controller RS485 port as RTU slave. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Write multiple registers
+
+- Method:
+
+  ```cpp
+  AbcErrorCode write_registers(
+      const PeripheralReadWriteParams& params,
+      const std::vector<uint8_t>& data)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `params` | Input | Parameter structure writing multiple registers. This method can write up to 10 registers once, that is, the value of the `num` member must not exceed 10. For details, please refer to [PeripheralReadWriteParams](/en/sdk/c-plus-plus/data-structures#PeripheralReadWriteParams). |
+  | `data` | Input | Data array to write to register. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Configure UDP Active Reporting
+
+This SDK provides an interface for active reporting of robotic arm status.
+
+Within the same local area network (LAN), by configuring UDP active reporting and registering a robotic arm status callback function, the application can receive periodic robotic arm status data at a specified interval (default: 5 ms).
+
+### Set UDP Active Reporting Configuration
+
+- Method:
+
+  ```cpp
+  AbcErrorCode realtime_arm_state_set_configuration(const RealtimePushConfig& config)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `config` | Input | UDP configuration. For details, please refer to [RealtimePushConfig](/en/sdk/c-plus-plus/data-structures#RealtimePushConfig). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Register Robotic Arm State Callback Function
+
+- Method:
+
+  ```cpp
+  void realtime_arm_state_call_back(AbcArmRealtimeStateCallback realtime_callback)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `realtime_callback` | Input | `AbcArmRealtimeStateCallback` is a function pointer type. For details, please refer to [AbcArmRealtimeStateCallback](/en/sdk/c-plus-plus/data-structures#AbcArmRealtimeStateCallback). The callback function is called whenever a robotic arm state update is received. |
+
+- Return Value:
+
+  None (void).
+
+## Get Error Information
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_error_flag(
+      std::vector<uint16_t>& err_flag,
+      std::vector<uint16_t>& brake_state)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `err_flag` | Output | Joint error codes. |
+  | `brake_state` | Output | Joint brake status.<br/>- `1`: Brake is engaged (not released).<br/>- `0`: Brake is released. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Robotic Arm Name
+
+- Method:
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- Return Value:
+
+  The name of the robotic arm instance.

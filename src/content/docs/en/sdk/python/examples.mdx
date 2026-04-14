@@ -1,0 +1,1163 @@
+---
+title: Examples
+description: Python Examples
+---
+
+To help you get started quickly, this SDK provides a complete set of example programs in the `python\examples` directory. Each example focuses on demonstrating the use of a specific set of APIs. It is recommended to reference them when necessary.
+
+## Robotic Arm Examples
+
+### ArmFactory Class
+
+```python
+import sys
+import os
+from alphabot import ArmFactory, ArmFactoryParam
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    
+    print("===== ArmFactory Sample Program =====")
+    
+    try: 
+        print("\n----- Method 1: Creating a Robotic Arm Using Parameters -----")
+        # Configure robotic arm parameters
+        param = ArmFactoryParam({
+            "arm_type": "realman",
+            "arm_name": "right_arm",
+            "ip": "192.168.1.18",
+            "port": "8080",
+            "udp_ip": "192.168.1.102",
+            "udp_port": "8089",
+            "udp_cycle": "5"
+        })
+        
+        # Create Realman robotic arm instance
+        arm1 = ArmFactory.create_arm(param)
+        if not arm1:
+            print("Failed to create robotic arm instance")
+            return 1
+        
+        print(f"Successfully created robotic arm: {arm1}")
+        
+        print("\n----- Method 2: Creating a Robotic Arm Using Configuration File -----")
+        # Create robotic arm instance from configuration file
+        arm2 = ArmFactory.create_arm_from_config(config_path)
+        if not arm2:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+        
+        print(f"Successfully created robotic arm from configuration file: {arm2}")
+        
+        return 0
+    
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Algorithm
+
+```python
+import sys
+import random
+from alphabot import ArmFactory, Pose, AbcErrorCode
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    
+    print("===== Robotic Arm Algorithm Example =====")
+    
+    try:
+        # Create robotic arm instance from configuration file
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+
+        # Connect to robotic arm
+        print("Connecting to robotic arm...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to robotic arm")
+            return 1
+
+        print("Robotic arm connected successfully!")
+
+        # Get current joint angles
+        result, joints = arm.get_joint_degree()
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Failed to get joint angles: {result}")
+            return 1
+
+        print(f"Current joint angles: {joints}")
+
+        # Forward kinematics example
+        print("\n----- Forward Kinematics Example -----")
+        result, pose = arm.forward_kinematics(joints)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Forward kinematics calculation failed: {result}")
+            return 1
+
+        print(f"Pose calculated via forward kinematics: position({pose.position.x}, {pose.position.y}, {pose.position.z}), "
+              f"quaternion({pose.quaternion.w}, {pose.quaternion.x}, {pose.quaternion.y}, {pose.quaternion.z})")
+
+        # Inverse kinematics example
+        print("\n----- Inverse Kinematics Example -----")
+        # Slightly modify pose
+        pose.position.x += random.uniform(-0.05, 0.05)
+        pose.position.y += random.uniform(-0.05, 0.05)
+        pose.position.z += random.uniform(-0.05, 0.05)
+
+        print(f"Target pose: position({pose.position.x}, {pose.position.y}, {pose.position.z}), "
+              f"quaternion({pose.quaternion.w}, {pose.quaternion.x}, {pose.quaternion.y}, {pose.quaternion.z})")
+
+        # Calculate inverse kinematics
+        # Mode 1: Iterative search - suitable for large differences between current and target poses
+        # (e.g., MOVJ_P, pose editing). Longer computation time.
+        # Mode 0: Single-step - suitable for small differences (e.g., Cartesian space planning).
+        # Shorter computation time.
+        result, target_joints = arm.inverse_kinematics(pose, joints, 1)
+
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Inverse kinematics calculation failed: {result}")
+            return 1
+
+        print(f"Joint angles calculated via inverse kinematics: {target_joints}")
+
+        # Disconnect
+        arm.disconnect()
+        print("Disconnected from robotic arm")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Gripper
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, GripperState, AbcErrorCode, ArmRealtimeState
+
+def arm_callback(state: ArmRealtimeState):
+    print(f"[Callback] Gripper status update: "
+          f"Aperture: {state.gripper_state.actpos}")
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Robotic Arm Gripper Example =====")
+
+    try:
+        # Create robotic arm instance from configuration file
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+
+        # Connect to robotic arm
+        print("Connecting to robotic arm...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to robotic arm")
+            return 1
+
+        print("Robotic arm connected successfully!")
+        arm.realtime_arm_state_call_back(arm_callback)
+        
+        # Get gripper status
+        result, gripper_state = arm.get_gripper_state()
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Failed to get gripper status: {result}")
+            return 1
+
+        print(f"Gripper status: status={gripper_state.status}, "
+              f"error={gripper_state.error}, mode={gripper_state.mode}, "
+              f"current_force={gripper_state.current_force}, temperature={gripper_state.temperature}, "
+              f"aperture={gripper_state.actpos}")
+
+        # Gripper grasp example
+        print("\n----- Gripper Grasp Example -----")
+        speed = 500    # Speed (0~1000)
+        force = 100    # Force (0~1000)
+        block = True   # Blocking mode
+        timeout = 5    # Timeout (s)
+
+        print(f"Grasping with gripper: speed={speed}, force={force}, blocking={block}, timeout={timeout}ms")
+        result = arm.set_gripper_pick(speed, force, block, timeout)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Failed to grasp with gripper: {result}")
+            return 1
+
+        print("Gripper grasped successfully!")
+        
+        # Wait for a moment
+        time.sleep(2)
+        
+        # Gripper release example
+        print("\n----- Gripper Release Example -----")
+        speed = 500    # Speed (0~1000)
+        block = True   # Blocking mode
+        timeout = 5    # Timeout (s)
+
+        print(f"Releasing gripper: speed={speed}, blocking={block}, timeout={timeout}s")
+        result = arm.set_gripper_release(speed, block, timeout)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Failed to release gripper: {result}")
+            return 1
+
+        print("Gripper released successfully!")
+
+        # Disconnect
+        arm.disconnect()
+        print("Disconnected from robotic arm")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Motion
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, Pose, AbcErrorCode, Position
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    
+    print("===== Robotic Arm Motion Example =====")
+    
+    try:        
+        # Create robotic arm instance from configuration file
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+        
+        # Connect to robotic arm
+        print("Connecting to robotic arm...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to robotic arm")
+            return 1
+        
+        print("Robotic arm connected successfully!")
+        
+        # Joint space motion example
+        print("\n----- Joint Space Motion Example -----")
+        target_joints = [20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0]  # Target joint angles
+        print(f"Moving to target joint angles: {target_joints}")
+        
+        result = arm.move_joint_position(target_joints, 10, 0, 0, 1)  # v=10, r=0, trajectory_connect=0, block=1
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Joint space motion failed: {result}")
+            return 1
+        
+        print("Joint space motion successful!")
+        time.sleep(0.5)
+        
+        # Get current joint angles
+        result, joints = arm.get_joint_degree()
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Failed to get joint angles: {result}")
+            return 1
+        
+        print(f"Current joint angles: {joints}")
+        
+        diff = [abs(t-j) for t, j in zip(target_joints, joints)]
+        print(f"Joint angle errors: {diff}")
+        
+        print("\n----- Joint-Cartesian Space Motion Example -----")
+
+        target_pose = Pose(
+            position=(0.158377, 0.386882, 0.265853),
+            quaternion=(0.660822, -0.625990, -0.135772, 0.391173)
+        )
+
+        result = arm.move_joint_pose(target_pose, 10, 0, 0, 1)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Joint-Cartesian space motion failed: {result}")
+            return 1
+        
+        print("Joint-Cartesian space motion successful!")
+        print(f"Moved to target pose: position({target_pose.position.x}, {target_pose.position.y}, {target_pose.position.z}), "
+              f"quaternion({target_pose.quaternion.w}, {target_pose.quaternion.x}, {target_pose.quaternion.y}, {target_pose.quaternion.z})")
+        
+        target_pose.position = Position(0.2, 0.4, 0.2)
+        
+        # Cartesian space linear motion example
+        print("\n----- Cartesian Space Linear Motion Example -----")
+        
+        result = arm.move_cartesian_linear(target_pose, 10, 0, 0, 1)  # v=10, r=0, trajectory_connect=0, block=1
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Cartesian space motion failed: {result}")
+            return 1
+        
+        print("Cartesian space motion successful!")
+        
+        # Disconnect
+        arm.disconnect()
+        print("Disconnected from robotic arm")
+        
+        return 0
+    
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+
+### Pass-Through
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, ArmRealtimeState, AbcErrorCode
+
+def arm_callback(state: ArmRealtimeState):
+    """Robotic arm status callback function"""
+    print(f"[Callback] Robotic arm status update: "
+          f"Joint 1 angle: {state.joint_status.joint_position[0]}, "
+          f"Joint 2 angle: {state.joint_status.joint_position[1]}, "
+          f"Joint 3 angle: {state.joint_status.joint_position[2]}, "
+          f"Joint 4 angle: {state.joint_status.joint_position[3]}, "
+          f"Joint 5 angle: {state.joint_status.joint_position[4]}, "
+          f"Joint 6 angle: {state.joint_status.joint_position[5]}, "
+          f"Joint 7 angle: {state.joint_status.joint_position[6]}, "
+          f"End-effector position: {state.waypoint.position.x, state.waypoint.position.y, state.waypoint.position.z}, "
+          f"End-effector orientation: {state.waypoint.quaternion.w, state.waypoint.quaternion.x, state.waypoint.quaternion.y, state.waypoint.quaternion.z}")
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+    try:
+        arm = ArmFactory.create_arm_from_config(config_path)
+        # Connect to robotic arm
+        print("Connecting to robotic arm...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to robotic arm")
+            return 1
+
+        print("Robotic arm connected successfully!")
+
+        arm.realtime_arm_state_call_back(arm_callback)
+        ret, joints = arm.get_joint_degree()
+        if ret != AbcErrorCode.SUCCESS:
+            print("Failed to get joint angles", ret)
+            return 1
+
+        # Forward motion pass-through control
+        for _ in range(200):
+            time.sleep(0.01)
+            joints[6] += 0.1
+            ret = arm.move_joint_position_canfd(joints, True)  # High-follow mode, requires >100Hz control frequency
+            if ret != AbcErrorCode.SUCCESS:
+                print("Pass-through failed", ret)
+                break
+                
+        # Reverse motion pass-through control
+        for _ in range(200):
+            time.sleep(0.01)
+            joints[6] -= 0.1
+            ret = arm.move_joint_position_canfd(joints, True)  # High-follow mode, requires >100Hz control frequency
+            if ret != AbcErrorCode.SUCCESS:
+                print("Pass-through failed", ret)
+                break
+        
+        arm.disconnect()
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Status Callback Function
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, ArmRealtimeState, AbcErrorCode
+
+def arm_left_callback(state: ArmRealtimeState):
+    """Left robotic arm status callback function"""
+    print(f"[Callback] Left arm status update: "
+          f"Joint 1 angle: {state.joint_status.joint_position[0]}, "
+          f"Joint 2 angle: {state.joint_status.joint_position[1]}, "
+          f"Joint 3 angle: {state.joint_status.joint_position[2]}, "
+          f"Joint 4 angle: {state.joint_status.joint_position[3]}, "
+          f"Joint 5 angle: {state.joint_status.joint_position[4]}, "
+          f"Joint 6 angle: {state.joint_status.joint_position[5]}, "
+          f"Joint 7 angle: {state.joint_status.joint_position[6]}")
+
+def arm_right_callback(state: ArmRealtimeState):
+    """Right robotic arm status callback function"""
+    print(f"[Callback] Right arm status update: "
+          f"Joint 1 angle: {state.joint_status.joint_position[0]}, "
+          f"Joint 2 angle: {state.joint_status.joint_position[1]}, "
+          f"Joint 3 angle: {state.joint_status.joint_position[2]}, "
+          f"Joint 4 angle: {state.joint_status.joint_position[3]}, "
+          f"Joint 5 angle: {state.joint_status.joint_position[4]}, "
+          f"Joint 6 angle: {state.joint_status.joint_position[5]}, "
+          f"Joint 7 angle: {state.joint_status.joint_position[6]}")
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} <left_arm_config_path> <right_arm_config_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json config/right_arm.json")
+        return 1
+    
+    config_path_left = sys.argv[1]
+    config_path_right = sys.argv[2]
+    
+    print("===== Robotic Arm Callback Example =====")
+    
+    try:
+        # Create left arm instance from configuration file
+        arm1 = ArmFactory.create_arm_from_config(config_path_left)
+        if not arm1:
+            print("Failed to create left arm instance from configuration file")
+            return 1
+        
+        # Connect to left arm
+        print("Connecting to left arm...")
+        if arm1.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to left arm")
+            return 1
+        
+        print("Left arm connected successfully!")
+        
+        # Create right arm instance from configuration file
+        arm2 = ArmFactory.create_arm_from_config(config_path_right)
+        if not arm2:
+            print("Failed to create right arm instance from configuration file")
+            return 1
+        
+        # Connect to right arm
+        print("Connecting to right arm...")
+        if arm2.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to right arm")
+            return 1
+        
+        print("Right arm connected successfully!")
+        
+        # Register callback functions
+        arm1.realtime_arm_state_call_back(arm_left_callback)
+        arm2.realtime_arm_state_call_back(arm_right_callback)
+        
+        print("Callback functions registered, waiting to receive status updates...")
+        print("Press Ctrl+C to exit")
+        
+        # Keep program running to receive callbacks
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nReceived exit signal")
+        
+        # Disconnect
+        arm1.disconnect()
+        arm2.disconnect()
+        print("Disconnected from robotic arms")
+        return 0
+    
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Modbus
+
+```python
+import sys
+import time
+from alphabot import ArmFactory, GripperState, AbcErrorCode
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== Robotic Arm Modbus Example =====")
+
+    try:
+        # Create robotic arm instance from configuration file
+        arm = ArmFactory.create_arm_from_config(config_path)
+        if not arm:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+
+        # Connect to robotic arm
+        print("Connecting to robotic arm...")
+        if arm.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to robotic arm")
+            return 1
+
+        print("Robotic arm connected successfully!")
+        
+        # Configure Modbus mode
+        # Port 1: End interface board RS485 port as RTU master
+        # Baud rate: 115200
+        # Timeout: 100 (10 seconds = 100 * 100ms)
+        arm.set_modbus_mode(1, 115200, 100)
+        print("Modbus mode configured successfully")
+        
+        # Disconnect
+        arm.disconnect()
+        print("Disconnected from robotic arm")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Chassis Examples
+
+```python
+import sys
+import time
+import random
+from alphabot import ChassisFactory, AbcErrorCode, ChassisInterface, ChassisBattery
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/woosh_chassis.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    print("===== Chassis Example Program =====")
+    
+    try:
+        # Create chassis instance from configuration file
+        chassis = ChassisFactory.create_chassis_from_config(config_path)
+        chassis.connect()
+        
+        # Get battery status
+        ret, battery = chassis.get_battery()
+        if ret == AbcErrorCode.SUCCESS:
+            print(f"Battery level: {battery}%")
+        else:
+            print(f"Failed to get battery status: {ret}")
+        
+        # Get pose and speed
+        ret, pose_speed = chassis.get_pose_speed()
+        if ret == AbcErrorCode.SUCCESS:
+            print(f"Pose and speed: {pose_speed}")
+        else:
+            print(f"Failed to get pose and speed: {ret}")
+        
+        # Disconnect chassis
+        chassis.disconnect()
+        print("Disconnected from chassis")
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return 1
+
+    print("===== Chassis Example Program Ended =====")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Head Examples
+
+```python
+import sys
+import time
+import random
+from alphabot import HeadFactory, AbcErrorCode, HeadInterface
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/ti5_head.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    print("===== Head Example Program =====")
+    
+    try:
+        # Create head instance from configuration file
+        head = HeadFactory.create_head_from_config(config_path)
+        if not head:
+            print("Failed to create head instance from configuration file")
+            return 1
+
+        # Connect to head
+        print("Connecting to head...")
+        if head.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to head")
+            return 1
+        print("Head connected successfully!")
+        
+        # Move to home position
+        head.move_joint_position([0, 0], 60, True)
+        
+        # Get current joint angles
+        status, joints = head.get_joint_degree()
+        if int(status) != 0:
+            print("Failed to get joint angles!", status)
+
+        # Define head joint movement ranges
+        head_yaw_range = (-90, 90)      # Yaw rotation range (pan)
+        head_pitch_range = (10, -30)    # Pitch rotation range (tilt)
+        
+        # Random movement demonstration
+        for i in range(20):
+            # Generate random target positions
+            random_head = (
+                random.uniform(*head_yaw_range),
+                random.uniform(*head_pitch_range),
+            )
+            
+            # Execute movement
+            status = head.move_joint_position(random_head, 60, True)
+            time.sleep(0.05)
+            
+            # Verify movement and get current positions
+            ret, joints = head.get_joint_degree()
+            assert ret == AbcErrorCode.SUCCESS, f"move joint position failed {ret}"
+            
+            print(f"Moved to target: {random_head}")
+            print(f"Current joint angles: {joints}")
+            time.sleep(0.5)
+            
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1 
+    
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Torso Examples
+
+```python
+import sys
+import time
+import random
+from alphabot import ArmFactory, Pose, AbcErrorCode, TorsoFactoryPose4D
+
+def main():
+    """Main function"""
+    # Parameter checking
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <config_file_path>")
+        print(f"Example: {sys.argv[0]} config/ti5_torso.json")
+        return 1
+    
+    config_path = sys.argv[1]
+    print("===== Torso Example Program =====")
+    
+    try:
+        # Create a torso instance from a configuration file
+        torso = TorsoFactoryPose4D.create_torso_from_config(config_path)
+        if not torso:
+            print("Failed to create torso instance from configuration file")
+            return 1
+
+        # Connect to torso
+        print("Connecting to torso...")
+        if torso.connect() != AbcErrorCode.SUCCESS:
+            print("Failed to connect to torso")
+            return 1
+        print("Torso connected successfully!")
+        torso.move_joint_position([-10, 20, -10, 0], 60, True)
+        status, joints = torso.get_joint_degree()
+        if int(status) != 0:
+            print("Failed to get joint angles! ", status)
+        status, pose = torso.forward_kinematics(joints)
+
+        height_range = (0.35, 0.7)
+        forward_range = (-0.15, 0)
+        pitch_range = (-5, 5)
+        yaw_range = (-30, 30)
+        for i in range(20):
+            random_height, random_forward, random_pitch, random_yaw = (
+                random.uniform(*height_range),
+                random.uniform(*forward_range),
+                random.uniform(*pitch_range),
+                random.uniform(*yaw_range)
+            )
+            pose.height = random_height
+            pose.forward = random_forward
+            pose.pitch = random_pitch
+            pose.yaw = random_yaw
+            
+            status = torso.move_cartesian_linear(pose, 60, True)
+            time.sleep(0.1)
+            ret, joints = torso.get_joint_degree()
+            print(f"move to {random_height} {random_forward} {random_pitch} {random_yaw}")
+            ret, cur_pose = torso.forward_kinematics(joints)
+            print("cur pose: ", cur_pose)
+            time.sleep(0.5)
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1 
+    
+if "__main__" == __name__:
+    main()
+```
+
+## Sensor Examples
+
+### SensorFactory Class
+
+```python
+import sys
+import time
+from alphabot import SensorFactory, DepthSensorParam, DepthCamera, RGBDData
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <sensor_config_file_path>")
+        print(f"Example: {sys.argv[0]} config/realsense1.json")
+        return 1
+    
+    param = DepthSensorParam({
+        'sensor_name': 'rs1',
+        'sensor_type': 'realsense',
+        'serial_number': '230422273294',
+        'color_width': '640',
+        "color_height": '480',
+        'depth_width': '640',
+        "depth_height": '480',
+        "frame_rate": '30',
+        'align_to_color': 'true'
+    })
+    sensor: DepthCamera = SensorFactory.create_depth_camera(param)
+    sensor.connect()
+    rgbd_data: RGBDData = sensor.get_data()
+    depth_data = rgbd_data.depth_data
+    mean_depth = depth_data[depth_data>0].mean()
+    
+    color_intrinsic = rgbd_data.get_color_intrinsic()
+    depth_intrinsic = rgbd_data.get_depth_intrinsic()
+    print(sensor.name, rgbd_data.timestamp, "mean depth: ", mean_depth)
+    print('color camera intrinsic parameters\n', color_intrinsic)
+    print('depth camera intrinsic parameters\n', depth_intrinsic)
+
+    print(rgbd_data)
+    sensor.disconnect()
+
+    config_path = sys.argv[1]
+    sensor1: DepthCamera = SensorFactory.create_depth_camera_from_config(config_path)
+    sensor1.connect()
+    rgbd_data: RGBDData = sensor1.get_data()
+    depth_data = rgbd_data.depth_data
+    mean_depth = depth_data[depth_data>0].mean()
+    color_intrinsic = rgbd_data.get_color_intrinsic()
+    depth_intrinsic = rgbd_data.get_depth_intrinsic()
+    print(sensor1.name, rgbd_data.timestamp, "mean depth: ", mean_depth)
+    print('color camera intrinsic parameters\n', color_intrinsic)
+    print('depth camera intrinsic parameters\n', depth_intrinsic)
+    sensor1.disconnect()
+
+if "__main__" == __name__:
+    main()
+```
+
+### RealSense Camera
+
+```python
+import sys
+import time
+from alphabot import SensorFactory, DepthSensorParam, RGBDData, DepthCamera, SensorSynchronizer
+
+def callback(data: RGBDData):
+    print(data.timestamp)
+    print("Depth camera intrinsic parameters: ", data.get_depth_intrinsic())
+    print("Color camera intrinsic parameters: ", data.get_color_intrinsic())
+    # print(data.rgb_data)
+    # print(data)
+    
+def main():
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <camera_config_file_path>")
+        print(f"Example: {sys.argv[0]} config/realsense1.json")
+        return 1
+    config_path = sys.argv[1]
+    sensor: DepthCamera = SensorFactory.create_depth_camera_from_config(config_path)
+
+    sensor.set_data_callback(callback)
+    try:
+        ret = sensor.connect()
+        if ret.value != 0:
+            print("Failed to connect to camera", ret)
+            return 1
+        ret = sensor.start_stream()
+        if ret.value != 0:
+            print("Failed to open stream", ret)
+            return 1
+        
+        for _ in range(5):
+            time.sleep(1)
+        sensor.disconnect()
+        return 0
+    except Exception as e:
+        print(e)
+
+if "__main__" == __name__:
+    sys.exit(main())
+```
+
+### Sensor Synchronizer
+
+```python
+import sys
+import time
+from datetime import datetime
+from alphabot import ArmFactory, SensorFactory, SyncDataPackage, SyncMode, SyncPolicy, SensorSynchronizer, RGBDData
+
+def callback(data: SyncDataPackage):
+    arms_data = data.get_all_arm_data()
+    sensors_data = data.get_all_sensor_data()
+    ts: datetime = data.get_timestamp()
+    print(f"Synchronized timestamp: {ts}")
+
+    for arm_name, arm_data in arms_data.items():
+        print(arm_name, arm_data.timestamp, *arm_data.joint_status.joint_position, "Gripper opening: ", arm_data.gripper_state.actpos)
+    for sensor_name, sensor_data in sensors_data.items():
+        if isinstance(sensor_data, RGBDData):
+            depth_data = sensor_data.depth_data
+            mean_depth = depth_data[depth_data>0].mean()
+            print(sensor_name, sensor_data.timestamp, "Mean depth: ", mean_depth)
+
+def main():
+    """Main function"""
+    # Parameter checking
+    if len(sys.argv) < 6:
+        print(f"Usage: {sys.argv[0]} <arm_config_file_path1> <arm_config_file_path2> <sensor_config_file_path1> <sensor_config_file_path2> <sensor_config_file_path3>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json config/right_arm.json config/realsense1.json config/realsense2.json config/realsense3.json")
+        return 1
+    
+    arm1_config_path = sys.argv[1]
+    arm2_config_path = sys.argv[2]
+    sensor1_config_path = sys.argv[3]
+    sensor2_config_path = sys.argv[4]
+    sensor3_config_path = sys.argv[5]
+    arm1 = ArmFactory.create_arm_from_config(arm1_config_path)
+    arm2 = ArmFactory.create_arm_from_config(arm2_config_path)
+    sensor1 = SensorFactory.create_depth_camera_from_config(sensor1_config_path)
+    sensor2 = SensorFactory.create_depth_camera_from_config(sensor2_config_path)
+    sensor3 = SensorFactory.create_depth_camera_from_config(sensor3_config_path)
+    
+    sync = SensorSynchronizer(SyncPolicy.NEAREST, time_tolerance_ms=100)
+    
+    if int(sync.add_arm(arm1.name, arm1)) != 0:
+        print("Failed to add arm1")
+    if int(sync.add_arm(arm2.name, arm2)) != 0:
+        print("Failed to add arm2")
+
+    if int(sync.add_sensor(sensor1.name, sensor1)) != 0:
+        print("Failed to add sensor1")        
+        return 1
+    if int(sync.add_sensor(sensor2.name, sensor2)) != 0:
+        print("Failed to add sensor2")    
+        return 1
+    if int(sync.add_sensor(sensor3.name, sensor3)) != 0:
+        print("Failed to add sensor3")
+        return 1
+
+    sync.set_sync_mode(SyncMode.REFERENCE_SENSOR)
+    sync.set_reference_sensor(sensor3.name)
+
+    sync.set_sync_data_callback(callback)
+
+    print("Starting synchronizer")
+    ret = sync.start()
+    if int(ret) != 0:
+        print("Failed to start synchronizer", ret)
+        return 1
+
+    print("Callback registered, waiting for state updates...")
+    print("Press Ctrl+C to exit")
+
+    # Keep the program running to receive callbacks
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nReceived exit signal")    
+
+if "__main__" == __name__:
+    sys.exit(main())
+```
+
+### Emergency Stop Button Monitoring
+
+```python
+import time, threading
+from alphabot import EStopMonitor, EStopMConfig, ESState
+
+def main():
+    cfg = EStopMConfig()
+    cfg.auto_start_ = False
+    esm = EStopMonitor(cfg)  
+    
+    # Set several callbacks
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed\033[0m"))
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed(02)\033[0m"))
+    esm.set_pressed_event_callback(lambda: print("\033[1;31m[ES] Pressed(03)\033[0m"))
+    
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released\033[0m"))
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released(02)\033[0m"))
+    esm.set_released_event_callback(lambda: print("\033[1;32m[ES] Released(03)\033[0m"))
+
+    esm.run()
+
+    stop_flag = False
+    def monitor_loop():
+        while not stop_flag:
+            state = esm.get_state() # Actively get the emergency stop state
+            if state == ESState.Invalid:
+                print("esm state: None")
+            elif state == ESState.Pressed:
+                print("esm state: Pressed")
+            elif state == ESState.Released:
+                print("esm state: Released")
+            else:
+                print(f"esm state: {state}")
+            time.sleep(1)
+
+    t = threading.Thread(target=monitor_loop)
+    t.start()
+
+    while False:
+        print("Pausing after 10s")
+        time.sleep(10)
+        esm.pause()
+        print("Paused! Resuming after 10s")
+        time.sleep(10)
+        esm.run()
+
+    time.sleep(600)
+
+    stop_flag = True
+    t.join()
+
+if __name__ == "__main__":
+    main()
+```
+
+## Kinematics Algorithm
+
+### Robotic Arm Kinematics
+
+```python
+import sys
+import random
+import numpy as np
+from alphabot import ArmType, ArmKinematics, AbcErrorCode
+
+def main():
+    """Main function"""
+    print("===== Robotic Arm Kinematics Example Program =====")
+    
+    try:
+        # Create robotic arm kinematics instance - ZM model
+        print("Creating robotic arm kinematics instance...")
+        kin = ArmKinematics.create(ArmType.ZM73L_6F)
+        if not kin:
+            print("Failed to create robotic arm kinematics instance")
+            return 1
+
+        print("Robotic arm kinematics instance created successfully!")
+
+        # Define example joint angles (in radians)
+        joints = [
+            0.08355030879064443,
+            0.021789388835488886,
+            -0.21593039291738889,
+            -1.6911874182518334,
+            -0.8637442609501667,
+            0.1572672578973611,
+            -0.8943957337265
+        ]
+        print(f"Initial joint angles: {[f'{j:.4f}' for j in joints]}")
+
+        # Forward kinematics example
+        print("\n----- Forward Kinematics Example -----")
+        result, pose = kin.forward_kinematics(joints)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Forward kinematics calculation failed: {result}")
+            return 1
+            
+        print("End-effector pose calculated by forward kinematics:")
+        print(pose)
+
+        # Inverse kinematics example - analytical solution
+        print("\n----- Inverse Kinematics Example (analytical solution) -----")
+        # Slightly modify the pose
+        target_pose = pose
+        target_pose.position.x += 0.02
+        target_pose.position.y -= 0.03
+        
+        print("Target pose:")
+        print(target_pose)
+
+        # Calculate inverse kinematics (analytical solution)
+        result, target_joints = kin.inverse_kinematics(target_pose, joints, 0)
+        if result != AbcErrorCode.SUCCESS:
+            print(f"Inverse kinematics calculation failed: {result}")
+        else:
+            print("Joint angles calculated by inverse kinematics (analytical solution):")
+            print(f"Target joint angles: {[f'{j:.4f}' for j in target_joints]}")
+            
+            # Verify inverse kinematics results
+            result, new_pose = kin.forward_kinematics(target_joints)
+            if result == AbcErrorCode.SUCCESS:
+                print("Verification result (substituting inverse solution joint angles into forward kinematics):")
+                print(new_pose)
+                
+                # Calculate position error
+                pos_error = np.sqrt((target_pose.position.x - new_pose.position.x)**2 + 
+                                  (target_pose.position.y - new_pose.position.y)**2 + 
+                                  (target_pose.position.z - new_pose.position.z)**2)
+                print(f"Position error: {pos_error:.6f} meters")
+
+        # Joint limit check example
+        print("\n----- Joint Limit Check Example -----")
+        valid_joints = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        invalid_joints = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]  # Joint angles exceeding limits
+        
+        result = kin.check_range(valid_joints)
+        print(f"Valid joint angles check result: {result}")
+        
+        result = kin.check_range(invalid_joints)
+        print(f"Invalid joint angles check result: {result}")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### Admittance Control Law
+
+```python
+from alphabot import AbcErrorCode, ArmKinematics, ArmType, Pose
+from alphabot import admittance_control_law
+
+
+def main() -> None:
+    arm = ArmKinematics.create(ArmType.RM65_6F)
+
+    pose = Pose(
+        position=(0.35, 0.00, 0.25),
+        quaternion=(1.0, 0.0, 0.0, 0.0),
+    )
+
+    #  The length of the q must be consistent with the degrees of freedom (DOF) of the robotic arm. 
+    # For instance, a 6-DOF robotic arm requires exactly six joint values. 
+    # Mismatched dimensions may result in the algorithm returning PARAM_ERROR, ALGO_ERROR, or ARM_OUT_OF_RANGE.
+    q = [0.0, -0.2, 0.3, 0.0, 0.1, 0.0]
+
+    # The force must be an array of exactly 6 elements, specified in the following order: [Mx, My, Mz, Fx, Fy, Fz]. 
+    # If the array length is not 6, pybind11 will raise a TypeError during type conversion.
+    force = [0.0, 0.0, 0.0, 3.5, 0.0, -1.0]
+
+    ret, next_q = admittance_control_law(
+        arm=arm,
+        pose=pose,
+        p_stiffness=200.0,
+        r_stiffness=8.0,
+        force=force,
+        t=0.005,
+        q=q,
+    )
+
+    if ret != AbcErrorCode.SUCCESS:
+        raise RuntimeError(f"admittance_control_law failed: {ret}")
+
+    print("next_q =", next_q)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+
+

@@ -1,0 +1,481 @@
+---
+title: 常用操作
+description: 常用操作
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+
+在使用 AlphaBot 2 机器人时，掌握以下操作将有助于您更高效地使用和操作机器人。
+
+## 开机
+
+import getting_started_5 from 'img/getting-started-5.png';
+import getting_started_6 from 'img/getting-started-6.png';
+
+<Steps>
+
+1. 在底盘处，长按 `开关` 键 1.5s，机器人上电，按钮全亮代表上电成功。
+   <Image src={getting_started_5} alt="" width="500"/>
+
+2. 在等待 1 分钟后，机械臂末端的蓝/绿按钮点亮，代表机械臂上电成功，随后便可开始使用机器人。
+   <Image src={getting_started_6} alt="" width="500"/>    
+
+</Steps>
+
+## 关机
+
+在底盘处，长按 `开关` 键 1.5s，机器人下电，按钮全灭代表下电成功。
+
+<Image src={getting_started_5} alt="" width="500"/>
+
+
+## 急停
+
+import architecture_12 from 'img/architecture-12.png';
+
+<Aside type="caution">
+- 严禁遮挡、损坏或拆除急停装置。
+- 每日开机前须检查急停装置：外观无异常，按钮按下及复位功能正常。
+</Aside>
+
+若机器人发生或可能发生危险或异常时，请立即按下后背急停按钮，机器人将立即停止并进入安全停机状态，具体操作如下。
+
+<Steps>
+
+1. 用力按下后背红色按钮，听到“咔哒”声，表示触发急停。
+
+   <Image src={architecture_12} alt="" width="400"/>
+
+2. 确认机器人是否完全静止，本体及末端执行器无任何运动。
+3. 检查底盘指示灯。若红色灯闪烁，表示急停生效。
+   <Aside>
+    - 急停生效后，机器人将切断电机驱动信号，进入安全停机状态。此时机器人无法执行任何运动指令，但仍然供电以保持通信和状态监测。
+    - 急停生效后，请排查异常或危险源（包括清空运动区域内的人员或异物）。如有需要，请切断相关故障设备的电源。
+   </Aside>
+4. 若需要恢复机器人使用，请顺时针旋转红色按钮，直至其弹出（听到“弹起”声）。
+
+</Steps>
+
+## 充电
+
+import architecture_9 from 'img/architecture-9.png';
+import architecture_10 from 'img/architecture-10.png';
+import architecture_13 from 'img/architecture-13.png';
+import architecture_7 from 'img/architecture-7.png';
+
+
+AlphaBot 2 内置电池电量不足时，会语音提示需要充电。AlphaBot 2 提供了如下两种充电方式，请根据具体场景选择合适的充电方式。
+
+1. 使用电源适配器充电：机器人关机或切换手动模式后，使用电源适配器直接对机器人进行手动充电。
+   <Image src={architecture_9} alt="" width="300"/>
+   
+2. 使用充电箱充电：机器人自行移动到充电箱进行自充电。
+   <Image src={architecture_13} alt="" width="400"/>
+
+在开始以下操作前，请阅读以下安全注意事项。
+
+<Aside type="caution">
+- 为获得最佳效能并避免兼容性问题，请使用产品随附的电源适配器、充电箱及电源线。
+- 严禁混用不同产品的电源适配器、充电箱，以免造成充电异常或损坏设备。
+- 请务必使用本司配置的电源适配器、充电箱，如使用其他劣质充电器造成任何损失，我司概不负责。
+- 连接电源适配器或充电箱时，请确保所有端口（包括电源线、变压器和插座）均已完全推入并牢固连接，以避免因松脱而导致充电不良等问题的发生。
+- 尽量勿将电源适配器及电源线置于地面，以防办公椅轮组压损线缆导致接触不良或漏电。
+- 电源线应尽量展开，切勿缠绕于电源适配器或其他物品上。
+- 充电过程中请勿移动机器人，以免造成充电接口损坏或安全事故。
+- 充电完成后请及时断开电源适配器或充电箱，避免过度充电对电池寿命造成影响。
+- 若电源适配器、充电箱或机器人出现异常，请立即停止使用并切断电源。
+</Aside>
+
+### 电源适配器转换充电箱
+
+import operation_1 from 'img/operation_1.png';
+import operation_2 from 'img/operation_2.png';
+import operation_3 from 'img/operation_3.png';
+import operation_4 from 'img/operation_4.png';
+
+<Steps>
+
+1. 将电源适配器上不带变压器的一段电源线取下，插在充电箱的外部插口。
+   <Image src={operation_1} alt=""/>
+
+2. 将充电箱上方的盖子打开。
+   <Image src={operation_2} alt="" width="400"/>
+
+3. 将充电箱内部的短线插在变压器上，变压器另一端的电源线插在充电箱内部的方形插槽上，完成后合上充电箱上方的盖子。
+   <Image src={operation_3} alt=""/>
+
+4. 充电时，将外部的电源线插在插座上，把充电箱上的电闸上调到开启状态，查看信号灯状态是否正常。若信号灯显示绿色，即可正常使用充电箱。
+   <Image src={operation_4} alt=""/>
+
+</Steps>
+
+### 充电箱转换电源适配器
+
+import operation_5 from 'img/operation_5.png';
+import operation_6 from 'img/operation_6.png';
+import operation_7 from 'img/operation_7.png';
+
+<Aside>
+开始前，请勿将充电箱外部的电源线插在插座上，以免触电。
+</Aside>
+
+<Steps>
+
+1. 将充电箱上方的盖子打开，将充电箱内部的短线从变压器上拔下，变压器另一端的电源线从充电箱内部的方形插槽上拔下。
+   <Image src={operation_5} alt=""/>
+
+2. 完成后取出电源适配器，合上充电箱上方的盖子。   
+   <Image src={operation_6} alt="" width="250"/>
+
+3. 将充电箱外部的电源线拔下，插在变压器上。
+   <Image src={operation_7} alt="" />   
+
+4. 参考[使用电源适配器充电](#use_power_adapter)部分进行充电。
+
+</Steps>
+
+### 使用电源适配器充电{#use_power_adapter}
+
+<Steps>
+
+1. 将机器人切换至手动模式（或长按 `开关` 键 1.5s 断电），然后将机器人推至电源插座旁。
+   <Image src={getting_started_5} alt="" width="500"/>
+
+2. 连接电源适配器：一端接电源插座，另一端接机器人底盘充电接口，务必确保两端连接牢固。
+   <Image src={architecture_7} alt="" width="500"/> 
+
+3. 连接成功后，电源适配器的 LED2 指示灯显示红色，表示正在充电。
+   <Image src={architecture_10} alt="" width="600"/>
+
+</Steps>
+
+## 远程连接主控板{#remote_connect}
+
+在某些情况下（如调试），电脑需要通过 ssh 命令远程连接至主控板。主控板的信息如下表所示。
+
+|信息项|说明|
+|---|---|
+|主控模块|NVIDIA AGX Orin 64G|
+|用户名|robot|
+|IP 地址|192.168.90.1|
+|Wi-Fi 名称|形如 Alphabot2-xxx-xxxx，具体见交付清单|
+|Wi-Fi 初始密码|88888888|
+
+接下来以 Windows 操作系统为例，详细讲解电脑如何连接主控板。
+
+import operation_8 from 'img/operation_8.png';
+import operation_9 from 'img/operation_9.png';
+import operation_10 from 'img/operation_10.png';
+import operation_11 from 'img/operation_11.png';
+import operation_12 from 'img/operation_12.png';
+import operation_13 from 'img/operation_13.png';
+import operation_14 from 'img/operation_14.png';
+import operation_15 from 'img/operation_15.png';
+import operation_16 from 'img/operation_16.png';
+import operation_17 from 'img/operation_17.png';
+
+<Steps>
+
+1. 点击无线网，查找形如 `Alphabot2-xxx-xxxx` 的 Wi-Fi 网络名称，然后点击 `连接`。此处以 Alphabot2-088-5d50 为例。
+   <Image src={operation_8} alt=""/>
+
+2. 在搜索框中搜索 `网络连接`，点击 `查看网络连接`。
+   <Image src={operation_9} alt="" width="500"/>
+
+3. 双击 `Alphabot2-xxx-xxxx`，点击 `详细信息`，查看其 IPv4 默认网关地址。该地址即为远程登陆主控板的 IP 地址。
+   <Image src={operation_10} alt="" />
+
+4. 使用快捷键 `Win+X`，弹出菜单，点击 `终端`。
+   <Image src={operation_11} alt=""/>
+
+5. 在终端输入 `ping 192.168.90.1`，显示下图则表示，可进行登录操作。
+   <Image src={operation_12} alt=""/>
+
+6. 在终端输入 `ssh robot@192.168.90.1`，随后输入 `yes`，以及登录密码（默认初始密码为 `88888888`），显示下图则表示连接主控板成功。
+   <Image src={operation_13} alt=""/>
+   
+</Steps>
+
+若需配置 Wi-Fi 连接，请继续以下操作。
+
+<Steps>
+
+1. 在上一步的终端中继续输入 `sudo nmcli device wifi list` 命令，以查看当前可用的 Wi-Fi，并记录要连接的 Wi-Fi 的名称（SSID）。
+   <Image src={operation_14} alt=""/>
+
+2. 在上一步的终端中继续输入 `sudo nmcli device wifi connect <SSID> password <password>` 命令，以连接新的 Wi-Fi，其中 `<SSID>` 和 `<password>` 分别替换为要连接的 Wi-Fi 的名称和密码。
+   <Image src={operation_15} alt=""/>
+
+3. 输入 `ifconfig` 命令以查看无线网络分配给主控版的 IP 地址（即 `wlan0/wlp2s0` IP 地址），以检查并确认是否已经成功连接到指定的 Wi-Fi 网络，自此 Wi-Fi 配置完成。
+   <Image src={operation_16} alt=""/>
+
+4. 完成 Wi-Fi 配置后，电脑连接上述 Wi-Fi，然后在终端输入命令 `ssh robot@x.x.x.x`，其中 `x.x.x.x` 为上一步获取的 IP 地址，随后输入 `yes`，以及登录密码，登录成功。每次连接主控板时，无需再配置 Wi-Fi。
+   <Image src={operation_17} alt=""/>
+
+</Steps>
+
+## 操作底盘上位机软件{#use_chassis_software}
+
+AlphaBot 2 提供两款底盘上位机软件。下表为两款软件的信息，请根据实际使用场景选择合适的软件。
+
+|软件名称|适用平台|说明|
+|---|---|---|
+|AI2ROBOTICS Design|Windows 电脑|具备地图编辑、任务编辑和监控信息三大功能，便于操作人员在多机工作的场景下灵活监控与管理机器人。|
+|AI2ROBOTICS Mobile|Android 平板|集成实时监控与控制、任务规划、设备配置、地图构建等功能于一体，方便操作人员在移动场景下更好的监控与管理机器人。|
+
+<Aside>
+请联系售后工程师获取软件安装包。
+</Aside>
+
+### AI2ROBOTICS Design
+
+import operation_18 from 'img/operation_18.png';
+import operation_19 from 'img/operation_19.png';
+import operation_20 from 'img/operation_20.png';
+import operation_21 from 'img/operation_21.png';
+import operation_22 from 'img/operation_22.png';
+
+通过以下步骤，您可以快速掌握 AI2ROBOTICS Design 软件的使用方法。
+
+<Steps>
+
+1. 打开 AI2ROBOTICS Design 软件，进入首页，点击左下角的 `设置` 图标，选择 `连接`。
+   <Image src={operation_18} alt=""/>
+
+2. 在弹窗中，输入调度或机器人底盘的 IP 和端口号，点击 `连接`。连接成功后，底部状态栏将提示已连接，并显示连接的 IP 地址。
+   <Image src={operation_19} alt=""/>
+
+3. 连接成功后，点击左侧导航栏的 `监控`，即可查看机器人当前的状态信息。
+
+4. 点击左侧导航栏的 `部署`，进入部署界面，在此界面可进行底图编辑、域编辑、部署点位、软引导、任务编辑（任务集和动作组合）和场景库等操作。
+
+   <Image src={operation_20} alt=""/>
+
+   |选项|说明|
+   |---|---|
+   |地图编辑|点击进入地图编辑页面，编辑地图的实体墙、通行区、导航禁区、交管禁区。|
+   |域编辑|编辑一些常见的域，约束机器人在该区域的一些行为和准则。|
+   |软引导编辑|约束机器人行走路径的行为和准则。|
+   |点位编辑|编辑一些导航目标点，任务的目标点位，包括运输、举升搬运、充电桩、停车点等。|
+   |任务编辑|根据部署的点位和动作组编辑一些任务集，比如循环任务、超时等待任务、临时任务等。|
+   |场景库|加载地图场景，用于编辑和部署任务。 |
+
+
+5. 点击左侧导航栏的 `统计`，即可查看统计信息。
+
+</Steps>
+
+### AI2ROBOTICS Mobile
+
+通过以下步骤，您可以快速掌握 AI2ROBOTICS Mobile 软件的使用方法。
+
+<Steps>
+
+1. 进入平板系统的 Wi-Fi 连接界面，连接机器人热点 `AI2Rocks-xxxx`（xxxx 为序列号），输入默认密码 `88888888`。如已连接机器人热点，则可跳过此步。
+
+2. 打开 AI2ROBOTICS Mobile 软件，进入首页，点击 `未连接`，输入底盘固定 IP 地址 `169.254.128.2`，点击 `连接`。
+   <Aside type="tip">
+   若连接成功，上方状态栏将显示机器人系统当前使用的地图和机器人底盘的状态、电流等信息。
+   </Aside>
+   <Image src={operation_21} alt=""/>
+
+3. 连接成功后，在首页中，可选择监控、地图、任务、设置、设备等选项进行操作。
+   <Image src={operation_22} alt=""/>
+
+   |选项|说明|
+   |---|---|
+   |监控|查看当前连接的机器人正在使用的导航地图信息。|
+   |地图|查看当前连接的机器人所有的导航地图信息。|
+   |任务|根据部署的点位和动作组编辑一些任务集，比如循环任务、超时等待任务、临时任务等。|
+   |设置|修改机器人相关信息、遥控机器人行进。|
+   |设备|查看机器人状态、电流等信息。|
+
+</Steps>
+
+## 使用机械臂 Web 示教器{#use_web_teaching_software}
+
+import operation_23 from 'img/operation_23.png';
+import operation_24 from 'img/operation_24.png';
+import operation_25 from 'img/operation_25.png';
+import operation_26 from 'img/operation_26.png';
+
+AlphaBot 2 提供一款基于 Web 的机械臂示教器软件，您可在浏览器中输入 URL，进入示教界面，对机械臂和控制器进行操作并查看相关信息。
+
+<Aside>
+使用机械臂 Web 示教器软件前，请确保[已连接到机器人主控板](#remote_connect)。
+</Aside>
+
+通过以下步骤，您可以快速掌握机械臂 Web 示教器软件的使用方法。
+
+<Steps>
+
+1. 打开浏览器，输入 `192.168.1.18`（左臂）或 `192.168.1.19`（右臂），回车进入登录页面。
+   <Image src={operation_23} alt="" width="300"/>
+
+2. 在登录页面，输入用户名 `user` 和密码 `123`，点击 `登录`。
+   <Image src={operation_24} alt="" width="400"/>
+
+3. 点击左侧导航栏的 `机械臂示教`，进入示教界面，在此界面可进行示教操作。
+   <Image src={operation_25} alt=""/>
+
+   |序号|功能|说明|
+   |---|---|---|
+   |1|菜单栏选项|用于切换机械臂示教、在线编程、数据管理、配置、系统信息和扩展等功能。|
+   |2|工作模式|黄色图标代表选择真实模式，此时程序在真实机械臂上运行。灰色图标代表选择仿真模式，此时真实机械臂不运动，只移动 3D 仿真模型。|
+   |3|工作坐标系|用户可以选择工作坐标系对机械臂运动状态进行控制。|
+   |4|工具坐标系|默认显示的位姿目标是法兰盘中心，用户自己可以设定工具坐标系。|
+   |5|机械臂状态|当机械臂发生错误时，会在此处提示错误，点击图标可打开错误提示列表。|
+   |6|网络连接状态|当与机械臂连接正常时，变为绿色，断开通讯时，变为红色。|
+   |7|速度|此处可拖动滑动条来设置机械臂运动速度占最大速度的百分比。|
+   |8|零位姿态|长按可使机械臂回到零位。松开按钮运动停止。|
+   |9|初始姿态|长按可使机械臂回到初始位置。|
+   |10|急停|按下急停按钮后，机械臂以最大速度停止，再次按下，取消急停，可重新对机械臂进行操作。|
+   |11|全屏按钮|该按钮用来控制示教界面进入全屏和退出全屏。|
+   |12|电源开关按钮|该按钮用来控制电源开关，蓝色代表机械臂电源处于开启状态，灰色代表机械臂电源处于关闭状态。|
+   |13|中英文切换按钮|点击中英文切换按钮可进行中文版示教器与英文版示教器的切换。|
+   |14|退出登录按钮|点击退出登录。|
+   |15|示教按钮区|使用示教界面上的关节控制按钮便可控制每个关节的转动。|
+   |16|位置控制|用户可以对末端进行不同坐标系下的示教。|
+   |17|姿态控制|用户可以对末端进行不同坐标系下的示教。姿态示教时，末端位置不变，姿态绕指定坐标轴发生变化。|
+   |18|步进模式|为了能够增加示教的精度，需要用到步进控制这个模式，能够让被控制的变量以步进的方式精确变化。|
+   |19|位姿编辑|该区域可对机械臂运动姿态进行编辑，点击应用到达编辑位姿。|
+   |20|拖动示教|按住机械臂末端绿色按钮，机械臂将处于可拖动状态，拖动机械臂末端进行轨迹记录，松开绿色按钮即完成轨迹记录。点击机械臂末端蓝色   按钮，机械臂自动回到轨迹起始位置，并进行一次轨迹复现。|
+   |21|机械臂位置姿态参数显示区域|显示机械臂末端的位姿参数，包括位置坐标和欧拉角姿态。|
+
+4. 点击左侧导航栏的 `扩展 -> 末端控制`，可对末端工具进行配置。
+   <Image src={operation_26} alt=""/>
+
+   |功能|说明|
+   |---|---|
+   |工具端电源输出|可配置工具末端接口板对外的输出电源，选项为 0V、5V、12V 和 24V。|
+   |末端外设设备|目前仅支持夹爪和灵巧手，后续可增加对其他设备的支持。|
+
+</Steps>   
+
+
+## 调试底盘 CAN 接口
+
+AlphaBot 2 底盘配备了 CAN 调试接口，供我司工程师在电机出现异常需检修时使用。请勿擅自调试。
+
+<Image src={architecture_7} alt="" width="500"/>
+
+
+## 升级固件
+
+<Aside type="caution">
+AlphaBot 2 的如下固件升级由我司售后工程师提供支持，请勿自行升级，以免造成设备损坏或其他安全问题。若需要升级固件，请联系售后工程师获取升级包和相关指导。
+</Aside>
+
+### 升级机械臂固件
+
+import operation_27 from 'img/operation_27.png';
+
+<Steps>
+
+1. 参考[使用机械臂 Web 示教器](#use_web_teaching_software)，通过 `192.168.1.18`（左臂）或 `192.168.1.19`（右臂）IP 地址登录至机械臂 Web 示教器界面。
+
+2. 参照下图步骤，选择固件文件，进行升级。
+   <Aside>
+   - 固件文件必须由我司提供，切勿使用其他来源的固件文件，以免造成设备损坏或其他安全问题。
+   - 固件文件名称示例如下，其中 `ZPFL73S` 代表左机械臂型号，`ZPFR73S` 代表右机械臂型号，`1.7.3.zpf.c5` 代表固件版本号。左右机械臂的固件文件不同，请勿混用。
+
+      - RMFirmwareUpdate\_**ZPFL73S**\_**1.7.3**\_2026-01-05\_18h42m.realman.**zpf**.**c5**.ZPF.realman
+      - RMFirmwareUpdate\_**ZPFR73S**\_**1.7.3**\_2026-01-05\_18h42m.realman.**zpf**.**c5**.ZPF.realman
+
+   </Aside>   
+   <Image src={operation_27} alt=""/>
+
+3. 稍等片刻，待升级完成后，机械臂会发出“嘀嘀嘀”的声音。升级完成后，请重新启动机械臂，以使新固件生效。
+
+4. 机械臂重启后，打开 WEB 示教器，进入到示教器首页之后，按下 Ctrl+F5 进行浏览器强制刷新，清理缓存。此时机械臂和 WEB 示教器可正常使用。
+
+</Steps>   
+
+
+### 升级机械臂末端控制器固件
+
+import operation_36 from 'img/operation_36.png';
+
+<Steps>
+
+1. 参考[使用机械臂 Web 示教器](#use_web_teaching_software)，通过 `192.168.1.18`（左臂）或 `192.168.1.19`（右臂）IP 地址登录至机械臂 Web 示教器界面。
+
+2. 参照下图步骤，选择固件文件（tool.bin 文件），进行升级。升级完成后，请重新启动机械臂，打开 WEB 示教器，按下 Ctrl+F5 进行浏览器强制刷新，此时末端接口板版本号已更新。
+   <Aside>
+   - 固件文件必须由我司提供，切勿使用其他来源的固件文件，以免造成设备损坏或其他安全问题。
+   - 末端控制器固件文件不区分左右机械臂。
+   </Aside>
+
+   <Image src={operation_36} alt=""/>
+
+</Steps>
+
+### 升级因时夹爪固件
+
+import operation_28 from 'img/operation_28.png';
+import operation_29 from 'img/operation_29.png';
+import operation_30 from 'img/operation_30.png';
+import operation_31 from 'img/operation_31.png';
+import operation_32 from 'img/operation_32.png';
+import operation_33 from 'img/operation_33.png';
+import operation_34 from 'img/operation_34.png';
+import operation_35 from 'img/operation_35.png';
+
+<Steps>
+
+1. 准备夹爪（大夹爪或小夹爪）、电源线、数据线、电脑（Windows 系统）、固件文件和因时驱动器固件升级软件。
+   <Aside>
+   - 固件文件必须由我司提供，切勿使用其他来源的固件文件，以免造成设备损坏或其他安全问题。
+   - 大夹爪和小夹爪的固件文件不同，请勿混用。
+   </Aside>
+   <Image src={operation_28} alt=""/>
+
+2. 将电源线一端与数据线连接，另一端与电源连接。
+   <Image src={operation_29} alt=""  height="250"/>
+
+3. 将数据线一端与夹爪连接，另一端与电脑 USB 接口连接。   
+   <Image src={operation_30} alt=""/>
+
+4. 打开因时驱动器固件升级软件（.exe 文件），选择夹爪对应的固件文件（.bin 文件），点击 `开始`。
+   <Image src={operation_31} alt=""/>
+
+5. 弹出如下提示，请重新插拔电源，等待进度条更新完成。
+   <Image src={operation_32} alt=""/>
+   <Image src={operation_33} alt=""/>   
+
+6. 在[机械臂 Web 示教器](#use_web_teaching_software)界面，点击 ``扩展 -> 末端控制``，将工具端电源输出配置为夹爪对应的电压，打开 `RM_ARM+协议`，将出现夹爪信息。
+   <Image src={operation_34} alt=""/>
+
+7. 在目标位置下，拖动 `自由度 1`，控制夹爪闭合和张开。
+   <Image src={operation_35} alt=""/> 
+
+</Steps>
+
+
+### 升级傲意灵巧手固件
+
+import operation_37 from 'img/operation_37.png';
+import operation_38 from 'img/operation_38.png';
+import operation_39 from 'img/operation_39.png';
+
+<Steps>
+
+1. 准备灵巧手、电源线、数据线、电脑（Windows 系统）、固件文件和[傲意上位机软件（需下载并安装）](https://oymotion.github.io/ROHand/Overview/#_3)。
+   <Aside>
+   固件文件必须由我司提供，切勿使用其他来源的固件文件，以免造成设备损坏或其他安全问题。
+   </Aside>
+
+2. 参照下图，连接各部件。
+   <Image src={operation_37} alt=""/>
+
+3. 打开傲意上位机软件，进入 `基础信息` 界面，点击 `更新固件` 按钮，将进入固件升级模式，固件来源选择 `本地文件`，点击 `确定` ，选择固件文件（.upd 文件）。
+   <Image src={operation_38} alt=""/>
+
+4. 根据软件界面提示，完成固件升级。升级完成后，灵巧手会重新开机自检，此时再次扫描设备，会重新加载设备信息。
+
+5. 在[机械臂 Web 示教器](#use_web_teaching_software)界面，点击 ``扩展 -> 末端控制``，将工具端电源输出配置为灵巧手对应的电压，打开 `RM_ARM+协议`，将出现灵巧手信息。在目标位置下，拖动 `自由度 1 - 6 `，控制灵巧手的运动。
+   <Image src={operation_39} alt=""/>
+
+</Steps>

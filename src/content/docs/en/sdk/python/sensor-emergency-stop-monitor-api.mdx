@@ -1,0 +1,154 @@
+---
+title: Emergency Stop Button Monitoring APIs
+description: Emergency Stop Button Monitoring Python APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## EStopMonitor {#EStopMonitor}
+
+`EStopMonitor` is an emergency stop button monitor that provides active querying of the emergency stop button state and supports setting event callbacks.
+
+### Constructor
+
+- Method:
+
+    ```python
+    __init__(self, cfg: EStopMConfig = ...) -> None
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `cfg` | Configuration parameter. For details, please refer to [EStopMConfig](#EStopMConfig). |
+
+- Return Value:
+
+    `None`.
+
+### Start Monitoring
+
+If `EStopMConfig.auto_start_` is set to `True` (default), the monitoring process will start automatically, and there is no need to manually call `run()`.
+
+Calling `run()` multiple times has no effect.
+
+Once monitoring is started, the registered event callback functions may be triggered.
+
+- Method:
+
+    ```python
+    run(self) -> bool
+    ```
+
+- Return Value:
+
+    `True` if started successfully, `False` otherwise.
+
+### Pause Monitoring
+
+After monitoring is paused, the registered event callback functions will not be triggered.
+
+Calling `pause()` multiple times has no effect.
+
+- Method:
+
+    ```python
+    pause(self) -> bool
+    ```
+
+- Return Value:
+
+    `True` if paused successfully, `False` otherwise.
+
+### Check if Monitoring Is Running
+
+- Method:
+
+    ```python
+    is_running(self) -> bool
+    ```
+
+- Return Value:
+
+    `True` if monitoring is running, `False` otherwise.
+
+### Get Current Emergency Stop Button State
+
+- Method:
+
+    ```python
+    get_state(self) -> ESState
+    ```
+
+- Return Value:
+
+    The emergency stop button state. For details, please refer to [ESState](#ESState).
+
+### Register Emergency Stop Button Pressed Callback Function
+
+- Method:
+
+    ```python
+    set_pressed_event_callback(self, callback: typing.Callable[[], None]) -> int
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `callback` | Callback function triggered when the emergency stop button is pressed. Multiple callback functions are allowed if `EStopMConfig.allow_multicb_` is `true`. |
+
+- Return Value:
+
+    `0` or `1` indicates success (where `1` means an existing callback was replaced, which only occurs when only one callback is allowed). `-1` indicates failure.
+
+### Register Emergency Stop Button Released Callback Function
+
+- Method:
+
+    ```python
+    set_released_event_callback(self, callback: typing.Callable[[], None]) -> int
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `callback` | Callback function triggered when the emergency stop button is released. Multiple callback functions are allowed if `EStopMConfig.allow_multicb_` is `true`. |
+
+- Return Value:
+
+    `0` or `1` indicates success (where `1` means an existing callback was replaced, which only occurs when only one callback is allowed). `-1` indicates failure.
+
+## EStopMConfig {#EStopMConfig}
+
+### Attributes
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `pressed_level_` | int | GPIO level polarity when the emergency stop button is pressed. <br/>- `0`: Active-Low. The pin level is low when the button is pressed. <br/>- `1`: Active-High. The pin level is high when the button is pressed. |
+| `allow_multicb_` | bool | Whether multiple callback functions are allowed.<br/>- `True`: Multiple callbacks are allowed.<br/>- `False`: Only one callback is allowed. |
+| `name_` | str | Name |
+
+### Static Functions
+
+| Static function | Description |
+|:---|:---|
+| `ApacheOrin` | Returns a configured `EStopMConfig` instance (gpiochip0 + pin 2 + Active-Low), suitable for robots equipped with the ApacheOrin chip. |
+| `NvidiaOrin` | Returns a configured `EStopMConfig` instance (gpiochip1 + pin 9 + Active-High), suitable for robots equipped with the NvidiaOrin chip. |
+
+## ESState {#ESState}
+
+The `ESState` class is an enumerator representing the state of the emergency stop button.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `Invalid` | -1 | Unable to get status |
+| `Pressed` | 1 | Emergency stop button is pressed |
+| `Released` | 0 | Emergency stop button is released |
+

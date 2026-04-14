@@ -1,6 +1,27 @@
 ---
-title: 概览
-description: AlphaBot SDK 概览
+title: Overview
+description: AlphaBotCore SDK Overview
 ---
 
-AlphaBot SDK 提供了一系列 C++ 及 Python API，用于集成并控制机器人的移动底盘、机械臂、躯干、头部及传感器等子系统，以实现对机器人的高效精确控制。
+import { Aside } from '@astrojs/starlight/components';
+
+The AlphaBotCore SDK provides a series of C++ and Python APIs for integrating and controlling robot subsystems, including the robotic arm, chassis, torso, head, cameras, and various sensors.
+
+By using this manual, you will learn how to utilize the exposed interfaces to develop applications quickly, enabling efficient and precise robot control.
+
+<Aside>
+- Please contact the pre-sales engineers or sales representatives to obtain the AlphaBotCore SDK.
+- This document is intended for robotic application developers. Ensure that you possess fundamental knowledge in robotics operation, C++ or Python programming, and the ROS before proceeding.
+</Aside>
+
+- **Supported CPU Architectures**
+
+  The AlphaBotCore SDK offers packages for both **X86** and **ARM64** architectures. Select the appropriate package based on the CPU architecture of your target device.
+ 
+- **Supported Programming Languages**
+   
+  For each supported architecture, the SDK offers both **C++** and **Python** APIs. You may choose either language according to your development requirements; only one is required for integration.
+
+  - [Getting Started with C++ API](/en/sdk/c-plus-plus/quick-start)
+  - [Getting Started with Python API](/en/sdk/python/quick-start)
+

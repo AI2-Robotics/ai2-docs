@@ -1,0 +1,621 @@
+---
+title: Common Data Structures
+description: Python 接口涉及的数据结构
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## AbcErrorCode {#AbcErrorCode}
+
+The `AbcErrorCode` class is a system-level error code enumeration that defines execution result statuses for the robotic system, including modules such as the robotic arm, head, torso, sensors, and algorithms.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+<table>
+<thead>
+<tr>
+<th>Constant Member</th>
+<th>Value</th>
+<th colspan="2">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+`SUCCESS`
+</td>
+<td>
+0
+</td>
+<td colspan="2">
+Success
+</td>
+</tr>
+
+<tr>
+<td>
+`UNKNOWN_ERROR`
+</td>
+<td>
+-1
+</td>
+<td>
+Unknown error
+</td>
+<td rowspan="7">
+General Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`TIMEOUT`
+</td>
+<td>
+-2
+</td>
+<td>
+Timeout
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_HANDLE`
+</td>
+<td>
+-3
+</td>
+<td>
+Invalid handle
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_STATE`
+</td>
+<td>
+-4
+</td>
+<td>
+Invalid state
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_INITIALIZED`
+</td>
+<td>
+-5
+</td>
+<td>
+Not initialized
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_IMPLEMENTED`
+</td>
+<td>
+-6
+</td>
+<td>
+Not implemented
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_ARGUMENT`
+</td>
+<td>
+-7
+</td>
+<td>
+Invalid argument
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_ERROR`
+</td>
+<td>
+-50
+</td>
+<td>
+Parameter error
+</td>
+<td rowspan="2">
+Parameter Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_OUT_OF_RANGE`
+</td>
+<td>
+-51
+</td>
+<td>
+Parameter value out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_ERROR`
+</td>
+<td>
+-100
+</td>
+<td>
+Robotic arm general error
+</td>
+<td rowspan="8">
+Robotic Arm Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CTRL_FALSE`
+</td>
+<td>
+-101
+</td>
+<td>
+Controller returned false; likely incorrect parameters or arm state error.
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_SEND_FAILED`
+</td>
+<td>
+-102
+</td>
+<td>
+Failed to send data (communication error)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_RECEIVE_FAILED`
+</td>
+<td>
+-103
+</td>
+<td>
+Failed to receive data or controller timeout
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_RETURN_DATA_ERR`
+</td>
+<td>
+-104
+</td>
+<td>
+Failed to parse returned data (invalid or incomplete format)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CHECK_FAILED`
+</td>
+<td>
+-105
+</td>
+<td>
+Current position device check failed (e.g., not a joint)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_TIMEOUT`
+</td>
+<td>
+-106
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_OUT_OF_RANGE`
+</td>
+<td>
+-107
+</td>
+<td>
+Robotic arm motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ERROR`
+</td>
+<td>
+-200
+</td>
+<td>
+Torso general error
+</td>
+<td rowspan="5">
+Torso Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_CANBUS_ERROR`
+</td>
+<td>
+-201
+</td>
+<td>
+Torso CAN bus error
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ACTUATOR_ERROR`
+</td>
+<td>
+-202
+</td>
+<td>
+Torso actuator error
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_TIMEOUT`
+</td>
+<td>
+-206
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_OUT_OF_RANGE`
+</td>
+<td>
+-207
+</td>
+<td>
+Torso motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ERROR`
+</td>
+<td>
+-220
+</td>
+<td>
+Head general error
+</td>
+<td rowspan="5">
+Head Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_CANBUS_ERROR`
+</td>
+<td>
+-221
+</td>
+<td>
+Head CAN bus error
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ACTUATOR_ERROR`
+</td>
+<td>
+-222
+</td>
+<td>
+Head actuator error
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_TIMEOUT`
+</td>
+<td>
+-226
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_OUT_OF_RANGE`
+</td>
+<td>
+-227
+</td>
+<td>
+Head motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_ERROR`
+</td>
+<td>
+-300
+</td>
+<td>
+Sensor general error
+</td>
+<td rowspan="3">
+Sensor Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_NOT_CONNECTED`
+</td>
+<td>
+-301
+</td>
+<td>
+Sensor not connected
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_DATA_ERROR`
+</td>
+<td>
+-302
+</td>
+<td>
+Sensor data error
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_ERROR`
+</td>
+<td>
+-400
+</td>
+<td>
+Chassis general error
+</td>
+<td rowspan="3">
+Chassis Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_INIT_ERROR`
+</td>
+<td>
+-401
+</td>
+<td>
+Chassis initialization error
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_TIMEOUT`
+</td>
+<td>
+-402
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_ERROR`
+</td>
+<td>
+-900
+</td>
+<td>
+Algorithm general error
+</td>
+<td rowspan="2">
+Algorithm Errors
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_NOT_CONVERGED`
+</td>
+<td>
+-901
+</td>
+<td>
+Algorithm did not converge
+</td>
+</tr>
+
+</tbody>
+</table>
+
+
+## Pose {#Pose}
+
+The `Pose` class represents a 3D pose (position and orientation).
+
+### Attributes
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `position` | [Position](#Position) | Position (3D coordinates: x, y, z) |
+| `quaternion` | [Quaternion](#Quaternion) | Orientation (rotation, represented as a quaternion: w, x, y, z) |
+
+### Set Position
+
+- Method:
+
+  ```python
+  set_position(self, arg0: float, arg1: float, arg2: float) -> Pose
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0`、`arg1`、`arg2` | XYZ-axis coordinate values |
+
+- Return Value:
+
+  Returns `self` to support method chaining.
+
+### Set Quaternion
+
+- Method:
+
+  ```python
+  set_quaternion(self, arg0: float, arg1: float, arg2: float, arg3: float) -> Pose
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0`、`arg1`、`arg2`、`arg3` | w、x、y、z |
+
+- Return Value:
+
+  Returns `self` to support method chaining.
+
+## Position {#Position}
+
+The `Position` class represents a position in 3D space.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `x`、`y`、`z` | float | XYZ-axis coordinate values |
+
+## Quaternion {#Quaternion}
+
+The `Quaternion` class represents a quaternion.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `w`、`x`、`y`、`z` | float | Quaternion (w、x、y、z) |
+
+## Euler {#Euler}
+
+The `Euler` class represents Euler angles.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `rx`、`ry`、`rz` | float | Euler angles |
+
+## ArmCurrentStatus {#ArmCurrentStatus}
+
+The `ArmCurrentStatus` class defines an enumeration of status codes representing the current state of the robotic arm.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `IDLE` | 0 | Enabled but idle state |
+| `MOVE` | 1 | Moving state |
+| `MOVE_THROUGH_JOINT` | 2 | Angle pass-through state |
+| `MOVE_THROUGH_POSE` | 3 | Pose pass-through state |
+| `MOVE_THROUGH_FORCE_POSE` | 4 | Force-Controlled pass-through state |
+| `MOVE_THROUGH_CURRENT` | 5 | Current-loop pass-through state |
+| `STOP` | 6 | Emergency stop state |
+| `SLOW_STOP` | 7 | Slow stop state |
+| `PAUSE` | 8 | Pause state |
+| `CURRENT_DRAG` | 9 | Current-loop drag state |
+| `SENSOR_DRAG` | 10 | 6-DoF force drag state |
+| `TECH_DEMONSTRATION` | 11 | Teaching state |
+
+## AbcTorsoPose4D {#AbcTorsoPose4D}
+
+The `AbcTorsoPose4D` class represents the torso pose.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `height` | float | Vertical height, in meters (m). |
+| `forward` | float | Front-back displacement, in meters (m). |
+| `pitch` | float | Pitch angle, in radians (rad). |
+| `yaw` | float | Waist rotation angle, in radians (rad). |
+
+## SensorStatus {#SensorStatus}
+
+The `SensorStatus` class is an enumerator that defines the states of sensors.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `DISCONNECTED` | 0 | Disconnected |
+| `CONNECTED` | 1 | Connected |
+| `STREAMING` | 2 | Data streaming in progress |
+| `SENSOR_ERROR` | 3 | Error state |
+
+## SensorType {#SensorType}
+
+The `SensorType` class is an enumerator that defines sensor types.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Description |
+|:---|:---|
+| `CAMERA` | Camera sensor |
+| `DEPTH_CAMERA` | Depth camera |
+| `LIDAR` | LiDAR |
+| `IMU` | Inertial Measurement Unit |
+| `FORCE_TORQUE` | Force sensor |
+| `PROXIMITY` | Proximity sensor |
+| `OTHER` | Other types of sensors |

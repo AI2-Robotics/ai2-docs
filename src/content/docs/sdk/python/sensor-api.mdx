@@ -22,11 +22,13 @@ import { Aside } from '@astrojs/starlight/components';
    - 参数说明：
 
      <table>
-        <tbody>
+        <thead>
            <tr>
-              <td>**参数名称**</td>
-              <td>**说明**</td>
+             <th><strong>参数名称</strong></th>
+             <th><strong>说明</strong></th>
            </tr>
+        </thead>       
+        <tbody>
            <tr>
               <td>`params`</td>
               <td>
@@ -65,11 +67,13 @@ import { Aside } from '@astrojs/starlight/components';
    - 参数说明：
 
      <table>
-        <tbody>
+        <thead>
            <tr>
-              <td>**参数名称**</td>
-              <td>**说明**</td>
+             <th><strong>参数名称</strong></th>
+             <th><strong>说明</strong></th>
            </tr>
+        </thead>       
+        <tbody>
            <tr>
               <td>`config_path`</td>
               <td>
@@ -128,11 +132,13 @@ import { Aside } from '@astrojs/starlight/components';
    - 参数说明：
 
      <table>
-        <tbody>
+        <thead>
            <tr>
-              <td>**参数名称**</td>
-              <td>**说明**</td>
+             <th><strong>参数名称</strong></th>
+             <th><strong>说明</strong></th>
            </tr>
+        </thead>       
+        <tbody>
            <tr>
               <td>`config_path`</td>
               <td>
@@ -677,8 +683,8 @@ import { Aside } from '@astrojs/starlight/components';
 | `depth_height` | int | 深度图的高。 |
 | `frame_rate` | int | 帧率。 |
 | `align_to_color` | bool | 是否将深度图对齐到彩色图。 |
-| `enable_depth` | bool | 是否启用深度流。默认为 `true`；设置为 `false` 时，深度流及所有依赖深度数据的相关逻辑将被关闭。|
-| `active_pull` | bool |  是否采用主动拉流模式。默认为 `false`（后台自动拉流）；设置为 `true` 时，仅在调用 `get_data()` 时拉取一帧，且不支持回调机制。|
+| `enable_depth` | bool | 是否启用深度流。默认为 `True`；设置为 `False` 时，深度流及所有依赖深度数据的相关逻辑将被关闭。|
+| `active_pull` | bool |  是否采用主动拉流模式。默认为 `False`（后台自动拉流）；设置为 `True` 时，仅在调用 `get_data()` 时拉取一帧，且不支持回调机制。|
 
 ## SensorData {#SensorData}
 

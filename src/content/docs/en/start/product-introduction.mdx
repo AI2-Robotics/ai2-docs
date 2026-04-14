@@ -1,8 +1,120 @@
 ---
 title: Product Introduction
-description: Product overview
+description: Product Introduction
 ---
 
 The AlphaBot Series by AI² Robotics represents the robotic embodiment of the Alpha Brain model—ushering in the next generation of intelligent terminals following smartphones and smart vehicles.
 
-With advanced spatial intelligence and powerful learning capabilities, it adapts swiftly to new environments and executes diverse tasks with human-like flexibility. Whether in enterprise operations or personal use, AlphaBot delivers efficient, reliable service across a wide range of applications.
+## AlphaBot 2
+
+AlphaBot 2 is the general-purpose intelligent robot powered by the world's first Global & Omni-body VLA (GOVLA) model. By enabling end-to-end coordination of vision, language, and action, it demonstrates strong generalization capabilities and adaptability in complex industrial and public service scenarios.
+
+import { Image } from 'astro:assets';
+import alphabot2 from 'img/alphabot2.png';
+
+<Image src={alphabot2} alt="" />
+
+import automobiles_electronics from 'img/automobiles_electronics.jpg';
+import semiconductor_manufacturing from 'img/semiconductor_manufacturing.jpg';
+import biotechnology from 'img/biotechnology.jpg';
+import public_service from 'img/public_service.jpg';
+
+AlphaBot 2 supports a wide range of applications, including but not limited to:
+
+<table>
+   <thead>
+      <tr>
+         <th>Scenario</th>
+         <th>Description</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>Automotive & Electronics Manufacturing</td>
+         <td>Supports flexible workflows across industrial scenarios such as automotive and electronics manufacturing, covering tasks from loading and transport to assembly and equipment operation. Adapts to diverse production line requirements.<Image src={automobiles_electronics} alt=""/></td>
+      </tr>
+      <tr>
+         <td>Semiconductor Manufacturing</td>
+         <td>Designed for flexible operations in semiconductor manufacturing and panel production, meeting stringent cleanliness requirements while adapting to tasks such as line integration, material handling, loading, and replacement tasks, flexibly meeting the demands of high-precision and high-cleanliness production requirements.<Image src={semiconductor_manufacturing} alt="" /></td>
+      </tr>
+      <tr>
+         <td>Biotechnology</td>
+         <td>Supports biotechnology and biopharma applications with sterile operations and effectively prevents cross-contamination. Capable of handling material transfer, unpacking and disinfection, feeding, and other tasks, it ensures safety and efficiency throughout R&D and production processes.<Image src={biotechnology} alt="" /></td>
+      </tr>
+      <tr>
+         <td>Public Services</td>
+         <td>Supports intelligent operations across public venues—including airports and transit hubs—performing tasks such as storage and organization, inventory management and distribution, as well as retrieval, placement, and transportation, delivering greater efficiency and enhanced experiences for public services.<Image src={public_service} alt="" /></td>
+      </tr>
+   </tbody>
+</table>
+
+## Teleoperation Devices
+
+To meet diverse application requirements such as data acquisition, remote control, and human-robot interaction research, AI² Robotics also provides the following two teleoperation devices.
+
+- **VR Teleoperation**: Enables immersive teleoperation and data collection for humanoid robots through VR headsets, controllers, pedals, and other peripherals. It overcomes physical space constraints and adapts to multi-scenario application demands.
+- **Exoskeleton Teleoperation**: It delivers intuitive control and high-precision data acquisition for humanoid robots via an exoskeleton robotic arm with the same structure as the robot’s own arm. It offers a comfortable operating experience and satisfies both research and industrial-grade application requirements.
+
+
+<table>
+   <thead>
+      <tr>
+         <th>Feature</th>
+         <th>VR Teleoperation</th>
+         <th>Exoskeleton Teleoperation</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>Drive Method</td>
+         <td>End-effector inverse kinematics drive</td>
+         <td>Joint-space drive</td>
+      </tr>
+      <tr>
+         <td>Advantages</td>
+         <td>
+            - Simple and portable
+            - Quick setup
+            - Strong visual immersion
+            - Relatively low cost
+         </td>
+         <td>
+            - No unsolvable motion or joint limit issues
+            - High operating precision
+            - Excellent stability
+            - Suitable for precise manipulation
+         </td>
+      </tr>
+      <tr>
+         <td>Disadvantages</td>
+         <td>
+            - Poor stability caused by inverse kinematics calculations
+            - Eye fatigue during prolonged use
+            - Low precision
+         </td>
+         <td>
+            - Large size, heavy weight, and poor mobility
+            - Complex installation and commissioning
+            - High cost
+         </td>
+      </tr>
+      <tr>
+         <td>Application Scenarios</td>
+         <td>
+            - Technical demonstrations and product exhibitions
+            - Temporary operational tasks
+            - Training and education
+            - Remote operation in simple environments
+            - Mobile tasks (e.g., airport cart handling)
+         </td>
+         <td>
+            - Fixed-site data collection
+            - High-precision operational tasks
+            - Complex operations requiring force feedback
+            - Long-term use by professional operators
+            - Critical tasks such as nuclear facility maintenance
+            - Fixed operations (e.g., PCB loading/unloading, retail services, assembly line tasks)
+         </td>
+      </tr>
+   </tbody>
+</table>

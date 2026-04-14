@@ -1,0 +1,827 @@
+---
+title: Chassis APIs
+description: Chassis Python APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ChassisFactory {#ChassisFactory}
+
+The `ChassisFactory` class provides the following method for creating a chassis instance.
+
+- Method:
+
+    ```python
+    create_chassis_from_config(config_file: str) -> ChassisInterface
+    ```
+
+- Parameter:
+
+  <table>
+     <thead>
+       <tr>
+         <th>Parameter</th>
+         <th>Description</th>
+       </tr>
+     </thead>
+     <tbody>
+        <tr>
+           <td>`config_path`</td>
+           <td>
+                Path to the configuration file. The configuration file must be a JSON file.
+
+                 ```json
+                 {
+                    "chassis_type":"woosh",   # Chassis vendor
+                    "chassis_name":"chassis", # Chassis name
+                    "ip":"127.0.0.1",         # IP address
+                    "port":51051              # Port number
+                 }
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>  
+
+- Return value:
+
+    An [ChassisInterface](#ChassisInterface) instance if creation succeeds, otherwise `None`.
+
+## ChassisFactoryParam {#ChassisFactoryParam}
+
+The `ChassisFactoryParam` class is used to describe the parameters required to create a chassis instance.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `chassis_type` | str | Chassis vendor (e.g., `"woosh"`) |
+| `chassis_name` | str | Chassis name (e.g., `"chassis"`) |
+| `ip` | str | IP address (e.g., `"127.0.0.1"`) |
+| `port` | int | Port number (e.g., `54051`) |
+
+## ChassisInterface {#ChassisInterface}
+
+The `ChassisInterface` class provides a series of public methods for controlling the chassis, such as moving it, obtaining its footprint, and querying its status. Ensure a chassis instance has been created before using these methods.
+
+### Connect to the Chassis
+
+After creating a chassis instance, you can establish a connection to the chassis using the following method.
+
+- Method:
+
+    ```python
+    connect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Disconnect from the Chassis
+
+You can disconnect from the chassis using the following method.
+
+- Method:
+
+    ```python
+    disconnect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Chassis Pose and Speed
+
+- Method:
+
+    ```python
+    get_pose_speed(self) -> tuple[alphabot.core.AbcErrorCode, ChassisPoseSpeed]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisPoseSpeed` | The chassis pose and speed. For details, please refer to [ChassisPoseSpeed](#ChassisPoseSpeed). |
+
+### Get Chassis Pose
+
+- Method:
+
+    ```python
+    get_pose(self) -> tuple[alphabot.core.AbcErrorCode, ChassisPose2D]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisPose2D` | The chassis pose. For details, please refer to [ChassisPose2D](#ChassisPose2D). |
+
+### Get Chassis Speed
+
+- Method:
+
+    ```python
+    get_speed(self) -> tuple[alphabot.core.AbcErrorCode, ChassisTwist]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisTwist` | The chassis speed. For details, please refer to [ChassisTwist](#ChassisTwist). |
+
+### Get Chassis Mileage
+
+- Method:
+
+    ```python
+    get_mileage(self) -> tuple[alphabot.core.AbcErrorCode, int]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `int` | Accumulated mileage. |
+
+### Get Chassis Battery Information
+
+- Method:
+
+    ```python
+    get_battery(self) -> tuple[alphabot.core.AbcErrorCode, ChassisBattery]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisBattery` | The chassis battery information. For details, please refer to [ChassisBattery](#ChassisBattery). |
+
+### Get Chassis Status
+
+- Method:
+
+    ```python
+    get_robot_state(self) -> tuple[alphabot.core.AbcErrorCode, ChassisState]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisState` | The chassis status. For details, please refer to [ChassisState](#ChassisState). |
+
+### Get Chassis Status Code
+
+- Method:
+
+    ```python
+    get_status_code(self) -> tuple[alphabot.core.AbcErrorCode, ChassisStatusCode]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisStatusCode` | The chassis status code. For details, please refer to [ChassisStatusCode](#ChassisStatusCode). |
+
+### Get Chassis Hardware Status
+
+- Method:
+
+    ```python
+    get_hardware_state(self) -> tuple[alphabot.core.AbcErrorCode, ChassisHardwareState]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `ChassisHardwareState` | The hardware status of the chassis. For details, please refer to [ChassisHardwareState](#ChassisHardwareState). |
+
+### Get Chassis Static Transform
+
+- Method:
+
+    ```python
+    get_static_tf(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisTransformStamped]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[ChassisTransformStamped]` | Chassis static transforms. For details, please refer to [ChassisTransformStamped](#ChassisTransformStamped). |
+
+### Set Chassis Twist
+
+- Method:
+
+    ```python
+    twist_control(self, linear: float, angular: float) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `linear` | Linear velocity |
+    | `angular` | Angular velocity |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Chassis Maximum Speed
+
+- Method:
+
+    ```python
+    set_max_speed(self, max_spd: float) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `max_spd` | Maximum speed |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Initialize Chassis
+
+- Method:
+
+    ```python
+    init_robot(self, pose: ChassisPose2D, update_flg: int) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `pose` | The chassis pose. For details, please refer to [ChassisPose2D](#ChassisPose2D). |
+    | `update_flg` | Flag indicating whether to update the chassis pose. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Move to a Target Position
+
+- Method:
+
+    ```python
+    move_to_point_sync(
+        self, 
+        x: float, 
+        y: float, 
+        theta: float, 
+        callback: typing.Callable, 
+        max_spd: float = 1.0
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `x` | X-axis coordinate of the target position. |
+    | `y` | Y-axis coordinate of the target position. |
+    | `theta` | Orientation of the target position. |
+    | `callback` | Callback function. |
+    | `max_spd` | Maximum speed. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Charge
+
+- Method:
+
+    ```python
+    to_charge_sync(self, max_spd: float = 1.0) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `max_spd` | Maximum speed |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Exit Charging
+
+- Method:
+
+    ```python
+    exit_charge_sync(self, max_spd: float = 1.0) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `max_spd` | Maximum speed |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Move Linearly
+
+- Method:
+
+    ```python
+    move_straight_sync(
+        self, 
+        distance: float, 
+        speed: float, 
+        callback: typing.Callable, 
+        use_avoid: bool = True
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `distance` | Travel distance. |
+    | `speed` | Travel speed. |
+    | `callback` | Callback function. |
+    | `use_avoid` | Whether to enable obstacle avoidance. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Move Rotationally
+
+- Method:
+
+    ```python
+    move_rotate_sync(
+        self, 
+        angle: float, 
+        speed: float, 
+        callback: typing.Callable, 
+        use_avoid: bool = True
+    ) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `angle` | Rotation angle. |
+    | `speed` | Rotation speed. |
+    | `callback` | Callback function. |
+    | `use_avoid` | Whether to enable obstacle avoidance. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Local Footprint
+
+- Method:
+
+    ```python
+    get_local_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[ChassisPoint32]` | Local footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Get Global Footprint
+
+- Method:
+
+    ```python
+    get_global_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[ChassisPoint32]` | Global footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Get Local and Global Footprint
+
+- Method:
+
+    ```python
+    get_all_footprint(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[ChassisPoint32], list[ChassisPoint32]]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `tuple[list[ChassisPoint32], list[ChassisPoint32]]` | The first element is the local footprint, and the second element is the global footprint. For the data structure of footprint points, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Get Static Footprint (Based on odom and base_link Frames)
+
+- Method:
+
+    ```python
+    ai2_get_local_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[ChassisPoint32]` | Footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Get Static Footprint (Based on map and base_link Frames)
+
+- Method:
+
+    ```python
+    ai2_get_global_footprint(self) -> tuple[alphabot.core.AbcErrorCode, list[ChassisPoint32]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `list[ChassisPoint32]` | Footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Get Static Footprint
+
+- Method:
+
+    ```python
+    ai2_get_all_footprint(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[ChassisPoint32], list[ChassisPoint32]]]
+    ```
+
+- Return Value:
+
+    A tuple containing two elements.
+
+    | Element Type | Description |
+    |:---|:---|
+    | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+    | `tuple[list[ChassisPoint32], list[ChassisPoint32]]` | The first element is the footprint calculated based on the odom and base_link frames, and the second element is the footprint calculated based on the map and base_link frames.<br/>For the data structure of footprint points, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+### Set Local Footprint
+
+- Method:
+
+    ```python
+    set_local_footprint(self, points: list[ChassisPoint32]) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `points` | Local footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Global Footprint
+
+- Method:
+
+    ```python
+    set_global_footprint(self, points: list[ChassisPoint32]) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `points` | Global footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Local and Global Footprint
+
+- Method:
+
+    ```python
+    set_all_footprint(self, local_points: list[ChassisPoint32], global_points: list[ChassisPoint32]) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `local_points` | Local footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+    | `global_points` | Global footprint points. For details, please refer to [ChassisPoint32](#ChassisPoint32). |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Chassis Name
+
+- Method:
+
+    ```python
+    get_name(self) -> str
+    ```
+
+- Return Value:
+
+    The name of the chassis instance.
+
+## ChassisPoseSpeed {#ChassisPoseSpeed}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `map_id` | int | Map ID |
+| `mileage` | int | Accumulated mileage |
+| `robot_id` | int | Chassis ID |
+| `pose` | [ChassisPose2D](#ChassisPose2D) | 2D pose |
+| `twist` | [ChassisTwist](#ChassisTwist) | Twist (linear + angular velocity) |
+
+## ChassisPose2D {#ChassisPose2D}
+
+The `ChassisPose2D` class represents the 2D pose of a chassis.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `theta` | float | Orientation |
+| `x` | float | X-axis coordinate value |
+| `y` | float | Y-axis coordinate value |
+
+## ChassisPoint32 {#ChassisPoint32}
+
+The `ChassisPoint32` class represents the position of a footprint point.
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `x` | float | X-axis coordinate value |
+| `y` | float | Y-axis coordinate value |
+| `z` | float | Z-axis coordinate value |
+
+## ChassisTwist {#ChassisTwist}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `angular` | float | Angular velocity |
+| `linear` | float | Linear velocity |
+
+## ChassisBattery {#ChassisBattery}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `charge_state` | [ChargeState](#ChargeState) | Charging State |
+| `robot_id` | int | Chassis ID |
+| `power` | int | Battery percentage (0--100).<br/>- 100: Fully charged.<br/>- 0: No charge. |
+| `health` | int | Battery Health (full charge capacity / design capacity) |
+| `charge_cycle` | int | Charge Cycle Count |
+| `battery_cycle` | int | Battery cycle |
+| `temp_max` | int | Battery temperature (maximum temperature) |
+| `success` | bool | Request success flag.<br/>- `True`: Request succeeded.<br/>- `False`: Request failed to process. |
+| `msg` | str | Response message description, typically used to explain why a request could not be processed. |
+
+## ChargeState {#ChargeState}
+
+The `ChargeState` class is an enumerator representing the charging status of the chassis battery.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `NOT` | 1 | Not charging |
+| `MANUAL` | 2 | Manual charging in progress |
+| `AUTO` | 3 | Auto charging in progress |
+
+## ChassisState {#ChassisState}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | int | Chassis ID |
+| `state` | [ChassisStateType](#ChassisStateType) | Chassis auto mode status |
+| `success` | bool | Request success flag.<br/>- `True`: Request succeeded.<br/>- `False`: Request failed to process. |
+| `msg` | str | Response message description, typically used to explain why a request could not be processed. |
+
+## ChassisStateType {#ChassisStateType}
+
+The `ChassisStateType` class is an enumerator representing the chassis state.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `UNINIT` | 1 | Uninitialized |
+| `IDLE` | 2 | Idle |
+| `PARKING` | 3 | Parking |
+| `TASK` | 4 | In Task |
+| `WARNING` | 5 | Warning |
+| `FAULT` | 6 | Fault |
+| `FOLLOWING` | 7 | Following |
+| `CHARGING` | 8 | Charging |
+| `MAPPING` | 9 | Mapping |
+
+## ChassisStatusCode {#ChassisStatusCode}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | int | Chassis ID |
+| `code` | int | Status code |
+| `time` | int | Time |
+| `status_msg` | str | Message |
+| `robot_task_id` | int | Task ID |
+| `state` | [StatusCodeRobotState](#StatusCodeRobotState) | Chassis auto mode status |
+| `type` | [ActionType](#ActionType) | Action type |
+| `level` | [StatusLevel](#StatusLevel) | Level |
+| `success` | bool | Request success flag.<br/>- `True`: Request succeeded.<br/>- `False`: Request failed to process. |
+| `msg` | str | Response message description, typically used to explain why a request could not be processed. |
+
+## StatusCodeRobotState {#StatusCodeRobotState}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `UNINIT` | 1 | Uninitialized |
+| `IDLE` | 2 | Idle |
+| `PARKING` | 3 | Parking |
+| `TASK` | 4 | In Task |
+| `WARNING` | 5 | Warning |
+| `FAULT` | 6 | Fault |
+| `FOLLOWING` | 7 | Following |
+| `CHARGING` | 8 | Charging |
+| `MAPPING` | 9 | Mapping |
+
+## ActionType {#ActionType}
+
+The `ActionType` class is an enumerator representing the type of chassis action.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `NAV` | 1 | Navigation |
+| `STEP_CTRL` | 2 | Step Control |
+| `SECONDPOS_ENTER` | 3 | Second Position Enter |
+| `SECONDPOS_QUIT` | 4 | Second Position Quit |
+| `CARRY` | 5 | Carrying Action |
+| `WAIT` | 6 | Wait |
+| `CHARGE` | 7 | Charge |
+
+## StatusLevel {#StatusLevel}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `NORMAL` | 0 | Normal |
+| `TIPS` | 1 | Tips |
+| `WARN` | 2 | Warning |
+| `FAULT` | 3 | Fault |
+
+## ChassisHardwareState {#ChassisHardwareState}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | int | Chassis ID |
+| `lidars` | list[[HardwareStateType](#HardwareStateType)] | Repeated Lidar 2 |
+| `cameras` | list[[HardwareStateType](#HardwareStateType)] | Repeated Camera 2 |
+| `success` | bool | Request success flag.<br/>- `True`: Request succeeded.<br/>- `False`: Request failed to process. |
+| `msg` | str | Response message description, typically used to explain why a request could not be processed. |
+
+## HardwareStateType {#HardwareStateType}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `NORMAL` | 0 | Normal |
+| `INFO` | 1 | Tips |
+| `WARN` | 16 | Warning |
+| `FATAL` | 17 | Fault |
+
+## ChassisTransformStamped {#ChassisTransformStamped}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `frame_id` | str | Frame ID |
+| `secs` | int | Seconds |
+| `nsecs` | int | Nanoseconds |
+| `child_frame_id` | str | Child frame ID |
+| `t_x` | float | XYZ-axis coordinate values |
+| `t_y` | float | |
+| `t_z` | float | |
+| `r_x` | float | Quaternion |
+| `r_y` | float | |
+| `r_z` | float | |
+| `r_w` | float | |
+
+## ChassisOperationState {#ChassisOperationState}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | int | Chassis ID |
+| `nav` | [NavState](#NavState) | Chassis navigation information |
+| `robot` | [RobotBit](#RobotBit) | Chassis bit information |
+| `success` | bool | Request success flag.<br/>- `True`: Request succeeded.<br/>- `False`: Request failed to process. |
+| `msg` | str | Response message description, typically used to explain why a request could not be processed. |
+
+## NavState {#NavState}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `NARROW` | 1 | Narrow passage |
+| `GUIDE` | 2 | Guide to destination |
+| `INA_LIFT` | 3 | In elevator |
+| `IMPEDE` | 4 | Obstruct |
+| `QR_CODE` | 5 | QR code |
+| `STAGE` | 6 | Segment arrival |
+
+## RobotBit {#RobotBit}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `UNDEFINED` | 0 | Undefined |
+| `TASKABLE` | 1 | Taskable |
+

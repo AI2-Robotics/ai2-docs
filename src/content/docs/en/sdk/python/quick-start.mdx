@@ -1,0 +1,359 @@
+---
+title: Getting Started
+description: Quick Start with Python API
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+
+This section will help you quickly master the basic structure and usage of the Python API.
+
+## 1. Set Up the Development Environment
+
+Before you begin development, ensure your Python environment meets the following requirements:
+
+- Operating System: Ubuntu 22 or later.
+- Python: Version 3.10.
+
+## 2. Install the alphabot Module
+
+After setting up the Python development environment, you can install the alphabot module using the pip tool.
+
+<Steps>
+
+1. Open a terminal and navigate to the `python` directory of the extracted SDK package.
+
+   ```bash
+   cd python
+   ```
+2. Install the `alphabot` module via `pip`.
+
+   ```bash
+   pip install .
+   ```  
+</Steps>
+
+## 3. Understand the Module Structure
+
+You can browse the `.pyi` interface files in the `alphabot` directory to understand the interface module organization.
+
+The `alphabot` module provides several ready-to-use classes, which can be imported via `from alphabot import <class_name>`.
+
+<table>
+   <tbody>
+      <tr>
+         <td>Class Name</td>
+         <td>Description</td>
+         <td>Module</td>
+      </tr>
+      <tr>
+         <td>[ArmFactory](/en/sdk/python/arm-api#ArmFactory)</td>
+         <td>Creates a robotic arm instance</td>
+         <td rowspan="8">alphabot.arm</td>
+      </tr>
+      <tr>
+         <td>[ArmFactoryParam](/en/sdk/python/arm-api#ArmFactoryParam)</td>
+         <td>Describes robotic arm parameters</td>
+      </tr>
+      <tr>
+         <td>[ArmInterface](/en/sdk/python/arm-api#ArmInterface)</td>
+         <td>Main interface for robotic arm control</td>
+      </tr>
+      <tr>
+         <td>[ArmForceSensor](/en/sdk/python/arm-api#ArmForceSensor)</td>
+         <td>Force sensor data</td>
+      </tr>
+      <tr>
+         <td>[ArmRealtimeState](/en/sdk/python/arm-api#ArmRealtimeState)</td>
+         <td>Real-time state of the robotic arm</td>
+      </tr>
+      <tr>
+         <td>[GripperState](/en/sdk/python/arm-api#GripperState)</td>
+         <td>Gripper state</td>
+      </tr>
+      <tr>
+         <td>[JointState](/en/sdk/python/arm-api#JointState)</td>
+         <td>Joint state</td>
+      </tr>
+      <tr>
+         <td>[PeripheralReadWriteParams](/en/sdk/python/arm-api#PeripheralReadWriteParams)</td>
+         <td>Configures Modbus communication parameters</td>
+      </tr>
+
+      <tr>
+         <td>[ChassisFactory](/en/sdk/python/chassis-api#ChassisFactory)</td>
+         <td>Creates a chassis instance</td>
+         <td rowspan="13">alphabot.chassis</td>
+      </tr>
+      <tr>
+         <td>[ChassisInterface](/en/sdk/python/chassis-api#ChassisInterface)</td>
+         <td>Main interface for chassis control</td>
+      </tr>
+      <tr>
+         <td>[ChassisBattery](/en/sdk/python/chassis-api#ChassisBattery)</td>
+         <td>Chassis battery information</td>
+      </tr>
+      <tr>
+         <td>[ChassisPoint32](/en/sdk/python/chassis-api#ChassisPoint32)</td>
+         <td>Footprint point position</td>
+      </tr>
+      <tr>
+         <td>[ChassisPose2D](/en/sdk/python/chassis-api#ChassisPose2D)</td>
+         <td>2D pose of the chassis</td>
+      </tr>
+      <tr>
+         <td>[ChassisPoseSpeed](/en/sdk/python/chassis-api#ChassisPoseSpeed)</td>
+         <td>Chassis pose and velocity</td>
+      </tr>
+      <tr>
+         <td>[ChassisState](/en/sdk/python/chassis-api#ChassisState)</td>
+         <td>Chassis state</td>
+      </tr>
+      <tr>
+         <td>[ChassisStatusCode](/en/sdk/python/chassis-api#ChassisStatusCode)</td>
+         <td>Chassis status codes</td>
+      </tr>
+      <tr>
+         <td>[ChassisTransformStamped](/en/sdk/python/chassis-api#ChassisTransformStamped)</td>
+         <td>Data related to static transforms</td>
+      </tr>
+      <tr>
+         <td>[ChassisTwist](/en/sdk/python/chassis-api#ChassisTwist)</td>
+         <td>Chassis twist</td>
+      </tr>
+      <tr>
+         <td>[ChassisOperationState](/en/sdk/python/chassis-api#ChassisOperationState)</td>
+         <td>Chassis operation state</td>
+      </tr>
+      <tr>
+         <td>[NavState](/en/sdk/python/chassis-api#NavState)</td>
+         <td>Chassis navigation information</td>
+      </tr>
+      <tr>
+         <td>[RobotBit](/en/sdk/python/chassis-api#RobotBit)</td>
+         <td>Chassis bit information</td>
+      </tr>
+
+      <tr>
+         <td>[HeadFactory](/en/sdk/python/head-api#HeadFactory)</td>
+         <td>Creates a head instance</td>
+         <td rowspan="3">alphabot.head</td>
+      </tr>
+      <tr>
+         <td>[HeadInterface](/en/sdk/python/head-api#HeadInterface)</td>
+         <td>Main interface for head control</td>
+      </tr>
+      <tr>
+         <td>[AbcHeadState](/en/sdk/python/head-api#AbcHeadState)</td>
+         <td>Head joint state</td>
+      </tr> 
+
+      <tr>
+         <td>[TorsoFactoryPose4D](/en/sdk/python/torso-api#TorsoFactoryPose4D)</td>
+         <td>Creates a torso instance</td>
+         <td rowspan="3">alphabot.torso</td>
+      </tr>
+      <tr>
+         <td>[TorsoInterfacePose4D](/en/sdk/python/torso-api#TorsoInterfacePose4D)</td>
+         <td>Main interface for torso control</td>
+      </tr>
+      <tr>
+         <td>[AbcTorsoState](/en/sdk/python/torso-api#AbcTorsoState)</td>
+         <td>Torso joint state</td>
+      </tr>
+
+      <tr>
+         <td>[SensorFactory](/en/sdk/python/sensor-api#SensorFactory)</td>
+         <td>Creates sensors and depth cameras</td>
+         <td rowspan="8">alphabot.sensor</td>
+      </tr>
+      <tr>
+         <td>[SyncDataPackage](/en/sdk/python/sensor-api#SyncDataPackage)</td>
+         <td>Synchronized sensor data package</td>
+      </tr>
+      <tr>
+         <td>[SyncMode](/en/sdk/python/sensor-api#SyncMode)</td>
+         <td>Synchronization mode</td>
+      </tr>
+      <tr>
+         <td>[SyncPolicy](/en/sdk/python/sensor-api#SyncPolicy)</td>
+         <td>Synchronization policy</td>
+      </tr>
+      <tr>
+         <td>[RGBData](/en/sdk/python/sensor-api#RGBData)</td>
+         <td>RGB image data</td>
+      </tr>
+      <tr>
+         <td>[RGBDData](/en/sdk/python/sensor-api#RGBDData)</td>
+         <td>RGB + Depth image data</td>
+      </tr>
+      <tr>
+         <td>[DepthCamera](/en/sdk/python/sensor-api#DepthCamera)</td>
+         <td>Depth camera</td>
+      </tr>
+      <tr>
+         <td>[DepthSensorParam](/en/sdk/python/sensor-api#DepthSensorParam)</td>
+         <td>Depth sensor parameters</td>
+      </tr>
+
+      <tr>
+         <td>[EStopMonitor](/en/sdk/python/sensor-emergency-stop-monitor-api#EStopMonitor)</td>
+         <td>Emergency stop button monitor</td>
+         <td rowspan="3">alphabot.estop</td>
+      </tr>
+      <tr>
+         <td>[EStopMConfig](/en/sdk/python/sensor-emergency-stop-monitor-api#EStopMConfig)</td>
+         <td>Monitor configuration</td>
+      </tr>
+      <tr>
+         <td>[ESState](/en/sdk/python/sensor-emergency-stop-monitor-api#ESState)</td>
+         <td>Emergency stop button state</td>
+      </tr>
+
+      <tr>
+         <td>[ArmKinematics](/en/sdk/python/kinematics-api#ArmKinematics)</td>
+         <td>Robotic arm kinematics</td>
+         <td rowspan="4">alphabot.algo</td>
+      </tr>
+      <tr>
+         <td>[ArmType](/en/sdk/python/kinematics-api#ArmType)</td>
+         <td>Robotic arm type</td>
+      </tr>
+      <tr>
+         <td>[TorsoKinematics](/en/sdk/python/kinematics-api#TorsoKinematics)</td>
+         <td>Torso kinematics</td>
+      </tr>
+      <tr>
+         <td>[admittance_control_law](/en/sdk/python/kinematics-api#admittance_control_law)</td>
+         <td>Admittance control law</td>
+      </tr>
+
+      <tr>
+         <td>[AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode)</td>
+         <td>Error codes</td>
+         <td rowspan="9">alphabot.core</td>
+      </tr>
+      <tr>
+         <td>[AbcTorsoPose4D](/en/sdk/python/data-structures#AbcTorsoPose4D)</td>
+         <td>Torso pose</td>
+      </tr>
+      <tr>
+         <td>[ArmCurrentStatus](/en/sdk/python/data-structures#ArmCurrentStatus)</td>
+         <td>Current robotic arm status code</td>
+      </tr>
+      <tr>
+         <td>[Euler](/en/sdk/python/data-structures#Euler)</td>
+         <td>Euler angles</td>
+      </tr>
+      <tr>
+         <td>[Pose](/en/sdk/python/data-structures#Pose)</td>
+         <td>3D pose</td>
+      </tr>
+      <tr>
+         <td>[Position](/en/sdk/python/data-structures#Position)</td>
+         <td>3D position</td>
+      </tr>
+      <tr>
+         <td>[Quaternion](/en/sdk/python/data-structures#Quaternion)</td>
+         <td>Quaternion</td>
+      </tr>
+      <tr>
+         <td>[SensorStatus](/en/sdk/python/data-structures#SensorStatus)</td>
+         <td>Sensor status</td>
+      </tr>
+      <tr>
+         <td>[SensorType](/en/sdk/python/data-structures#SensorType)</td>
+         <td>Sensor type</td>
+      </tr>          
+   </tbody>
+</table>
+
+## 4. Refer to Example Programs
+
+Refer to the example programs under the `examples` directory to learn how to call core interfaces.
+
+For example, the sample code in `Python\examples\arm\arm_factory_example.py` is shown below.
+
+```python
+import sys
+import os
+from alphabot import ArmFactory, ArmFactoryParam
+
+
+def main():
+    """Main function"""
+    # Parameter validation
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <configuration_file_path>")
+        print(f"Example: {sys.argv[0]} config/left_arm.json")
+        return 1
+
+    config_path = sys.argv[1]
+
+    print("===== ArmFactory Sample Program =====")
+
+    try:
+        print("\n----- Method 1: Creating a Robotic Arm Using Parameters -----")
+        # Configure robotic arm parameters
+        param = ArmFactoryParam({
+            "arm_type": "realman",
+            "arm_name": "right_arm",
+            "ip": "192.168.1.18",
+            "port": "8080",
+            "udp_ip": "192.168.1.102",
+            "udp_port": "8089",
+            "udp_cycle": "5"
+        })
+
+        # Create Realman robotic arm instance
+        arm1 = ArmFactory.create_arm(param)
+        if not arm1:
+            print("Failed to create robotic arm instance")
+            return 1
+
+        print(f"Successfully created robotic arm: {arm1}")
+
+        print("\n----- Method 2: Creating a Robotic Arm Using Configuration File -----")
+        # Create robotic arm instance from configuration file
+        arm2 = ArmFactory.create_arm_from_config(config_path)
+        if not arm2:
+            print("Failed to create robotic arm instance from configuration file")
+            return 1
+
+        print(f"Successfully created robotic arm from configuration file: {arm2}")
+
+        return 0
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+Through the above example program, you can quickly learn how to create an instance of the robotic arm interface and connect to the robotic arm. Other example programs follow similar structures and calling conventions. Please refer to [more example programs](/en/sdk/python/examples) for further learning.
+
+## 5. Run the Program
+
+The following uses `Python\examples\arm\arm_factory_example.py` as an example to explain the execution process.
+
+<Steps>
+
+1. Open a terminal and navigate to the directory where the example program is located.
+
+   ```bash
+   cd python/examples/arm
+   ```
+2. Execute the `python` command to run the program. This example requires passing the robotic arm configuration file path as a parameter.
+
+   ```bash
+   python arm_factory_example.py ../config/left_arm.json
+   ```    
+
+</Steps>
+
+The execution steps for other example programs are similar; follow the steps above.
+
+Through this section, you have learned the basic structure and usage of the Python interface. We recommend further exploring other example programs and developing with reference to the Python API documentation.

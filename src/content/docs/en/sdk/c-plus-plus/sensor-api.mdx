@@ -1,0 +1,717 @@
+---
+title: Sensor APIs
+description: Sensor C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+
+The sensor APIs are implemented by the following classes. You can find the corresponding header files in the `c++/include/drivers/sensors` directory to access the complete set of APIs.
+
+<table>
+   <tbody>
+      <tr>
+         <td>Header File</td>
+         <td>Class Name</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`sensor_factory.h`</td>
+         <td>`SensorFactory`</td>
+         <td>A factory class for creating sensor instances of different types.</td>
+      </tr>
+      <tr>
+         <td rowspan="3">`sensor_interface.h`</td>
+         <td>`SensorData`</td>
+         <td>Base class for sensor data. All sensor data types should inherit from this class to provide timestamp information.</td>
+      </tr>
+      <tr>
+         <td>`SensorInterface`</td>
+         <td>Base class for sensor interfaces, defining common sensor control interfaces. All specific sensors should inherit from this class.</td>
+      </tr>
+      <tr>
+         <td>`StreamableSensor`</td>
+         <td>Sensor data stream class, derived from `SensorInterface`.</td>
+      </tr>
+      <tr>
+         <td rowspan="2">`camera_data.h`</td>
+         <td>`RGBData`</td>
+         <td>RGB image data class, derived from `SensorData`.</td>
+      </tr>
+      <tr>
+         <td>`RGBDData`</td>
+         <td>RGB-D (Depth) image data class, derived from `RGBData`.</td>
+      </tr>
+      <tr>
+         <td>`depth_camera_interface.h`</td>
+         <td>`DepthCamera`</td>
+         <td>Depth camera interface class, inheriting from `SensorInterface`.</td>
+      </tr>
+   </tbody>
+</table>
+
+## Sensors
+
+### Create a Sensor Instance
+
+There are two ways to create a sensor instance.
+
+1. Create a sensor instance by sensor parameters.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<SensorInterface> create_sensor(
+         const std::unordered_map<std::string, std::string>& params)
+     ```
+   
+   - Parameter:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `params`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Parameters related to the sensor, such as:
+     
+     ```json
+     {
+       "sensor_name": "rs1", # Sensor name
+       "sensor_type": "realsense", # Sensor vendor
+       "serial_number": "215322070063", # Serial number
+       "color_width": "640",  # Color image width
+       "color_height": "480",  # Color image height
+       "depth_width": "640",  # Depth image width
+       "depth_height": "480",  # Depth image height
+       "align_to_color": "true",  # Whether to align depth image to color image
+       "frame_rate": "30"  # Frame rate
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>  
+
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `SensorInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+2. Create a sensor instance from a configuration file.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<SensorInterface> create_sensor_from_config(
+         const std::string& config_path)
+     ```
+   
+   - Parameter:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+       "sensor_name": "rs1", # Sensor name
+       "sensor_type": "realsense", # Sensor vendor
+       "serial_number": "215322070063", # Serial number
+       "color_width": "640",  # Color image width
+       "color_height": "480",  # Color image height
+       "depth_width": "640",  # Depth image width
+       "depth_height": "480",  # Depth image height
+       "align_to_color": "true",  # Whether to align depth image to color image
+       "frame_rate": "30"  # Frame rate
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>  
+
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `SensorInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+### Connect to the Sensor
+
+- Method:
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Disconnect from the Sensor
+
+- Method:
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Register Sensor Data Processing Callback Function
+
+This method registers a callback function. When the sensor captures new data, the system automatically invokes this callback for data processing.
+
+- Method:
+
+  ```cpp
+  void set_data_callback(SensorCallback cb)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `cb` | Input | `SensorCallback` is a function pointer type. For details, please refer to [SensorCallback](/en/sdk/c-plus-plus/data-structures#SensorCallback). The callback function is called whenever sensor data update is received. |
+
+- Return Value:
+
+  None (void).
+
+### Get Sensor Name
+
+- Method:
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- Return Value:
+
+  The name of the sensor instance.
+
+### Get Sensor Type
+
+- Method:
+
+  ```cpp
+  SensorType get_type() const
+  ```
+
+- Return Value:
+
+  The sensor type. For details, please refer to [SensorType](/en/sdk/c-plus-plus/data-structures#SensorType).
+
+### Get Sensor Status
+
+- Method:
+
+  ```cpp
+  SensorStatus get_status() const
+  ```
+
+- Return Value:
+
+  The sensor status. For details, please refer to [SensorStatus](/en/sdk/c-plus-plus/data-structures#SensorStatus).
+
+### Set Sensor Status
+
+- Method:
+
+  ```cpp
+  void set_status(SensorStatus status)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `status` | Input | The sensor status. For details, please refer to [SensorStatus](/en/sdk/c-plus-plus/data-structures#SensorStatus). |
+
+- Return Value:
+
+  None (void).
+
+## Sensor Data
+
+### Get Data Timestamp
+
+- Method:
+
+  ```cpp
+  std::chrono::system_clock::time_point get_timestamp()
+  ```
+
+- Return Value:
+
+  Timestamp.
+
+### Set Data Timestamp
+
+- Method:
+
+  ```cpp
+  void set_timestamp(const std::chrono::system_clock::time_point& timestamp)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `timestamp` | Input | Timestamp. |
+
+- Return Value:
+
+  None (void).
+
+## Sensor Data Stream
+
+### Start Data Stream
+
+- Method:
+
+  ```cpp
+  AbcErrorCode start_stream()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Stop Data Stream
+
+- Method:
+
+  ```cpp
+  AbcErrorCode stop_stream()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Image Data
+
+### Get Color Image Width
+
+- Method:
+
+  ```cpp
+  int get_width() const
+  ```
+
+- Return Value:
+
+  Color image width.
+
+### Get Color Image Height
+
+- Method:
+
+  ```cpp
+  int get_height() const
+  ```
+
+- Return Value:
+
+  Color image height.
+
+### Get Color Image Channels
+
+- Method:
+
+  ```cpp
+  int get_channels() const
+  ```
+
+- Return Value:
+
+  Number of color image channels.
+
+### Get Color Image Data
+
+- Method:
+
+  ```cpp
+  std::vector<uint8_t>& get_rgb_data()
+  ```
+
+- Return Value:
+
+  Color image data.
+
+### Set Color Image Data
+
+- Method:
+
+  ```cpp
+  void set_rgb_data(const std::vector<uint8_t>& data)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `data` | Input | Color image data. |
+
+- Return Value:
+
+  None (void).
+
+### Get Color Camera Intrinsic Parameters
+
+- Method:
+
+  ```cpp
+  const AbcIntrinsic& get_color_intrinsic() const
+  ```
+
+- Return Value:
+
+  Color camera intrinsic parameters. For details, please refer to [AbcIntrinsic](/en/sdk/c-plus-plus/data-structures#AbcIntrinsic).
+
+### Set Color Camera Intrinsic Parameters
+
+- Method:
+
+  ```cpp
+  void set_color_intrinsic(const AbcIntrinsic& intrinsic)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `intrinsic` | Input | Color camera intrinsic parameters. For details, please refer to [AbcIntrinsic](/en/sdk/c-plus-plus/data-structures#AbcIntrinsic). |
+
+- Return Value:
+
+  None (void).
+
+### Get Depth Image Data
+
+- Method:
+
+  ```cpp
+  const std::vector<float>& get_depth_data() const
+  std::vector<float>& get_depth_data()
+  ```
+
+- Return Value:
+
+  Depth image data, in meters.
+
+### Set Depth Image Data
+
+- Method:
+
+  ```cpp
+  void set_depth_data(const std::vector<float>& data)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `data` | Input | Depth image data, in meters. |
+
+- Return Value:
+
+  None (void).
+
+### Get Depth Image Width
+
+- Method:
+
+  ```cpp
+  int get_depth_width() const
+  ```
+
+- Return Value:
+
+  Depth image width.
+
+### Get Depth Image Height
+
+- Method:
+
+  ```cpp
+  int get_depth_height() const
+  ```
+
+- Return Value:
+
+  Depth image height.
+
+### Get Depth Camera Intrinsic Parameters
+
+- Method:
+
+  ```cpp
+  const AbcIntrinsic& get_depth_intrinsic() const
+  ```
+
+- Return Value:
+
+  Depth camera intrinsic parameters. For details, please refer to [AbcIntrinsic](/en/sdk/c-plus-plus/data-structures#AbcIntrinsic).
+
+### Set Depth Camera Intrinsic Parameters
+
+- Method:
+
+  ```cpp
+  void set_depth_intrinsic(const AbcIntrinsic& intrinsic)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `intrinsic` | Input | Depth camera intrinsic parameters. For details, please refer to [AbcIntrinsic](/en/sdk/c-plus-plus/data-structures#AbcIntrinsic). |
+
+- Return Value:
+
+  None (void).
+
+## Depth Camera
+
+### Create a Depth Camera Instance
+
+There are two ways to create a depth camera instance.
+
+1. Create a depth camera instance by depth camera parameters.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<DepthCamera> create_depth_camera(
+         const DepthSensorParam& param)
+     ```
+   
+   - Parameter:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `param` | Input | Parameters related to the depth camera. For details, please refer to [DepthSensorParam](/en/sdk/c-plus-plus/data-structures#DepthSensorParam). |
+   
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `DepthCamera` if the instance is created successfully; otherwise, returns `nullptr`.
+
+2. Create a depth camera instance from a configuration file.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<DepthCamera> create_depth_camera_from_config(
+         const std::string& config_path)
+     ```
+   
+   - Parameter:
+   
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+       "sensor_name": "rs1", # Sensor name
+       "sensor_type": "realsense", # Sensor vendor
+       "serial_number": "215322070063", # Serial number
+       "color_width": "640",  # Color image width
+       "color_height": "480",  # Color image height
+       "depth_width": "640",  # Depth image width
+       "depth_height": "480",  # Depth image height
+       "align_to_color": "true",  # Whether to align depth image to color image
+       "frame_rate": "30"  # Frame rate
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+   
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `DepthCamera` if the instance is created successfully; otherwise, returns `nullptr`.
+
+### Get Depth Image Data
+
+- Method:
+
+  ```cpp
+  std::shared_ptr<const RGBDData> get_data()
+  ```
+
+- Return Value:
+
+  A shared pointer to the `RGBDData` object.
+
+### Start Data Stream
+
+- Method:
+
+  ```cpp
+  AbcErrorCode start_stream()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Stop Data Stream
+
+- Method:
+
+  ```cpp
+  AbcErrorCode stop_stream()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Color Image Resolution
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_color_resolution(int width, int height)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `width` | Input | Image width. |
+  | `height` | Input | Image height. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Depth Image Resolution
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_depth_resolution(int width, int height)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `width` | Input | Image width. |
+  | `height` | Input | Image height. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Frame Rate
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_framerate(int fps)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `fps` | Input | Frame rate. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Set Depth Image Alignment to Color Image
+
+- Method:
+
+  ```cpp
+  AbcErrorCode set_align_to_color(bool align)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `align` | Input | Whether to align the depth image to the color image. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Get Current Alignment Setting
+
+- Method:
+
+  ```cpp
+  bool is_aligned_to_color()
+  ```
+
+- Return Value:
+
+  `true` indicates the depth image is aligned to the color image; `false` indicates it is not.

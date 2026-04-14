@@ -1,0 +1,246 @@
+---
+title: Head APIs
+description: Head C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The head APIs are implemented by the following classes. You can find the corresponding header files in the `c++/include/drivers/head` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:---|:---|:---|
+| `head_factory.h` | `HeadFactory` | A factory class for creating head instances of different types. |
+| `head_interface.h` | `HeadInterface` | The base interface class defining common APIs for head control. All vendor-specific drivers should inherit from this class. |
+
+## Create a Head Instance
+
+There are two ways to create a head instance.
+
+1. Create a head instance by head parameters.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<HeadInterface> create_head(const HeadFactoryParam& param)
+     ```
+   
+   - Parameter:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `param` | Input | Parameters related to the head. For details, please refer to [HeadFactoryParam](/en/sdk/c-plus-plus/data-structures#HeadFactoryParam). |
+   
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `HeadInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+2. Create a head instance from a configuration file.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<HeadInterface> create_head_from_config(const std::string& config_path)
+     ```
+   
+   - Parameter:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+       "head_type": "ti5",           # Head vendor
+       "head_name": "ti5_head",      # Head name
+       "head_joint_num": 2,          # Number of head joints
+       "can_device": "can0",         # CAN device name
+       "can_id": 0,                  # CAN node ID (0x00~0xFF)
+       "motor_params": [             # Motor parameters
+         {
+           "motor_id": 5,            # Motor ID
+           "reduction_ratio": 51,    # Reduction ratio
+           "position_max": 90,       # Maximum rotation angle
+           "position_min": -90.0,    # Minimum rotation angle
+           "speed_max": 30,          # Maximum rotation speed
+           "speed_min": -30,         # Minimum rotation speed
+           "acc_max": 10,            # Maximum rotation acceleration
+           "acc_min": -10            # Minimum rotation acceleration
+         }
+       ]
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>  
+
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `HeadInterface` if the instance is created successfully; otherwise, returns `nullptr`.
+
+## Connect to the Head
+
+- Method:
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Disconnect from the Head
+
+- Method:
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control Head Trajectories
+
+### Joint Motion
+
+In joint space, a motion trajectory is planned to drive each joint of the head to the specified target joint positions.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+      const std::vector<AbcType>& joints,
+      int v,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `v` | Input | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0–100. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the head completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Angle Pass-through
+
+Joint angles are sent to the head via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller. If the method is called correctly, the head executes the motion immediately.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the head.
+</Aside>
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(const std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Current Joint Angles
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Output | Current joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Error Information
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_error_flag(std::vector<int32_t>& error_flag)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `error_flag` | Output | Error codes. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      AbcPose& pose)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. For details, please refer to [AbcPose](/en/sdk/c-plus-plus/data-structures#AbcPose). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Head Name
+
+- Method:
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- Return Value:
+
+  The name of the head instance.
+

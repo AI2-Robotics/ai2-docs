@@ -1,0 +1,1042 @@
+---
+title: Robotic Arm APIs
+description: Robotic Arm Python APIs
+tableOfContents:
+  maxHeadingLevel: 6
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ArmFactory {#ArmFactory}
+
+The `ArmFactory` class provides the following methods for creating robotic arm instances.
+
+1. Create a robotic arm instance by specifying the type and name.
+
+   - Method:
+   
+     ```python
+     create_arm(vendor_type: str, name: str, params: dict[str, str]) -> ArmInterface
+     ```
+
+   - Parameters:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     `vendor_type`
+     </td>
+     <td>     
+     The manufacturer or type of the robotic arm (e.g., `"realman"`).    
+     </td>
+     </tr>
+     <tr>
+     <td>
+     `name`
+     </td>
+     <td>
+     The instance identifier for the arm (e.g., `"left_arm"`, `"right_arm"`).
+     </td>
+     </tr>
+     <tr>
+     <td>
+     
+     `params`
+     
+     </td>
+     <td>
+     
+     Additional robotic arm parameters, such as IP address, port number, etc.
+     
+     ```json
+     {
+        'ip':'192.168.1.10',      # TCP IP address
+        'port':'5000',            # TCP port number
+        'udp_ip':'192.168.1.100', # UDP IP address
+        'udp_port':'6000',        # UDP port number
+        'udp_cycle':'20', # UDP cycle (period = udp_cycle * 5 ms)
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table>
+
+   - Return value:
+   
+     An `ArmInterface` instance if creation succeeds, otherwise `None`.
+
+2. Create a robotic arm instance using an ArmFactoryParam object.
+
+   - Method:
+   
+     ```python
+     create_arm(param: ArmFactoryParam) -> ArmInterface
+     ```
+   
+   - Parameters:
+   
+     | Parameter | Description |
+     |:---|:---|
+     | `param` | Robotic arm configuration parameters. For details, please refer to [ArmFactoryParam](#ArmFactoryParam). |
+   
+   - Return value:
+   
+     An `ArmInterface` instance if creation succeeds, otherwise `None`.
+
+3. Create a robotic arm instance from a configuration file.
+
+   - Method:
+   
+     ```python
+     create_arm_from_config(config_path: str) -> ArmInterface
+     ```
+   
+   - Parameter:
+
+      <table>
+      <thead>
+      <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>
+      
+      `config_path`
+      
+      </td>
+      <td>
+      
+      Path to the configuration file. The configuration file must be a JSON file.
+      
+      ```json
+      {
+          "arm_type":"realman", # Robotic arm vendor
+          "arm_name":"left_arm", # Robotic arm name
+          "ip": "192.168.1.18", # TCP IP address
+          "port": "8080", # TCP port number
+          "udp_ip": "192.168.1.102", # UDP IP address
+          "udp_port": "8089", # UDP port number
+          "udp_cycle": "1", # UDP cycle (period = udp_cycle * 5 ms)
+          "enable_gripper": "false" # Enable gripper
+      }
+      ```     
+      </td>
+      </tr>
+      </tbody>
+      </table>
+
+   - Return value:
+   
+     An `ArmInterface` instance if creation succeeds, otherwise `None`.
+
+## ArmFactoryParam {#ArmFactoryParam}
+
+The `ArmFactoryParam` class is used to describe the parameters required for creating a robotic arm. It can be initialized either through the default constructor or by passing a dictionary.
+
+### Attributes
+
+All attributes of the `ArmFactoryParam` class are read-write.
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `arm_type` | str | Robotic arm vendor (e.g., `"realman"`) |
+| `arm_name` | str | Robotic arm name (e.g., `"left_arm"`) |
+| `ip` | str | TCP IP address |
+| `udp_ip` | str | UDP IP address |
+| `port` | int | TCP port number |
+| `udp_port` | int | UDP port number |
+| `udp_cycle` | int | UDP cycle (period = udp_cycle * 5 ms) |
+
+### Constructor with Parameters
+
+- Method:
+
+  ```python
+  __init__(self, arg0: dict[str, str]) -> None
+  ```
+
+- Parameter:
+
+  <table>
+     <tbody>
+        <tr>
+           <td>Parameter</td>
+           <td>Description</td>
+        </tr>
+        <tr>
+           <td>`arg0`</td>
+           <td>
+                A dictionary containing all necessary parameters for creating the robotic arm. It must include the keys shown in the example below. <br/>
+                The constructor will raise a `RuntimeError` if any required key is missing or its format is invalid.
+                 ```json
+                 {
+                     'arm_type':'realman',  # Robotic arm vendor
+                     'arm_name':'left_arm', # Robotic arm name
+                     'ip':'192.168.1.10',   # TCP IP address
+                     'port':'5000',         # TCP port number
+                     'udp_ip': '192.168.1.100', # UDP IP address
+                     'udp_port':'6000',         # UDP port number
+                     'udp_cycle':'20', # UDP cycle (period = udp_cycle * 5 ms)  
+                     'enable_gripper': 'false' # Enable gripper
+                 }
+                 ``` 
+           </td>
+        </tr>
+     </tbody>
+  </table>
+
+## ArmInterface {#ArmInterface}
+
+The `ArmInterface` class provides a series of public methods for controlling the robotic arm, including motion, grasping, and status queries. Ensure a robotic arm instance has been created before using these methods.
+
+### Attributes
+
+| Attribute (Read-Only) | Data Type | Description |
+|:---|:---|:---|
+| `name` | str | The name of the robotic arm instance. |
+
+### Connect to the Robotic Arm
+
+- Method:
+
+  ```python
+  connect(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Disconnect from the Robotic Arm
+
+- Method:
+
+  ```python
+  disconnect(self) -> None
+  ```
+
+- Return value:
+
+  `None`.
+
+### Joint Motion
+
+- Method:
+
+  ```python
+  move_joint_position(
+      self,
+      joints: list[float],
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `joints` | Target joint positions, in degrees. |
+  | `v` | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0-100. |
+  | `r` | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Cartesian Linear Motion
+
+- Method:
+
+  ```python
+  move_cartesian_linear(
+      self,
+      pose: alphabot.core.Pose,
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | Target pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+  | `v` | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0-100. |
+  | `r` | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Move to Target Pose in Joint Space
+
+In joint space, a motion trajectory is planned to move the robotic arm to the specified target pose.
+
+- Method:
+
+  ```python
+  move_joint_pose(
+      self,
+      pose: alphabot.core.Pose,
+      v: int,
+      r: int,
+      trajectory_connect: int,
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | Target pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+  | `v` | Percentage of the maximum joint angular velocity and joint angular acceleration used for planning. Valid range: 0-100. |
+  | `r` | Trajectory blending radius. Default value is 0. |
+  | `trajectory_connect` | Trajectory connection flag. Accepts 0 or 1.<br/>- `0`: Plan and execute the trajectory immediately. Do not connect to the next trajectory.<br/>- `1`: Plan the current trajectory together with the next one, but do not execute immediately. Note: In blocking mode, the method returns immediately even after the trajectory is successfully sent. |
+  | `block` | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the arm completes the motion or an error occurs before returning. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Angle Pass-through
+
+Joint angles are sent to the robotic arm via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller. If the method is called correctly, the robotic arm executes the motion immediately.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the robotic arm.
+- The I-series wired Ethernet interface supports a minimum cycle time of 2 ms, providing higher real-time performance.
+</Aside>
+
+- Method:
+
+  ```python
+  move_joint_position_canfd(
+      self,
+      joints: list[float],
+      follow: bool,
+      trajectory_mode: int = 0,
+      radio: int = 0
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `joints` | Target joint positions, in degrees. |
+  | `follow` | Follow mode flag. Accepts `True` or `False`.<br/>- `True`: High-follow mode.<br/>- `False`: Low-follow mode.<br/>Note: High-follow mode requires a pass-through cycle of 10ms or less. |
+  | `trajectory_mode` | Used in high-follow mode. Accepts 0, 1, or 2.<br/>- `0`: Full pass-through mode.<br/>- `1`: Curve-fitting mode.<br/>- `2`: Filtering mode. |
+  | `radio` | - In curve-fitting mode: `radio` is the smoothing coefficient, range 0-100.<br/>- In filtering mode: `radio` is the filter parameter, range 0-1000. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Pose Pass-through
+
+The target pose is sent to the robotic arm via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller.
+
+When the target pose is received by the arm controller, the controller first attempts inverse kinematics calculation. If the inverse kinematics solution succeeds and the calculated joint angles do not differ significantly from the current joint positions, the angles are sent directly to the joints for execution, skipping additional trajectory planning.
+
+This feature is suitable for scenarios that require periodic pose adjustments, such as visual servoing applications.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the robotic arm.
+- The I-series wired Ethernet interface supports a minimum cycle time of 2 ms, providing higher real-time performance.
+</Aside>
+
+- Method:
+
+  ```python
+  move_cartesian_pose_canfd(
+      self,
+      pose: alphabot.core.Pose,
+      follow: bool,
+      trajectory_mode: int = 0,
+      radio: int = 0
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | Target pose. |
+  | `follow` | Follow mode flag. Accepts `True` or `False`.<br/>- `True`: High-follow mode.<br/>- `False`: Low-follow mode.<br/>Note: High-follow mode requires a pass-through cycle of 10ms or less. |
+  | `trajectory_mode` | Used in high-follow mode. Accepts 0, 1, or 2.<br/>- `0`: Full pass-through mode.<br/>- `1`: Curve-fitting mode.<br/>- `2`: Filtering mode. |
+  | `radio` | - In curve-fitting mode: `radio` is the smoothing coefficient, range 0-100.<br/>- In filtering mode: `radio` is the filter parameter, range 0-1000. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Joint Space Following Motion
+
+Joint space following motion refers to real-time trajectory planning in joint space to achieve dynamic following of target joint positions.
+
+- Method:
+
+  ```python
+  move_joint_follow(self, joints: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `joints` | Target joint positions. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Cartesian Space Following Motion
+
+Cartesian space following motion refers to real-time trajectory planning in Cartesian space to achieve dynamic following of the target pose.
+
+- Method:
+
+  ```python
+  move_pose_follow(self, pose: alphabot.core.Pose) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | Target pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Register Robotic Arm State Callback Function
+
+- Method:
+
+  ```python
+  realtime_arm_state_call_back(self, callback: typing.Callable) -> None
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `callback` | The callback function is called whenever a robotic arm state update is received. The callback function receives a parameter of type [ArmRealtimeState](#ArmRealtimeState). |
+
+- Return value:
+
+  `None`.
+
+### Slow Stop
+
+The robotic arm decelerates and stops smoothly along the currently executing trajectory.
+
+- Method:
+
+  ```python
+  set_arm_slow_stop(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Emergency Stop
+
+The robotic arm stops immediately at the maximum joint speed along the currently executing trajectory. This operation is an irreversible abort; motion cannot be resumed from the interruption point.
+
+- Method:
+
+  ```python
+  set_arm_stop(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Pause
+
+The robotic arm pauses execution along the currently running trajectory. This operation is a recoverable interruption; motion can be resumed from the point of interruption.
+
+- Method:
+
+  ```python
+  set_arm_pause(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Resume
+
+After being paused, the robotic arm resumes execution from the interruption point and continues the unfinished motion task.
+
+- Method:
+
+  ```python
+  set_arm_continue(self) -> alphabot.core.AbcErrorCode
+  ```
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set End-Effector Ecosystem Protocol Mode
+
+- Method:
+
+  ```python
+  set_plus_mode(self, mode: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `mode` | The end-effector ecosystem protocol mode. <br/>- `0`: Disable protocol.<br/>- `9600`: Enable protocol (baud rate 9600). <br/>- `115200`: Enable protocol (baud rate 115200). <br/>- `256000`: Enable protocol (baud rate 256000). <br/>- `460800`: Enable protocol (baud rate 460800). |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+
+### Release Gripper
+
+The gripper moves to its fully open position at the specified speed.
+
+- Method:
+
+  ```python
+  set_gripper_release(
+      self,
+      speed: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `speed` | Gripper release speed. Valid range: 1-1000 (dimensionless). |
+  | `block` | Blocking mode flag.<br/>- `True`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `False`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Force-Controlled Grasp
+
+The gripper grasps at the specified speed and force. Grasping stops automatically when the gripping force exceeds the configured force threshold.
+
+- Method:
+
+  ```python
+  set_gripper_pick(
+      self,
+      speed: int,
+      force: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `speed` | Gripper closing speed. Valid range: 1-1000 (dimensionless). |
+  | `force` | Force-control threshold. Valid range: 50-1000 (dimensionless). |
+  | `block` | Blocking mode flag.<br/>- `True`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `False`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Continuous Force-Controlled Grasp
+
+- Method:
+
+  ```python
+  set_gripper_pick_on(
+      self,
+      speed: int,
+      force: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `speed` | Gripper closing speed. Valid range: 1-1000 (dimensionless). |
+  | `force` | Force-control threshold. Valid range: 50-1000 (dimensionless). |
+  | `block` | Blocking mode flag.<br/>- `True`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `False`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Gripper Aperture Position
+
+After the gripper reaches the target position, the following behavior applies:
+
+- If the current aperture is smaller than the target, the gripper opens to the target position at the default speed.
+- If the current aperture is larger than the target, the gripper closes towards the target position at the specified speed and torque limit. The gripper stops when either the torque threshold is exceeded or the target position is reached.
+
+- Method:
+
+  ```python
+  set_gripper_position(
+      self,
+      position: int,
+      block: bool,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `position` | Target gripper aperture position. Valid range: 1-1000 (dimensionless). |
+  | `block` | Blocking mode flag.<br/>- `true`: Blocking mode. Waits for the controller to confirm the gripper has reached the position.<br/>- `false`: Non-blocking mode. Does not wait for the gripper-in-position feedback. |
+  | `timeout` | Timeout behavior depends on the blocking mode.<br/>- Blocking mode: Maximum waiting time for the gripper to reach the target position, in seconds.<br/>- Non-blocking mode: If set to 0, the method returns immediately after sending the command; otherwise, it returns after receiving the successful setting command. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Gripper Status
+
+- Method:
+
+  ```python
+  get_gripper_state(self) -> tuple[alphabot.core.AbcErrorCode, GripperState]
+  ```
+
+- Return value:
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `GripperState` | The current gripper status. For details, please refer to [GripperState](#GripperState). |
+
+### Set Target Gesture Sequence Number of the Dexterous Hand
+
+- Method:
+
+  ```python
+  set_hand_posture(
+      self, 
+      posture_num: int, 
+      block: bool, 
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `posture_num` | Gesture sequence number pre-stored in the dexterous hand, range: 1-40. |
+  | `block` | - `True` indicates blocking mode, which waits until the dexterous hand motion completes before returning. <br/>- `False` indicates non-blocking mode, which returns immediately after the command is sent. |
+  | `timeout` | Timeout value in blocking mode, in seconds. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Each DOF Angle of the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```python
+  set_hand_angle(
+      self, 
+      hand_angle: list[int]
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `hand_angle` | Array of finger angles. The array length is 6. The angle range is 0–1000. Additionally, `-1` indicates that no action will be performed for this degree of freedom, and the current state will be maintained.|
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).  
+
+### Set Angle Following Control for the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```python
+  set_hand_follow_angle(
+      self, 
+      hand_angle: list[int], 
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `hand_angle` | Array of finger angles. The array length is 6. The angle range is defined by the dexterous hand manufacturer (e.g., for INSPIRE-ROBOTS, the range is 0–2000). |
+  | `block` | Timeout value before returning, in milliseconds. A value of `0` means non-blocking mode. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). 
+
+### Set Position Following Control for the Dexterous Hand
+
+The dexterous hand has 6 degrees of freedom (DOF), numbered 1–6 as follows:
+
+1: Little finger, 2: Ring finger, 3: Middle finger, 4: Index finger, 5: Thumb flexion, 6: Thumb rotation.
+
+- Method:
+
+  ```python
+  set_hand_follow_pos(
+      self, 
+      hand_pos: list[int], 
+      block: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `hand_angle` | Array of finger positions. The array length is 6. The position range is defined by the dexterous hand manufacturer (e.g., for INSPIRE-ROBOTS, the range is 0–1000). |
+  | `block` | Timeout value before returning, in milliseconds. A value of `0` means non-blocking mode. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Speed of the Dexterous Hand
+
+- Method:
+
+  ```python
+  set_hand_speed(self, speed: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `speed` | Finger speed. Valid range: 1–1000. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).   
+
+### Set Force Threshold of the Dexterous Hand
+
+- Method:
+
+  ```python
+  set_hand_force(self, hand_force: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `hand_force` | Finger force. Valid range: 1–1000. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Current Joint Angles
+
+- Method:
+
+  ```python
+  get_joint_degree(self) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Return value:
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Current joint angles. |
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```python
+  forward_kinematics(
+      self,
+      joints: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.Pose]
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `joints` | Joint angles. |
+
+- Return value:
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `Pose` | Pose computed by forward kinematics. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```python
+  inverse_kinematics(
+      self,
+      pose: alphabot.core.Pose,
+      ref_joints: list[float],
+      mode: int = 0
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | The target pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+  | `ref_joints` | Reference joint angles. |
+  | `mode` | Solution mode. Accepts 0 or 1. Default is 0.<br/>- `0`: Single-step solution.<br/>- `1`: Iterative search solution. |
+
+- Return value:
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode) | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Joint angles computed by inverse kinematics. |
+
+### Configure Modbus RTU Mode
+
+After the robotic arm is started, you must first call the following method to configure Modbus RTU mode before performing any operation on the communication port. Otherwise, an error will be returned.
+
+The robotic arm persists the Modbus configuration. After a reboot, the arm automatically restores the mode that was configured before power-off.
+
+- Method:
+
+  ```python
+  set_modbus_mode(
+      self,
+      port: int,
+      baudrate: int,
+      timeout: int
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `port` | Specifies the communication port. Valid values: 0, 1, or 2.<br/>- `0`: Controller RS485 port as RTU master.<br/>- `1`: End interface board RS485 port as RTU master.<br/>- `2`: Controller RS485 port as RTU slave. |
+  | `baudrate` | Baud rate, supporting three common baud rates, namely 9600, 115200, and 460800. |
+  | `timeout` | Timeout period, in 100 ms.<br/>For all read and write commands to the Modbus device, if no response data is returned within the specified timeout period, a timeout error will be returned.<br/>The timeout period cannot be set to 0; if set to 0, the robotic arm will take it as 1 for configuration. |
+
+  <Aside>
+  Other configurations are as follows by default: data bit - 8, stop bit - 1, parity check - no.
+  </Aside>
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Close Modbus RTU Mode
+
+- Method:
+
+  ```python
+  close_modbus_mode(self, port: int) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `port` | Specifies the communication port. Valid values: 0, 1, or 2.<br/>- `0`: Controller RS485 port as RTU master.<br/>- `1`: End interface board RS485 port as RTU master.<br/>- `2`: Controller RS485 port as RTU slave. |
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Write multiple registers
+
+- Method:
+
+  ```python
+  write_registers(
+      self,
+      params: PeripheralReadWriteParams,
+      values: list[int]
+  ) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `params` | Parameter structure writing multiple registers. For details, please refer to `PeripheralReadWriteParams`. |
+  | `values` | An array of data to be written to the registers, where each value is a 16-bit unsigned integer in the range 0-65535. |
+
+  <Aside>
+  - A maximum of 10 registers can be written at a time. The array length must equal the number of registers.
+  - This method automatically converts 16-bit integers into a byte sequence with the high byte first (big-endian order).
+  </Aside>
+
+- Return value:
+
+  `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Error Information
+
+- Method:
+
+  ```python
+  get_error_flag(self) -> tuple[alphabot.core.AbcErrorCode, tuple[list[int], list[int]]]
+  ```
+
+- Return value:
+
+  A tuple containing two elements.
+
+  <table>
+     <tbody>
+        <tr>
+           <td colspan="2">Element Type</td>
+           <td>Description</td>
+        </tr>
+        <tr>
+           <td colspan="2">`AbcErrorCode`</td>
+           <td>`AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to  [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode)。</td>
+        </tr>
+        <tr>
+           <td rowspan="2">`tuple[list[int], list[int]]`</td>
+           <td>list[int]</td>
+           <td>Joint error codes.</td>
+        </tr>
+        <tr>
+           <td>list[int]</td>
+           <td>Joint brake status. <br/>- `1`: Brake is engaged (not released). <br/>- `0`: Brake is released.</td>
+        </tr>
+     </tbody>
+  </table>
+
+## ArmForceSensor {#ArmForceSensor}
+
+The `ArmForceSensor` class represents force sensor data of the robotic arm.
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `force` | list[float] | Current raw force sensor data, in units of 0.001 N or 0.001 N·m. |
+| `zero_force` | list[float] | Current external force data measured by the force sensor system, in units of 0.001 N or 0.001 N·m. |
+| `coordinate` | int | Coordinate frame of the external force data.<br/>- `0`: Sensor coordinate frame.<br/>- `1`: Current working coordinate frame.<br/>- `2`: Current tool coordinate frame. |
+
+## ArmRealtimeState {#ArmRealtimeState}
+
+The `ArmRealtimeState` class represents the real-time state of the robotic arm.
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `name` | str | Robotic arm name |
+| `timestamp` | typing.Any | Timestamp |
+| `joint_status` | [JointState](#JointState) | Joint states |
+| `force_sensor` | [ArmForceSensor](#ArmForceSensor) | Force sensor status |
+| `arm_current_status` | [ArmCurrentStatus](/en/sdk/python/data-structures#ArmCurrentStatus) | Robotic arm status |
+| `gripper_state` | [GripperState](#GripperState) | Gripper status |
+| `ee_pose` | [Pose](/en/sdk/python/data-structures#Pose) | End-effector pose |
+
+## JointState {#JointState}
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `joint_position` | list[float] | Current joint angles, in degrees (°). |
+| `joint_speed` | list[float] | Current joint speeds, in RPM (revolutions per minute). |
+| `joint_current` | list[float] | Current joint current, in milliamperes (mA). |
+| `joint_temperature` | list[float] | Current joint temperature, in degrees Celsius (°C). |
+| `joint_voltage` | list[float] | Current joint voltage, in volts (V). |
+| `joint_err_code` | list[int] | Current joint error codes. |
+| `joint_en_flag` | list[bool] | Current joint enable flags.<br/>- `True`: Enabled.<br/>- `False`: Disabled. |
+
+## GripperState {#GripperState}
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `status` | int | Gripper status.<br/>- `0`: Offline.<br/>- `1`: Online.<br/>- `-1`: Online but disabled. |
+| `error` | int | Gripper error information.<br/>- Lower 8 bits: Internal gripper error codes.<br/>- Bits 5--7: Reserved.<br/>- Bit 4: Internal communication error.<br/>- Bit 3: Driver error.<br/>- Bit 2: Overcurrent.<br/>- Bit 1: Overtemperature.<br/>- Bit 0: Locked-rotor. |
+| `mode` | int | Current operating mode.<br/>- `1`: Gripper fully open and idle.<br/>- `2`: Gripper fully closed and idle.<br/>- `3`: Gripper stopped and idle.<br/>- `4`: Gripper is closing.<br/>- `5`: Gripper is opening.<br/>- `6`: Gripper stopped by force-controlled during closing. |
+| `current_force` | int | Current force, in grams (g). |
+| `temperature` | int | Current temperature, in degrees Celsius (°C). |
+| `actpos` | int | Gripper aperture, range 0-1000.<br/>- `0`: Gripper fully closed.<br/>- `1000`: Gripper fully open. |
+
+## PeripheralReadWriteParams {#PeripheralReadWriteParams}
+
+The `PeripheralReadWriteParams` class is used to configure Modbus communication parameters between the controller and peripheral devices.
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `port` | int | Communication port.<br/>- `0`: Controller RS485 port<br/>- `1`: End-effector interface board RS485 port<br/>- `3`: Controller Modbus TCP device |
+| `address` | int | Starting data address |
+| `device` | int | Peripheral device address |
+| `num` | int | Number of data items |

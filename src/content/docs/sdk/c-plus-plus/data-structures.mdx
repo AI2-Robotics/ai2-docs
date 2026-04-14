@@ -421,10 +421,10 @@ using AbcType = double;
 -400
 </td>
 <td>
-传感器通用错误
+底盘通用错误
 </td>
 <td rowspan="3">
-底盘通用错误（-400~-499）
+底盘错误（-400~-499）
 </td>
 </tr>
 
@@ -665,19 +665,6 @@ using AbcType = double;
 
 
 ## 机械臂相关的数据结构
-
-### ArmFactoryParam {#ArmFactoryParam}
-
-| 结构体成员 | 数据类型 | 说明 |
-|:-------|:---|:-|
-|`arm_type` | string | 机械臂厂商，例如 `"realman"`。|
-|`arm_name` |string | 机械臂名称，例如 `"left_arm"`。 |
-|`ip` | string | TCP IP地址。|
-|`udp_ip` | string | UDP IP地址。|
-|`port` | int | TCP 端口号。 |
-|`udp_port` | int | UDP 端口号。|
-|`udp_cycle` | int | UDP 周期，以 `udp_cycle*5` 毫秒为周期。|
-|`enable_gripper` | bool | 夹爪状态。|
 
 ### AbcArmCurrentStatus {#AbcArmCurrentStatus}
 

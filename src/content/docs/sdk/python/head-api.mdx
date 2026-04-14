@@ -18,11 +18,13 @@ import { Aside } from '@astrojs/starlight/components';
 - 参数说明：
 
   <table>
-     <tbody>
+     <thead>
         <tr>
-           <td>**参数名称**</td>
-           <td>**说明**</td>
+          <th><strong>参数名称</strong></th>
+          <th><strong>说明</strong></th>
         </tr>
+     </thead>    
+     <tbody>
         <tr>
            <td>`config_path`</td>
            <td>
@@ -33,11 +35,11 @@ import { Aside } from '@astrojs/starlight/components';
                     "head_type":"ti5",      # 头部厂商
                     "head_name":"ti5_head", # 头部名称
                     "head_joint_num":2,     # 头部关节数
-                    "can_device":"can0",    # CAN设备名称
+                    "can_device":"can0",    # CAN 设备名称
                     "can_id":0,             # CAN 节点 ID（0x00~0xFF）
                     "motor_params":[        # 电机参数
                         {
-                            "motor_id":5,         # 电机ID
+                            "motor_id":5,         # 电机 ID
                             "reduction_ratio":51, # 减速比
                             "position_max":90,    # 转动的最大角度
                             "position_min":-90.0, # 转动的最小角度

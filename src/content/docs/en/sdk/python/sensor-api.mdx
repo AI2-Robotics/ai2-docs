@@ -1,0 +1,960 @@
+---
+title: Sensor APIs
+description: Sensor Python APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## SensorFactory {#SensorFactory}
+
+The `SensorFactory` class is used to create sensor and depth camera instances.
+
+### Create a Sensor Instance
+
+1. Create a sensor instance by sensor parameters.
+
+   - Method:
+
+     ```python
+     create_sensor(params: dict[str, str]) -> SensorInterface
+     ```
+
+   - Parameter:
+
+     <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+          </tr>
+        </thead>     
+        <tbody>
+           <tr>
+              <td>`params`</td>
+              <td>
+                   Parameters related to the sensor, such as:
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", #  Sensor name
+                        "sensor_type":"realsense", # Sensor vendor
+                        "serial_number":"215322070063", # Serial number
+                        "color_width":"640", # Color image width
+                        "color_height":"480", # Color image height
+                        "depth_width":"640", # Depth image width
+                        "depth_height":"480", # Depth image height
+                        "align_to_color":"true", # Whether to align depth image to color image
+                        "frame_rate":"30" # Frame rate
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - Return value:
+
+     A [SensorInterface](#SensorInterface) instance if creation succeeds, otherwise `None`.
+
+2. Create a sensor instance from a configuration file.
+
+   - Method:
+
+     ```python
+     create_sensor_from_config(config_path: str) -> SensorInterface
+     ```
+
+   - Parameter:
+
+     <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+           <tr>
+              <td>`params`</td>
+              <td>
+                   Path to the configuration file. The configuration file must be a JSON file.
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", #  Sensor name
+                        "sensor_type":"realsense", # Sensor vendor
+                        "serial_number":"215322070063", # Serial number
+                        "color_width":"640", # Color image width
+                        "color_height":"480", # Color image height
+                        "depth_width":"640", # Depth image width
+                        "depth_height":"480", # Depth image height
+                        "align_to_color":"true", # Whether to align depth image to color image
+                        "frame_rate":"30" # Frame rate
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - Return value:
+
+     A [SensorInterface](#SensorInterface) instance if creation succeeds, otherwise `None`.
+
+### Create a Depth Camera Instance
+
+1. Create a depth camera instance by depth camera parameters.
+
+    - Method:
+
+        ```python
+        create_depth_camera(param: DepthSensorParam) -> DepthCamera
+        ```
+
+    - Parameter:
+
+        | Parameter | Description |
+        |:---|:---|
+        | `param` | Parameters related to the depth camera. For details, please refer to [DepthSensorParam](#DepthSensorParam). |
+
+    - Return value:
+
+        A [DepthCamera](#DepthCamera) instance if creation succeeds, otherwise `None`.
+
+2. Create a depth camera instance from a configuration file.
+
+   - Method:
+
+     ```python
+     create_depth_camera_from_config(config_path: str) -> DepthCamera
+     ```
+
+   - Parameter:
+
+     <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+          </tr>
+        </thead>     
+        <tbody>
+           <tr>
+              <td>`params`</td>
+              <td>
+                   Path to the configuration file. The configuration file must be a JSON file.
+                               
+                    ```json
+                   {
+                        "sensor_name":"rs1", #  Sensor name
+                        "sensor_type":"realsense", # Sensor vendor
+                        "serial_number":"215322070063", # Serial number
+                        "color_width":"640", # Color image width
+                        "color_height":"480", # Color image height
+                        "depth_width":"640", # Depth image width
+                        "depth_height":"480", # Depth image height
+                        "align_to_color":"true", # Whether to align depth image to color image
+                        "frame_rate":"30" # Frame rate
+                   }
+                    ``` 
+              </td>
+           </tr>
+        </tbody>
+     </table>
+
+   - Return value:
+
+     A [DepthCamera](#DepthCamera) instance if creation succeeds, otherwise `None`.
+
+## SensorInterface {#SensorInterface}
+
+The `SensorInterface` class provides a series of public methods for controlling sensors. Ensure a sensor instance has been created before using these methods.
+
+### Attributes
+
+| Attribute (Read-Only) | Data Type | Description |
+|:---|:---|:---|
+| `name` | str | Sensor name |
+| `status` | [SensorStatus](#SensorStatus) | Sensor status |
+| `type` | [SensorType](#SensorType) | Sensor type |
+
+### Connect to the Sensor
+
+After creating a sensor instance, you can establish a connection to the sensor using the following method.
+
+- Method:
+
+    ```python
+    connect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Disconnect from the Sensor
+
+You can disconnect from the sensor using the following method.
+
+- Method:
+
+    ```python
+    disconnect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+## SyncDataPackage {#SyncDataPackage}
+
+The `SyncDataPackage` class synchronizes robotic arm and sensor data. It supports adding and getting the robotic arm real-time state and sensor data with aligned timestamps.
+
+### Get Package Timestamp
+
+- Method:
+
+    ```python
+    get_timestamp(self) -> typing.Any
+    ```
+
+- Return Value:
+
+    Timestamp.
+
+### Add Sensor Data
+
+- Method:
+
+    ```python
+    add_sensor_data(self, arg0: str, arg1: SensorData) -> None
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Sensor name. |
+    | `arg1` | Sensor data. For details, please refer to [SensorData](#SensorData). |
+
+- Return Value:
+
+    `None`.
+
+### Add Robotic Arm Real-time State Data
+
+- Method:
+
+    ```python
+    add_arm_state(self, arg0: str, arg1: alphabot.arm.ArmRealtimeState) -> None
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Robotic arm name. |
+    | `arg1` | Robotic arm real-time state data. For details, please refer to [ArmRealtimeState](/en/sdk/python/arm-api#ArmRealtimeState). |
+
+- Return Value:
+
+    `None`.
+
+### Get Sensor Data
+
+- Method:
+
+    ```python
+    get_sensor_data(self, arg0: str) -> SensorData
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Sensor name |
+
+- Return Value:
+
+    Sensor data. For details, please refer to [SensorData](#SensorData).
+
+### Get All Sensor Data
+
+- Method:
+
+    ```python
+    get_all_sensor_data(self) -> dict[str, SensorData]
+    ```
+
+- Return value:
+
+    A dictionary mapping `str` keys to `SensorData` values.
+
+    | Type | Description |
+    |:---|:---|
+    | `str` | Sensor name. |
+    | `SensorData` | Sensor data. For details, please refer to [SensorData](#SensorData). |
+
+### Get All Robotic Arm Real-time State Data
+
+- Method:
+
+    ```python
+    get_all_arm_data(self) -> dict[str, alphabot.arm.ArmRealtimeState]
+    ```
+
+- Return value:
+
+    A dictionary mapping `str` keys to `ArmRealtimeState` values.
+
+    | Type | Description |
+    |:---|:---|
+    | `str` | Robotic arm name. |
+    | `ArmRealtimeState` | Robotic arm real-time state data. For details, please refer to [ArmRealtimeState](/en/sdk/python/arm-api#ArmRealtimeState). |
+
+### Check If Contains Data for Specified Sensor
+
+- Method:
+
+    ```python
+    has_sensor_data(self, arg0: str) -> bool
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Sensor name |
+
+- Return Value:
+
+    `True` if data exists, `False` otherwise.
+
+### Get Sensor Count in Data Package
+
+- Method:
+
+    ```python
+    get_sensor_count(self) -> int
+    ```
+
+- Return Value:
+
+    Number of sensors.
+
+### Get Arm Count in Data Package
+
+- Method:
+
+    ```python
+    get_arm_count(self) -> int
+    ```
+
+- Return Value:
+
+    Number of arms.
+
+## SensorSynchronizer {#SensorSynchronizer}
+
+The `SensorSynchronizer` class implements software-based synchronization for data from multiple sensors and the robotic arm.
+
+### Parameterized Constructor
+
+- Method:
+
+    ```python
+    __init__(self, sync_policy: typing.Any = None, time_tolerance_ms: int = 10) -> None
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `sync_policy` | Synchronization policy. For details, please refer to [SyncPolicy](#SyncPolicy). |
+    | `time_tolerance_ms` | Time tolerance, in milliseconds. |
+
+- Return Value:
+
+    `None`.
+
+### Add Sensor
+
+- Method:
+
+    ```python
+    add_sensor(self, name: str, sensor: SensorInterface) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `name` | Sensor name. |
+    | `sensor` | A [SensorInterface](#SensorInterface) instance. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Add Robotic Arm
+
+- Method:
+
+    ```python
+    add_arm(self, name: str, arm: alphabot.arm.ArmInterface) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `name` | Robotic arm name. |
+    | `arm` | A [ArmInterface](#ArmInterface) instance. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Remove Sensor
+
+- Method:
+
+    ```python
+    remove_sensor(self, name: str) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `name` | Sensor name |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Remove Robotic Arm
+
+- Method:
+
+    ```python
+    remove_arm(self, name: str) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `name` | Robotic arm name |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Sensor
+
+- Method:
+
+    ```python
+    get_sensor(self, name: str) -> SensorInterface
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `name` | Sensor name |
+
+- Return Value:
+
+    A [SensorInterface](#SensorInterface) instance.
+
+### Start Synchronization
+
+- Method:
+
+    ```python
+    start(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Stop Synchronization
+
+- Method:
+
+    ```python
+    stop(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Register Data Synchronization Callback Function
+
+- Method:
+
+    ```python
+    set_sync_data_callback(self, arg0: typing.Callable) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | The callback function is called whenever sensor data or robotic arm state data is updated. The callback function receives a parameter of type [SyncDataPackage](#SyncDataPackage). |
+
+- Return Value:
+
+    `None`.
+
+### Set Synchronization Policy
+
+- Method:
+
+    ```python
+    set_sync_policy(self, policy: SyncPolicy) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `policy` | Synchronization policy. For details, please refer to [SyncPolicy](#SyncPolicy). |
+
+- Return Value:
+
+    `None`.
+
+### Set Time Tolerance
+
+- Method:
+
+    ```python
+    set_time_tolerance(self, tolerance_ms: int) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `tolerance_ms` | Time tolerance, in milliseconds. |
+
+- Return Value:
+
+    `None`.
+
+### Get Synchronization Policy
+
+- Method:
+
+    ```python
+    get_sync_policy(self) -> SyncPolicy
+    ```
+
+- Return Value:
+
+    The current synchronization policy. For details, please refer to [SyncPolicy](#SyncPolicy).
+
+### Get Time Tolerance
+
+- Method:
+
+    ```python
+    get_time_tolerance(self) -> int
+    ```
+
+- Return Value:
+
+    Time tolerance, in milliseconds.
+
+### Set Synchronization Mode
+
+- Method:
+
+    ```python
+    set_sync_mode(self, mode: SyncMode) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `mode` | Synchronization mode. For details, please refer to [SyncMode](#SyncMode). |
+
+- Return Value:
+
+    `None`.
+
+### Get Synchronization Mode
+
+- Method:
+
+    ```python
+    get_sync_mode(self) -> SyncMode
+    ```
+
+- Return Value:
+
+    The current synchronization mode. For details, please refer to [SyncMode](#SyncMode).
+
+### Set Reference Sensor
+
+- Method:
+
+    ```python
+    set_reference_sensor(self, sensor_name: str) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `sensor_name` | Sensor name |
+
+- Return Value:
+
+    `None`.
+
+### Get Reference Sensor
+
+- Method:
+
+    ```python
+    get_reference_sensor(self) -> str
+    ```
+
+- Return Value:
+
+    The name of the reference sensor.
+
+### Check If Data Is Synchronizing
+
+- Method:
+
+    ```python
+    is_syncing(self) -> bool
+    ```
+
+- Return Value:
+
+    `true` if data is synchronizing, `false` otherwise.
+
+## SyncPolicy {#SyncPolicy}
+
+The `SyncPolicy` class is an enumerator representing synchronization policies.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `NEAREST` | 0 | Nearest timestamp matching |
+| `INTERPOLATE` | 1 | Interpolation matching |
+| `EXTRAPOLATE` | 2 | Extrapolation matching |
+
+## SyncMode {#SyncMode}
+
+The `SyncMode` class is an enumerator representing synchronization modes.
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+| Constant Member | Value | Description |
+|:---|:---|:---|
+| `LATEST_TIMESTAMP` | 0 | Synchronize based on the latest timestamp (default mode) |
+| `REFERENCE_SENSOR` | 1 | Synchronize based on a reference sensor |
+
+## DepthSensorParam {#DepthSensorParam}
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `sensor_type` | str | Sensor vendor (e.g., `"realsense"`) |
+| `sensor_name` | str | Sensor name (e.g., `"head_camera"`) |
+| `serial_number` | str | Serial number |
+| `color_width` | int | Color image width |
+| `color_height` | int | Color image height |
+| `depth_width` | int | Depth image width |
+| `depth_height` | int | Depth image height |
+| `frame_rate` | int | Frame rate |
+| `align_to_color` | bool | Whether to align the depth image to the color image |
+| `enable_depth` | bool | Whether to enable the depth stream. Default is `True`. When set to `False`, the depth stream and all related logic that depends on depth data will be disabled. |
+| `active_pull` | bool |  Whether to use active frame pulling mode. Defaults to `False` (automatic background frame pulling). When set to `True`, only one frame is fetched when `get_data()` is called, and the callback mechanism is not supported. |
+
+## SensorData {#SensorData}
+
+| Attribute (Read-Write) | Data Type | Description |
+|:---|:---|:---|
+| `timestamp` | typing.Any | Timestamp |
+
+## AbcIntrinsic {#AbcIntrinsic}
+
+The `AbcIntrinsic` class represents the intrinsic parameters of a camera.
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `width` | int | Image width, in pixels. |
+| `height` | int | Image height, in pixels. |
+| `ppx` | float | Horizontal coordinate of the principal point, expressed as pixel offset from the left edge. |
+| `ppy` | float | Vertical coordinate of the principal point, expressed as pixel offset from the top edge. |
+| `fx` | float | Horizontal focal length, expressed as a multiple of pixel width. |
+| `fy` | float | Vertical focal length, expressed as a multiple of pixel height. |
+| `coeffs` | list[float] | Distortion coefficients. The parameter order for each model is as follows:<br/>- Brown-Conrady model: `[k1, k2, p1, p2, k3]`.<br/>- F-Theta fisheye lens model: `[k1, k2, k3, k4, 0]`.<br/>- Other models: Refer to their specific interpretation rules. |
+
+## DepthCamera {#DepthCamera}
+
+The `DepthCamera` class inherits from [SensorInterface](#SensorInterface). This section only explains methods that are overridden or newly added in the `DepthCamera` class.
+
+### Connect to the Depth Camera
+
+- Method:
+
+    ```python
+    connect(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Disconnect from the Depth Camera
+
+- Method:
+
+    ```python
+    disconnect(self) -> None
+    ```
+
+- Return Value:
+
+    `None`.
+
+### Get Depth Image Data
+
+- Method:
+
+    ```python
+    get_data(self) -> RGBDData
+    ```
+
+- Return Value:
+
+    Depth image data. For details, please refer to [RGBDData](#RGBDData).
+
+### Start Data Stream
+
+- Method:
+
+    ```python
+    start_stream(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Stop Data Stream
+
+- Method:
+
+    ```python
+    stop_stream(self) -> alphabot.core.AbcErrorCode
+    ```
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Color Image Resolution
+
+- Method:
+
+    ```python
+    set_color_resolution(self, arg0: int, arg1: int) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Image width |
+    | `arg1` | Image height |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Depth Image Resolution
+
+- Method:
+
+    ```python
+    set_depth_resolution(self, arg0: int, arg1: int) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameters:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Image width |
+    | `arg1` | Image height |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Frame Rate
+
+- Method:
+
+    ```python
+    set_framerate(self, arg0: int) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Frame rate |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Set Depth Image Alignment to Color Image
+
+- Method:
+
+    ```python
+    set_align_to_color(self, arg0: bool) -> alphabot.core.AbcErrorCode
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Whether to align the depth image to the color image. |
+
+- Return Value:
+
+    `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+### Get Current Alignment Setting
+
+- Method:
+
+    ```python
+    is_aligned_to_color(self)
+    ```
+
+- Return Value:
+
+    `True` indicates the depth image is aligned to the color image; `False` indicates it is not.
+
+### Register Depth Camera Data Processing Callback Function
+
+- Method:
+
+    ```python
+    set_data_callback(self, arg0: typing.Callable) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | The callback function is called whenever depth camera data is updated. The callback function receives a parameter of type [RGBDData](#RGBDData). |
+
+- Return Value:
+
+    `None`.
+
+## RGBData {#RGBData}
+
+The `RGBData` class, which inherits from [SensorData](#SensorData), encapsulates RGB image data along with the intrinsic parameters of the camera.
+
+### Attributes
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `height` (read-only) | int | Color image height |
+| `width` (read-only) | int | Color image width |
+| `channels` (read-only) | int | Number of color image channels |
+| `rgb_data` (read-write) | numpy.ndarray[numpy.uint8] | Color image data (height, width, channels) |
+
+### Get Color Camera Intrinsic Parameters
+
+- Method:
+
+    ```python
+    get_color_intrinsic(self) -> AbcIntrinsic
+    ```
+
+- Return Value:
+
+    Color camera intrinsic parameters. For details, please refer to [AbcIntrinsic](#AbcIntrinsic).
+
+### Set Color Camera Intrinsic Parameters
+
+- Method:
+
+    ```python
+    set_color_intrinsic(self, arg0: AbcIntrinsic) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Color camera intrinsic parameters. For details, please refer to [AbcIntrinsic](#AbcIntrinsic). |
+
+- Return Value:
+
+    `None`.
+
+## RGBDData {#RGBDData}
+
+The `RGBDData` class, which inherits from [RGBData](#RGBData), encapsulates RGB-D images and the intrinsic parameters of the camera.
+
+### Attributes
+
+| Attribute | Data Type | Description |
+|:---|:---|:---|
+| `depth_height` (read-only) | int | Depth image height |
+| `depth_width` (read-only) | int | Depth image width |
+| `depth_data` (read-write) | numpy.ndarray[numpy.float32] | Depth image data (depth_height, depth_width) |
+
+### Get Depth Camera Intrinsic Parameters
+
+- Method:
+
+    ```python
+    get_depth_intrinsic(self) -> AbcIntrinsic
+    ```
+
+- Return Value:
+
+    Depth camera intrinsic parameters. For details, please refer to [AbcIntrinsic](#AbcIntrinsic).
+
+### Set Depth Camera Intrinsic Parameters
+
+- Method:
+
+    ```python
+    set_depth_intrinsic(self, arg0: AbcIntrinsic) -> None
+    ```
+
+- Parameter:
+
+    | Parameter | Description |
+    |:---|:---|
+    | `arg0` | Depth camera intrinsic parameters. For details, please refer to [AbcIntrinsic](#AbcIntrinsic). |
+
+- Return Value:
+
+    `None`.

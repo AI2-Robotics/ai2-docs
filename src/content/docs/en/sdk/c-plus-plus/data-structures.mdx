@@ -1,0 +1,1327 @@
+---
+title: Data Structures
+description: C++ 接口涉及的数据结构
+---
+
+
+## Common Data Structures
+
+### AbcType {#AbcType}
+
+```cpp
+using AbcType = double;
+```
+
+### AbcErrorCode {#AbcErrorCode}
+
+<table>
+<thead>
+<tr>
+<th>Enumeration</th>
+<th>Value</th>
+<th colspan="2">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+`SUCCESS`
+</td>
+<td>
+0
+</td>
+<td colspan="2">
+Success
+</td>
+</tr>
+
+<tr>
+<td>
+`UNKNOWN_ERROR`
+</td>
+<td>
+-1
+</td>
+<td>
+Unknown error
+</td>
+<td rowspan="7">
+General Errors (-1 ~ -49)
+</td>
+</tr>
+
+<tr>
+<td>
+`TIMEOUT`
+</td>
+<td>
+-2
+</td>
+<td>
+Timeout
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_HANDLE`
+</td>
+<td>
+-3
+</td>
+<td>
+Invalid handle
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_STATE`
+</td>
+<td>
+-4
+</td>
+<td>
+Invalid state
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_INITIALIZED`
+</td>
+<td>
+-5
+</td>
+<td>
+Not initialized
+</td>
+</tr>
+
+<tr>
+<td>
+`NOT_IMPLEMENTED`
+</td>
+<td>
+-6
+</td>
+<td>
+Not implemented
+</td>
+</tr>
+
+<tr>
+<td>
+`INVALID_ARGUMENT`
+</td>
+<td>
+-7
+</td>
+<td>
+Invalid argument
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_ERROR`
+</td>
+<td>
+-50
+</td>
+<td>
+Parameter error
+</td>
+<td rowspan="2">
+Parameter Errors (-50 ~ -99)
+</td>
+</tr>
+
+<tr>
+<td>
+`PARAM_OUT_OF_RANGE`
+</td>
+<td>
+-51
+</td>
+<td>
+Parameter value out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_ERROR`
+</td>
+<td>
+-100
+</td>
+<td>
+Robotic arm general error
+</td>
+<td rowspan="8">
+Robotic Arm Errors (-100 ~ -199)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CTRL_FALSE`
+</td>
+<td>
+-101
+</td>
+<td>
+Controller returned false; likely incorrect parameters or arm state error.
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_SEND_FAILED`
+</td>
+<td>
+-102
+</td>
+<td>
+Failed to send data (communication error)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_DATA_RECEIVE_FAILED`
+</td>
+<td>
+-103
+</td>
+<td>
+Failed to receive data or controller timeout
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_RETURN_DATA_ERR`
+</td>
+<td>
+-104
+</td>
+<td>
+Failed to parse returned data (invalid or incomplete format)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_CHECK_FAILED`
+</td>
+<td>
+-105
+</td>
+<td>
+Current position device check failed (e.g., not a joint)
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_TIMEOUT`
+</td>
+<td>
+-106
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`ARM_OUT_OF_RANGE`
+</td>
+<td>
+-107
+</td>
+<td>
+Robotic arm motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ERROR`
+</td>
+<td>
+-200
+</td>
+<td>
+Torso general error
+</td>
+<td rowspan="5">
+Torso Errors (-200 ~-219)
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_CANBUS_ERROR`
+</td>
+<td>
+-201
+</td>
+<td>
+Torso CAN bus error
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_ACTUATOR_ERROR`
+</td>
+<td>
+-202
+</td>
+<td>
+Torso actuator error
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_TIMEOUT`
+</td>
+<td>
+-206
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`TORSO_OUT_OF_RANGE`
+</td>
+<td>
+-207
+</td>
+<td>
+Torso motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ERROR`
+</td>
+<td>
+-220
+</td>
+<td>
+Head general error
+</td>
+<td rowspan="5">
+Head Errors (-220 ~ -229)
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_CANBUS_ERROR`
+</td>
+<td>
+-221
+</td>
+<td>
+Head CAN bus error
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_ACTUATOR_ERROR`
+</td>
+<td>
+-222
+</td>
+<td>
+Head actuator error
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_TIMEOUT`
+</td>
+<td>
+-226
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`HEAD_OUT_OF_RANGE`
+</td>
+<td>
+-227
+</td>
+<td>
+Head motion out of range
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_ERROR`
+</td>
+<td>
+-300
+</td>
+<td>
+Sensor general error
+</td>
+<td rowspan="3">
+Sensor Errors (-300 ~ -399)
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_NOT_CONNECTED`
+</td>
+<td>
+-301
+</td>
+<td>
+Sensor not connected
+</td>
+</tr>
+
+<tr>
+<td>
+`SENSOR_DATA_ERROR`
+</td>
+<td>
+-302
+</td>
+<td>
+Sensor data error
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_ERROR`
+</td>
+<td>
+-400
+</td>
+<td>
+Chassis general error
+</td>
+<td rowspan="3">
+Chassis Errors (-400 ~ -499)
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_INIT_ERROR`
+</td>
+<td>
+-401
+</td>
+<td>
+Chassis initialization error
+</td>
+</tr>
+
+<tr>
+<td>
+`CHASSIS_TIMEOUT`
+</td>
+<td>
+-402
+</td>
+<td>
+Timeout waiting for response
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_ERROR`
+</td>
+<td>
+-900
+</td>
+<td>
+Algorithm general error
+</td>
+<td rowspan="3">
+Algorithm Errors (-900 ~ -999)
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_NOT_CONVERGED`
+</td>
+<td>
+-901
+</td>
+<td>
+Algorithm did not converge
+</td>
+</tr>
+
+<tr>
+<td>
+`ALGO_APPROXIMATE_SOLUTION`
+</td>
+<td>
+-902
+</td>
+<td>
+Algorithm approximate solution
+</td>
+</tr>
+
+</tbody>
+</table>
+
+### AbcPose {#AbcPose}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `position` | [AbcPosition](#AbcPosition) | XYZ-axis coordinate values |
+| `quaternion` | [AbcQuat](#AbcQuat) | Quaternion |
+
+### AbcPosition {#AbcPosition}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Structure Member</td>
+         <td>Data Type</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+         <td rowspan="3">[AbcType](#AbcType)</td>
+         <td rowspan="3">XYZ-axis coordinate values, in meters.</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>            
+   </tbody>
+</table>
+
+
+### AbcQuat {#AbcQuat}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Structure Member</td>
+         <td>Data Type</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`w`</td>
+         <td rowspan="4">[AbcType](#AbcType)</td>
+         <td rowspan="4">Quaternion</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>            
+   </tbody>
+</table>
+
+### AbcPoseVelocity {#AbcPoseVelocity}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Structure Member</td>
+         <td>Data Type</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`x`</td>
+         <td rowspan="6">[AbcType](#AbcType)</td>
+         <td rowspan="6">Velocity (Cartesian space)</td>
+      </tr>
+      <tr>
+         <td>`y`</td>
+      </tr>
+      <tr>
+         <td>`z`</td>
+      </tr>
+      <tr>
+         <td>`wx`</td>
+      </tr>
+      <tr>
+         <td>`wy`</td>
+      </tr>
+      <tr>
+         <td>`wz`</td>
+      </tr>            
+   </tbody>
+</table>
+
+
+### ArmType {#ArmType}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Enumeration</td>
+         <td>Value</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`RM65_B`</td>
+         <td>0</td>
+         <td rowspan="8">Robotic arm type</td>
+      </tr>
+      <tr>
+         <td>`RM65_6FB`</td>
+         <td>1</td>
+      </tr>
+      <tr>
+         <td>`RM65_6F`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`RM75_B`</td>
+         <td>3</td>
+      </tr>
+      <tr>
+         <td>`RM75_6FB`</td>
+         <td>4</td>
+      </tr>
+      <tr>
+         <td>`RM75_6F`</td>
+         <td>5</td>
+      </tr>
+      <tr>
+         <td>`ZM73L_6F`</td>
+        <td>6</td>
+      </tr>
+      <tr>
+         <td>`ZM73R_6F`</td>
+         <td>7</td>
+      </tr>
+   </tbody>
+</table>
+
+### RobotType {#RobotType}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Enumeration</td>
+         <td>Value</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s`</td>
+         <td>1</td>
+         <td rowspan="3">Robot Type</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot2`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s_HuiKe`</td>
+         <td>3</td>
+      </tr>
+   </tbody>
+</table>
+
+### AbcTorsoPose4D {#AbcTorsoPose4D}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `height` | [AbcType](#AbcType) | Vertical height, in meters (m). |
+| `forward` | [AbcType](#AbcType) | Front-back displacement, in meters (m). |
+| `pitch` | [AbcType](#AbcType) | Pitch angle, in radians (rad). |
+| `yaw` | [AbcType](#AbcType) | Waist rotation angle, in radians (rad). |
+
+
+## Robotic Arm Data Structures
+
+### ArmFactoryParam {#ArmFactoryParam}
+
+| Structure Member | Data Type | Description |
+|:-------|:---|:-|
+|`arm_type` | string | Robotic arm vendor (e.g., `"realman"`) |
+|`arm_name` |string | Robotic arm name (e.g., `"left_arm"`) |
+|`ip` | string | TCP IP address |
+|`udp_ip` | string | UDP IP address |
+|`port` | int | TCP port number |
+|`udp_port` | int | UDP port number |
+|`udp_cycle` | int | UDP cycle (period = udp_cycle * 5 ms) |
+|`enable_gripper` | bool | Gripper status (enable/disable) |
+
+### AbcArmCurrentStatus {#AbcArmCurrentStatus}
+
+| Enumeration | Description |
+|:---|:---|
+| `ARM_IDLE` | Enabled but idle state |
+| `ARM_MOVE` | Moving state |
+| `ARM_MOVE_THROUGH_JOINT` | Angle pass-through state |
+| `ARM_MOVE_THROUGH_POSE` | Pose pass-through state |
+| `ARM_MOVE_THROUGH_FORCE_POSE` | Force-Controlled pass-through state |
+| `ARM_MOVE_THROUGH_CURRENT` | Current-loop pass-through state |
+| `ARM_STOP` | Emergency stop state |
+| `ARM_SLOW_STOP` | Slow stop state |
+| `ARM_PAUSE` | Pause state |
+| `ARM_CURRENT_DRAG` | Current-loop drag state |
+| `ARM_SENSOR_DRAG` | 6-DoF force drag state |
+| `ARM_TECH_DEMONSTRATION` | Teaching state |
+
+### AbcJointState {#AbcJointState}
+
+If the number of joints is less than [MAX_ARM_DOF](#MAX_ARM_DOF), the extra data fields will be zero.
+
+<table>
+   <tbody>
+      <tr>
+         <td>Structure Member</td>
+         <td>Data Type</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`joints`</td>
+         <td rowspan="6">array\<[AbcType](#AbcType), [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>Current joint angles, in radians (rad).</td>
+      </tr>
+      <tr>
+         <td>`joint_position`</td>
+         <td>Current joint angles, in degrees (°).</td>
+      </tr>
+      <tr>
+         <td>`joint_speed`</td>
+         <td>Current joint speeds, in RPM (revolutions per minute).</td>
+      </tr>
+      <tr>
+         <td>`joint_current`</td>
+         <td>Current joint current, in milliamperes (mA).</td>
+      </tr>
+      <tr>
+         <td>`joint_temperature`</td>
+         <td>Current joint temperature, in degrees Celsius (°C).</td>
+      </tr>
+      <tr>
+         <td>`joint_voltage`</td>
+         <td>Current joint voltage, in volts (V).</td>
+      </tr>
+      <tr>
+         <td>`joint_err_code`</td>
+         <td>array\<uint16_t, [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>Current joint error codes.</td>
+        </tr>
+      <tr>
+         <td>`joint_en_flag`</td>
+         <td>array\<bool, [MAX_ARM_DOF](#MAX_ARM_DOF)\></td>
+         <td>Current joint enable flags.<br/>- `true`: Enabled.<br/>- `false`: Disabled.</td>
+      </tr>            
+   </tbody>
+</table>
+
+### AbcArmForceSensor {#AbcArmForceSensor}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `force` | [AbcType](#AbcType)[6] | Current raw force sensor data, in units of 0.001 N or 0.001 N·m. |
+| `zero_force` | [AbcType](#AbcType)[6] | Current external force data measured by the force sensor system, in units of 0.001 N or 0.001 N·m. |
+| `coordinate` | int | Coordinate frame of the external force data. <br/>- `0`: Sensor coordinate frame. <br/>- `1`: Current working coordinate frame. <br/>- `2`: Current tool coordinate frame. |
+
+### AbcArmRealtimeState {#AbcArmRealtimeState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `name` | char[64] | Robotic arm name |
+| `timestamp` | std::chrono::system_clock::time_point | Timestamp |
+| `joint_status` | [AbcJointState](#AbcJointState) | Joint states |
+| `pose` | [AbcPose](#AbcPose) | Current pose of the robotic arm |
+| `force_sensor` | [AbcArmForceSensor](#AbcArmForceSensor) | Force sensor status |
+| `arm_current_status` | [AbcArmCurrentStatus](#AbcArmCurrentStatus) | Robotic arm status |
+| `gripper_state` | [AbcGripperState](#AbcGripperState) | Gripper status |
+| `ee_pose` | [AbcPose](#AbcPose) | End-effector pose |
+
+### PeripheralReadWriteParams {#PeripheralReadWriteParams}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `port` | int | Communication port. <br/>- `0`: Controller RS485 port. <br/>- `1`: End-effector interface board RS485 port. <br/>- `3`: Controller Modbus TCP device. |
+| `address` | int | Starting data address |
+| `device` | int | Peripheral device address |
+| `num` | int | Number of data items |
+
+### UdpCustomConfig {#UdpCustomConfig}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `joint_speed` | int | Joint speed. |
+| `lift_state` | int | Lift joint information. <br/>- `1`: Enable reporting. <br/>- `0`: Disable reporting. <br/>- `-1`: Do not set, keep previous state. |
+| `expand_state` | int | Extended joint information (either lift joint or extended joint, lift joint has priority). <br/>- `1`: Enable reporting. <br/>- `0`: Disable reporting. <br/>- `-1`: Do not set, keep previous state. |
+| `hand_state` | int | Dexterous hand status. <br/>- `1`: Enable reporting. <br/>- `0`: Disable reporting. <br/>- `-1`: Do not set, keep previous state.  |
+| `arm_current_status` | int | Current status of the robotic arm. <br/>- `1`: Enable reporting. <br/>- `0`: Disable reporting. <br/>- `-1`: Do not set, keep previous state.  |
+| `aloha_state` | int | Status of the AlphaBot main arm. <br/>- `1`: Enable reporting. <br/>- `0`: Disable reporting. <br/>- `-1`: Do not set, keep previous state.  |
+
+### RealtimePushConfig {#RealtimePushConfig}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `cycle` | int | Broadcasting cycle, a multiple of 5ms. |
+| `enable` | bool | Enable flag. Whether to enable active reporting. |
+| `port` | int | Broadcast port number. |
+| `force_coordinate` | int | Coordinate frame for external force data. <br/>- `-1`: Force sensor not supported. <br/>- `0`: Sensor frame. <br/>- `1`: Current work frame. <br/>- `2`: Current tool frame. |
+| `ip` | char[28] | Custom reporting target IP address. |
+| `custom_config` | [UdpCustomConfig](#UdpCustomConfig) | Custom configuration settings. |
+
+
+### MAX_ARM_DOF {#MAX_ARM_DOF}
+
+```cpp
+const size_t MAX_ARM_DOF = 7;
+```
+
+### AbcArmRealtimeStateCallback {#AbcArmRealtimeStateCallback}
+
+```cpp
+using AbcArmRealtimeStateCallback =
+    std::function<void(std::shared_ptr<const AbcArmRealtimeState>)>;
+```
+
+## Chassis Data Structures
+
+### ChassisFactoryParam {#ChassisFactoryParam}
+
+| Structure Member | Data Type | Description |
+|:-------|:---|:-|
+|`chassis_type` | string | Chassis vendor (e.g., `"woosh"`) |
+|`chassis_name` |string | Chassis name (e.g., `"chassis"`) |
+|`ip` | string | IP address (e.g., `"127.0.0.1"`) |
+|`port` | int | Port number (e.g., `54051`) |
+
+### ChassisPose2D {#ChassisPose2D}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `theta` | float | Orientation |
+| `x` | float | X-axis coordinate value |
+| `y` | float | Y-axis coordinate value |
+
+### ChassisPoseSpeed {#ChassisPoseSpeed}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `map_id` | uint32_t | Map ID |
+| `mileage` | uint32_t | Accumulated mileage |
+| `robot_id` | uint32_t | Chassis ID |
+| `pose` | [ChassisPose2D](#ChassisPose2D) | 2D pose |
+| `twist` | [ChassisTwist](#ChassisTwist) | Twist (linear + angular velocity) |
+
+### ChassisPoint32 {#ChassisPoint32}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `x` | float | X-axis coordinate value |
+| `y` | float | Y-axis coordinate value |
+| `z` | float | Z-axis coordinate value |
+
+### ChassisTwist {#ChassisTwist}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `angular` | float | Angular velocity |
+| `linear` | float | Linear velocity |
+
+### ChassisTransformStamped {#ChassisTransformStamped}
+
+<table>
+   <tbody>
+      <tr>
+         <td>Structure Member</td>
+         <td>Data Type</td>
+         <td>Description</td>
+      </tr>
+      <tr>
+         <td>`frame_id`</td>
+         <td>string</td>
+         <td>Frame ID</td>
+      </tr>
+      <tr>
+         <td>`secs`</td>
+         <td>int32_t</td>
+         <td>Seconds</td>
+      </tr>
+      <tr>
+         <td>`nsecs`</td>
+         <td>uint32_t</td>
+         <td>Nanoseconds</td>
+      </tr>
+      <tr>
+         <td>`child_frame_id`</td>
+         <td>string</td>
+         <td>Child frame ID</td>
+      </tr>
+      <tr>
+         <td>`t_x`</td>
+         <td>double</td>
+         <td rowspan="3">XYZ-axis coordinate values</td>
+      </tr>
+      <tr>
+         <td>`t_y`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`t_z`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_x`</td>
+         <td>double</td>
+         <td rowspan="4">Quaternion</td>
+      </tr>
+      <tr>
+         <td>`r_y`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_z`</td>
+         <td>double</td>
+      </tr>
+      <tr>
+         <td>`r_w`</td>
+         <td>double</td>
+      </tr>            
+   </tbody>
+</table>
+
+### ChassisBattery {#ChassisBattery}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `charge_state` | [ChargeState](#ChassisBatteryChargeState) | Charging State |
+| `robot_id` | uint32_t | Chassis ID |
+| `power` | uint32_t | Battery percentage (0–100). <br/>- `100`: Fully charged. <br/>- `0`: No charge.  |
+| `health` | uint32_t | Battery Health (full charge capacity / design capacity) |
+| `charge_cycle` | uint32_t | Charge Cycle Count |
+| `battery_cycle` | uint32_t | Battery cycle |
+| `temp_max` | uint32_t | Battery temperature (maximum temperature) |
+| `success` | bool | Request success flag. <br/>- `true`: Request succeeded. <br/>- `false`: Request failed to process. |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisBattery::ChargeState {#ChassisBatteryChargeState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kChargeStateUndefined` | 0 | Undefined |
+| `kNot` | 1 | Not charging |
+| `kManual` | 2 | Manual charging in progress |
+| `kAuto` | 3 | Auto charging in progress |
+
+### ChassisOperationState {#ChassisOperationState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | uint32_t | Chassis ID |
+| `nav` | [NavState](#ChassisOperationStateNavState) | Chassis navigation information |
+| `robot` | [RobotBit](#ChassisOperationStateRobotBit) | Chassis bit information |
+| `success` | bool | Request success flag. <br/>- `true`: Request succeeded. <br/>- `false`: Request failed to process. |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisOperationState::NavState {#ChassisOperationStateNavState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kNavBitUndefined` | 0 | Undefined |
+| `kNarrow` | 1 | Narrow passage |
+| `kGuide` | 2 | Guide to destination |
+| `kInaLift` | 3 | In elevator |
+| `kImpede` | 4 | Obstruct |
+| `kQRCode` | 5 | QR code |
+| `kStage` | 6 | Segment arrival |
+
+### ChassisOperationState::RobotBit {#ChassisOperationStateRobotBit}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kRobotBitUndefined` | 0 | Undefined |
+| `kTaskable` | 1 | Taskable |
+
+### ChassisState {#ChassisState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | uint32_t | Chassis ID |
+| `state` | [State](#ChassisStateState) | Chassis auto mode status |
+| `success` | bool | Request success flag. <br/>- `true`: Request succeeded. <br/>- `false`: Request failed to process. |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisState::State {#ChassisStateState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kStateUndefined` | 0 | Undefined |
+| `kUninit` | 1 | Uninitialized |
+| `kIdle` | 2 | Idle |
+| `kParking` | 3 | Parking |
+| `kTask` | 4 | In Task |
+| `kWarning` | 5 | Warning |
+| `kFault` | 6 | Fault |
+| `kFollowing` | 7 | Following |
+| `kCharging` | 8 | Charging |
+| `kMapping` | 9 | Mapping |
+
+### ChassisStatusCode {#ChassisStatusCode}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | uint32_t | Chassis ID |
+| `code` | uint64_t | Status code |
+| `time` | uint64_t | Time |
+| `status_msg` | string | Message |
+| `robot_task_id` | int64_t | Task ID |
+| `state` | [RobotState](#ChassisStatusCodeRobotState) | Chassis auto mode status |
+| `type` | [ActionType](#ChassisStatusCodeActionType) | Action type |
+| `level` | [Level](#ChassisStatusCodeLevel) | Level |
+| `success` | bool | Request success flag. <br/>- `true`: Request succeeded. <br/>- `false`: Request failed to process. |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisStatusCode::RobotState {#ChassisStatusCodeRobotState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `rs_kStateUndefined` | 0 | Undefined |
+| `rs_kUninit` | 1 | Uninitialized |
+| `rs_kIdle` | 2 | Idle |
+| `rs_kParking` | 3 | Parking |
+| `rs_kTask` | 4 | In Task |
+| `rs_kWarning` | 5 | Warning |
+| `rs_kFault` | 6 | Fault |
+| `rs_kFollowing` | 7 | Following |
+| `rs_kCharging` | 8 | Charging |
+| `rs_kMapping` | 9 | Mapping |
+
+### ChassisStatusCode::ActionType {#ChassisStatusCodeActionType}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `at_kTypeUndefined` | 0 | Undefined |
+| `at_kNav` | 1 | Navigation |
+| `at_kStepCtrl` | 2 | Step Control |
+| `at_kSecondposEnter` | 3 | Second Position Enter |
+| `at_kSecondposQuit` | 4 | Second Position Quit |
+| `at_kCarry` | 5 | Carrying Action |
+| `at_kWait` | 6 | Wait |
+| `at_kCharge` | 7 | Charge |
+
+### ChassisStatusCode::Level {#ChassisStatusCodeLevel}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `l_kNormal` | 0 | Normal |
+| `l_kTips` | 1 | Tips |
+| `l_kWarn` | 2 | Warning |
+| `l_kFault` | 3 | Fault |
+
+### ChassisHardwareState {#ChassisHardwareState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `robot_id` | uint32_t | Chassis ID |
+| `lidars` | vector\<[HardwareState_State](#ChassisHardwareStateHardwareState_State)\> | Repeated Lidar 2 |
+| `cameras` | vector\<[HardwareState_State](#ChassisHardwareStateHardwareState_State)\> | Repeated Camera 2 |
+| `success` | bool | Request success flag. <br/>- `true`: Request succeeded. <br/>- `false`: Request failed to process. |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisHardwareState::HardwareState_State {#ChassisHardwareStateHardwareState_State}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kNormal` | 0 | Normal |
+| `kInfo` | 1 | Tips |
+| `kWarn` | 16 | Warning |
+| `kFatal` | 17 | Fault |
+
+### ChassisTaskResponse {#ChassisTaskResponse}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `task_state` | [TaskState](#ChassisTaskResponseTaskState) | Task state |
+| `current_pose` | [ChassisPose2D](#ChassisPose2D) | Current 2D pose |
+| `msg_type` | [MassageType](#ChassisTaskResponseMassageType) | Message type |
+| `msg` | string | Response message description, typically used to explain why a request could not be processed. |
+
+### ChassisTaskResponse::TaskState {#ChassisTaskResponseTaskState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kSuccess` | 0 | Success |
+| `kRunning` | 1 | Running |
+| `kFailed` | 2 | Failed |
+
+### ChassisTaskResponse::MassageType {#ChassisTaskResponseMassageType}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `kNormal` | 0 | Normal |
+| `kWarn` | 1 | Warning |
+| `kFault` | 2 | Fault |
+
+
+## Head and Torso Data Structures
+
+### ABC_TORSO_DOF {#ABC_TORSO_DOF}
+
+```cpp
+#define ABC_TORSO_DOF 4
+```
+
+### ABC_HEAD_DOF {#ABC_HEAD_DOF}
+
+```cpp
+#define ABC_HEAD_DOF  2
+```
+
+### HeadFactoryParam {#HeadFactoryParam}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `head_type` | string | Head vendor |
+| `head_name` | string | Head name |
+| `head_joint_num` | uint8_t | Number of head joints |
+| `comm_params` | [CommParamsUnion](#CommParamsUnion) | Communication parameters |
+| `motor_params` | vector\<[MotorParam](#MotorParam)\> | Motor parameters |
+
+### CommParamsUnion {#CommParamsUnion}
+
+| Union Member | Data Type | Description |
+|:---|:---|:---|
+| `can` | [CommParamsCAN](#CommParamsCAN) | CAN parameters |
+| `eth` | [CommParamsETH](#CommParamsETH) | ETH parameters (reserved) |
+
+### CommParamsCAN {#CommParamsCAN}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `device` | string | Device name (e.g., `"can0"`) |
+| `baud_rate` | int | Baud rate (e.g., `500000`) |
+| `can_id` | uint8_t | CAN node ID (0x00 - 0xFF) |
+
+### CommParamsETH {#CommParamsETH}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `ip` | string | IP address (e.g., `"192.168.1.10"`) |
+| `port` | uint16_t | Port number (e.g., `8080`) |
+
+### MotorParam {#MotorParam}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `motor_id` |  uint16_t | Motor ID |
+| `reduction_ratio` |  uint16_t | Reduction ratio |
+| `position_max` | [AbcType](#AbcType) | Maximum rotation angle |
+| `position_min` | [AbcType](#AbcType) | Minimum rotation angle |
+| `speed_max` | [AbcType](#AbcType) | Maximum rotation speed |
+| `speed_min` | [AbcType](#AbcType) | Minimum rotation speed |
+| `acc_max` | [AbcType](#AbcType) | Maximum rotation acceleration |
+| `acc_min` | [AbcType](#AbcType) | Minimum rotation acceleration |
+
+### TorsoFactoryParam {#TorsoFactoryParam}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `torso_type` | string | Torso vendor (e.g., `"ti5"`) |
+| `torso_name` | string | Torso name |
+| `torso_joint_num` | uint8_t | Number of torso joints |
+| `comm_params` | [CommParamsUnion](#CommParamsUnion) | Communication parameters |
+| `motor_params` | vector\<[MotorParam](#MotorParam)\> | Motor parameters |
+
+### AbcTorsoStateCallback {#AbcTorsoStateCallback}
+
+```cpp
+using AbcTorsoStateCallback = std::function<
+    void(std::shared_ptr<const AbcTorsoState>)>;
+```
+
+### AbcTorsoState {#AbcTorsoState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `timestamp` | std::chrono::system_clock::time_point | Timestamp |
+| `err_code` | std::array\<uint32_t, [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | Error codes for each joint |
+| `joints_positions` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | Angle for each joint |
+| `joints_speed` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF) | Speed for each joint |
+| `joints_current` | std::array\<[AbcType](#AbcType), [ABC_TORSO_DOF](#ABC_TORSO_DOF)\> | Current for each joint |
+
+
+## Sensor Data Structures
+
+### DepthSensorParam {#DepthSensorParam}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `sensor_type` | string | Sensor vendor (e.g., `"realsense"`) |
+| `sensor_name` | string | Sensor name (e.g., `"head_camera"`) |
+| `serial_number` | string | Serial number |
+| `color_width` | int | Color image width |
+| `color_height` | int | Color image height |
+| `depth_width` | int | Depth image width |
+| `depth_height` | int | Depth image height |
+| `frame_rate` | int | Frame rate |
+| `align_to_color` | bool | Whether to align the depth image to the color image |
+| `enable_depth` | bool | Whether to enable the depth stream. Default is `true`. When set to `false`, the depth stream and all related logic that depends on depth data will be disabled. |
+| `active_pull` | bool |  Whether to use active frame pulling mode. Defaults to `false` (automatic background frame pulling). When set to `true`, only one frame is fetched when `get_data()` is called, and the callback mechanism is not supported. |
+
+### SensorCallback {#SensorCallback}
+
+```cpp
+using SensorCallback = std::function<
+    void(std::shared_ptr<const SensorData>)>;
+```
+
+### SensorType {#SensorType}
+
+| Enumeration | Description |
+|:---|:---|
+| `CAMERA` | Camera sensor |
+| `DEPTH_CAMERA` | Depth camera |
+| `LIDAR` | LiDAR |
+| `IMU` | Inertial Measurement Unit |
+| `FORCE_TORQUE` | Force sensor |
+| `PROXIMITY` | Proximity sensor |
+| `OTHER` | Other types of sensors |
+
+### SensorStatus {#SensorStatus}
+
+| Enumeration | Description |
+|:---|:---|
+| `DISCONNECTED` | Disconnected |
+| `CONNECTED` | Connected |
+| `STREAMING` | Data streaming in progress |
+| `SENSOR_ERROR` | Error state |
+
+### AbcIntrinsic {#AbcIntrinsic}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `width` | int | Image width, in pixels. |
+| `height` | int | Image height, in pixels. |
+| `ppx` | float | Horizontal coordinate of the principal point, expressed as pixel offset from the left edge. |
+| `ppy` | float | Vertical coordinate of the principal point, expressed as pixel offset from the top edge. |
+| `fx` | float | Horizontal focal length, expressed as a multiple of pixel width. |
+| `fy` | float | Vertical focal length, expressed as a multiple of pixel height. |
+| `coeffs` | float[5] | Distortion coefficients. The parameter order for each model is as follows: <br/>- Brown-Conrady model: `[k1, k2, p1, p2, k3]`. <br/>- F-Theta fisheye lens model: `[k1, k2, k3, k4, 0]`. <br/>- Other models: Refer to their specific interpretation rules. |
+
+## Trajectory Planner Data Structures
+
+### TrajectoryPoint {#TrajectoryPoint}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `positions` | vector\<[AbcType](#AbcType)\> | Positions |
+| `velocities` | vector\<[AbcType](#AbcType)\> | Velocities |
+| `accelerations` | vector\<[AbcType](#AbcType)\> | Accelerations |
+| `timestamp` | [AbcType](#AbcType) | Timestamp |
+
+### TrajectoryEvaluation {#TrajectoryEvaluation}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `is_valid` | bool | Whether the trajectory is valid |
+| `issues` | vector\<string\> | Issues |
+| `score` | double | Trajectory score (higher is better) |
+| `has_collision` | bool | Whether any collision exists |
+| `collision_indices` | vector\<size_t\> | Indices of trajectory points |
+
+### TrajectoryStatusCallback {#TrajectoryStatusCallback}
+
+```cpp
+using TrajectoryStatusCallback = std::function<
+    void(bool finished, AbcErrorCode error_code)>;
+```
+
+## Sensor Synchronizer Data Structures
+
+### SyncDataCallback {#SyncDataCallback}
+
+```cpp
+using SyncDataCallback = std::function<
+    void(std::shared_ptr<SyncDataPackage>)>;
+```
+
+### SyncPolicy {#SyncPolicy}
+
+| Enumeration | Description |
+|:---|:---|
+| `NEAREST` | Nearest timestamp matching |
+| `INTERPOLATE` | Interpolation matching |
+| `EXTRAPOLATE` | Extrapolation matching |
+
+### SyncMode {#SyncMode}
+
+| Enumeration | Description |
+|:---|:---|
+| `LATEST_TIMESTAMP` | Synchronize based on the latest timestamp (default mode) |
+| `REFERENCE_SENSOR` | Synchronize based on a reference sensor |
+
+## Emergency Stop Button Monitoring Data Structures
+
+### EStopMConfig {#EStopMConfig}
+
+{/* | `input_chip_name_` | string | 芯片设备名，例如 `"gpiochip1"`。 |
+| `input_line_offset_` | int | 引脚偏移量。 | 
+| `auto_start_` | bool | 是否自动启动。 |
+| `debounce_time_ms_` | const unsigned int | 去抖动时间。 | */}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `pressed_level_` | int | GPIO level polarity when the emergency stop button is pressed. <br/>- `0`: Active-Low. The pin level is low when the button is pressed. <br/>- `1`: Active-High. The pin level is high when the button is pressed. |
+| `allow_multicb_` | bool | Whether multiple callback functions are allowed. <br/>- `true`: Multiple callbacks are allowed. <br/>- `false`: Only one callback is allowed. |
+| `name_` | string | Name |
+| `EStopMConfig` | Constructor | Initializes all data members using a member initializer list. |
+| `ApacheOrin` | Static function | Returns a configured `EStopMConfig` instance (gpiochip0 + pin 2 + Active-Low). Configuration is identical to `EStopMConfig()`, suitable for robots equipped with the ApacheOrin chip. |
+| `NvidiaOrin` | Static function | Returns a configured `EStopMConfig` instance (gpiochip1 + pin 9 + Active-High), suitable for robots equipped with the NvidiaOrin chip. |
+
+### ESState {#ESState}
+
+| Enumeration | Value | Description |
+|:---|:---|:---|
+| `None` | -1 | Unable to get status |
+| `Pressed` | 1 | Emergency stop button is pressed |
+| `Released` | 0 | Emergency stop button is released |
+
+## Gripper Data Structures
+
+### AbcGripperState {#AbcGripperState}
+
+| Structure Member | Data Type | Description |
+|:---|:---|:---|
+| `status` | int | Gripper status. <br/>- `0`: Offline. <br/>- `1`: Online. <br/>- `-1`: Online but disabled. |
+| `error` | int | Gripper error information. <br/>- Lower 8 bits: Internal gripper error codes. <br/>- Bits 5–7: Reserved. <br/>- Bit 4: Internal communication error. <br/>- Bit 3: Driver error. <br/>- Bit 2: Overcurrent. <br/>- Bit 1: Overtemperature. <br/>- Bit 0: Locked-rotor. |
+| `mode` | int | Current operating mode. <br/>- `1`: Gripper fully open and idle. <br/>- `2`: Gripper fully closed and idle. <br/>- `3`: Gripper stopped and idle. <br/>- `4`: Gripper is closing. <br/>- `5`: Gripper is opening. <br/>- `6`: Gripper stopped by force-controlled during closing. |
+| `current_force` | int | Current force, in grams (g). |
+| `temperature` | int | Current temperature, in degrees Celsius (°C). |
+| `actpos` | int | Gripper aperture, range 0–1000. <br/>- `0`: Gripper fully closed. <br/>- `1000`: Gripper fully open. |

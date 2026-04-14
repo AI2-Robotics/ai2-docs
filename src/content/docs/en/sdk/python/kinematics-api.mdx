@@ -1,0 +1,353 @@
+---
+title: Kinematics APIs
+description: Kinematics Python APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ArmKinematics {#ArmKinematics}
+
+`ArmKinematics` provides kinematics computation interfaces for robotic arms.
+
+### Create Robotic Arm Kinematics
+
+This method is a static method.
+
+- Method:
+
+  ```python
+  create(arg0: ArmType) -> ArmKinematics
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0` | Robotic arm type. For details, please refer to [ArmType](#ArmType). |
+
+- Return Value: 
+
+  An `ArmKinematics` instance if creation succeeds, otherwise `None`.
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```python
+  forward_kinematics(
+    self, 
+    arg0: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.Pose]
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0` | Joint angles. |
+
+- Return Value: 
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `Pose` | Pose computed by forward kinematics. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```python
+  inverse_kinematics(
+    self, 
+    pose: alphabot.core.Pose, 
+    ref_joints: list[float], 
+    mode: int = 0
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | End-effector pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+  | `ref_joints` | Reference joint angles. |
+  | `mode` | - `0`: Numerical solution, single-step mode. Suitable when the current pose is close to the target pose; recommended for continuous motion.<br/>- `1`: Numerical solution, multi-step mode. Suitable for larger differences between current and target poses; requires more computation time.<br/>- `2`: Analytical solution. |
+
+- Return Value: 
+  
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Joint angles computed by inverse kinematics. |
+
+### Analytical Inverse Kinematics (Single Solution)
+
+- Method:
+
+  ```python
+  inverse_kinematics_analytical(
+    self, 
+    pose: alphabot.core.Pose, 
+    parameter: float, 
+    select: int
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `pose` | End-effector pose. For details, please refer to [Pose](/en/sdk/python/data-structures#Pose). |
+  | `parameter` | Redundancy parameter. |
+  | `select` | Index of the inverse kinematics solution set. It is recommended to use `0`. Important: During continuous end-effector motion, do not change this value; keeping the selected solution fixed ensures motion continuity. |
+
+- Return Value: 
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Joint angles. |
+
+### Set Numerical Precision
+
+- Method:
+
+  ```python
+  set_numerical_precision(self, precision: float) -> None
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `precision` | Desired precision. |
+
+- Return Value: 
+  
+  `None`.
+
+---
+
+## ArmType {#ArmType}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+<table>
+   <thead>
+     <tr>
+       <th>Constant Member</th>
+       <th>Value</th>
+       <th>Description</th>
+     </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>`RM65_B`</td>
+         <td>0</td>
+         <td rowspan="8">Robotic arm type</td>
+      </tr>
+      <tr>
+         <td>`RM65_6FB`</td>
+         <td>1</td>
+      </tr>
+      <tr>
+         <td>`RM65_6F`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`RM75_B`</td>
+         <td>3</td>
+      </tr>
+      <tr>
+         <td>`RM75_6FB`</td>
+         <td>4</td>
+      </tr>
+      <tr>
+         <td>`RM75_6F`</td>
+         <td>5</td>
+      </tr>
+      <tr>
+         <td>`ZM73L_6F`</td>
+        <td>6</td>
+      </tr>
+      <tr>
+         <td>`ZM73R_6F`</td>
+         <td>7</td>
+      </tr>
+   </tbody>
+</table>
+
+---
+
+## TorsoKinematics {#TorsoKinematics}
+
+`TorsoKinematics` provides kinematics computation interfaces for the torso.
+
+### Create Torso Kinematics
+
+This method is a static method.
+
+- Method:
+
+  ```python
+  create(arg0: alphabot.core.RobotType) -> TorsoKinematics
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0` | Robot type. For details, please refer to [RobotType](#RobotType). |
+
+- Return Value: 
+  
+  A `TorsoKinematics` instance if creation succeeds, otherwise `None`.
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```python
+  forward_kinematics(
+    self, 
+    arg0: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, alphabot.core.AbcTorsoPose4D]
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0` | Joint angles. |
+
+- Return Value: 
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `AbcTorsoPose4D` | Pose computed by forward kinematics. For details, please refer to [AbcTorsoPose4D](/en/sdk/python/data-structures#AbcTorsoPose4D). |
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```python
+  inverse_kinematics(
+    self, 
+    pose: alphabot.core.AbcTorsoPose4D
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The target pose. For details, please refer to [AbcTorsoPose4D](/en/sdk/python/data-structures#AbcTorsoPose4D). |
+
+- Return Value: 
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Joint angles computed by inverse kinematics. |
+
+### Check Joint Limits
+
+- Method:
+
+  ```python
+  check_range(self, arg0: list[float]) -> alphabot.core.AbcErrorCode
+  ```
+
+- Parameter:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arg0` | Joint angles. |
+
+- Return Value: 
+
+  `AbcErrorCode.SUCCESS` indicates all joint values are within limits. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode).
+
+---
+
+## RobotType {#RobotType}
+
+<Aside>
+This class is an enumeration. You should directly use the constant members defined within it and do not need to instantiate it.
+</Aside>
+
+<table>
+   <thead>
+     <tr>
+        <th>Constant Member</th>
+        <th>Value</th>
+        <th>Description</th>
+     </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>`AlphaBot1s`</td>
+         <td>1</td>
+         <td rowspan="3">Robot Type</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot2`</td>
+         <td>2</td>
+      </tr>
+      <tr>
+         <td>`AlphaBot1s_HuiKe`</td>
+         <td>3</td>
+      </tr>
+   </tbody>
+</table>
+
+## admittance_control_law {#admittance_control_law}
+
+- Method:
+
+  ```python
+  admittance_control_law(
+      arm: ArmKinematics, 
+      pose: alphabot.core.Pose, 
+      p_stiffness: float, 
+      r_stiffness: float, 
+      force: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(6)], 
+      t: float, 
+      q: list[float]
+  ) -> tuple[alphabot.core.AbcErrorCode, list[float]]
+  ```
+
+- Parameters:
+
+  | Parameter | Description |
+  |:---|:---|
+  | `arm` | An object of type [ArmKinematics](#ArmKinematics). |
+  | `pose` | Current end-effector pose. Refer to [Pose](/en/sdk/python/data-structures#Pose) for details. |
+  | `p_stiffness` | Translational stiffness. |
+  | `r_stiffness` | Rotational stiffness. |
+  | `force` | Six-dimensional spatial force applied at the end-effector, ordered as `[Mx, My, Mz, Fx, Fy, Fz]`. |
+  | `t` | Integration time, which must be less than or equal to the duration of one control loop. |
+  | `q` | Current joint angles. |
+
+- Return Value:
+
+  A tuple containing two elements.
+
+  | Element Type | Description |
+  |:---|:---|
+  | `AbcErrorCode` | `AbcErrorCode.SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/python/data-structures#AbcErrorCode). |
+  | `list[float]` | Joint angles for the next time step. |

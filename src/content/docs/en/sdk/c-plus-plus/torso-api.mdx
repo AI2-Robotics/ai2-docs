@@ -1,0 +1,342 @@
+---
+title: Torso APIs
+description: Torso C++ APIs
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The torso APIs are implemented by the following classes. You can find the corresponding header files in the `c++/include/drivers/torso` directory to access the complete set of APIs.
+
+| Header File | Class Name | Description |
+|:---|:---|:---|
+| `torso_factory.h` | `TorsoFactory` | A factory class for creating torso instances of different types. |
+| `torso_interface.h` | `TorsoInterface` | The base interface class defining common APIs for torso control. All vendor-specific drivers should inherit from this class. |
+
+## Create a Torso Instance
+
+There are two ways to create a torso instance.
+
+1. Create a torso instance by torso parameters.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<TorsoInterface<PoseType>> create_torso(
+         const TorsoFactoryParam& param)
+     ```
+   
+   - Parameter:
+   
+     | Parameter | Type | Description |
+     |:---|:---|:---|
+     | `param` | Input | Parameters related to the torso. For details, please refer to [TorsoFactoryParam](/en/sdk/c-plus-plus/data-structures#TorsoFactoryParam). |
+   
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `TorsoInterface` if the instance is created successfully; otherwise, returns `nullptr`. `PoseType` is a placeholder type name that is specified when the `TorsoFactory` class is instantiated.
+
+2. Create a torso instance from a configuration file.
+
+   - Method:
+   
+     ```cpp
+     static std::shared_ptr<TorsoInterface<PoseType>> create_torso_from_config(
+         const std::string& config_path)
+     ```
+   
+   - Parameter:
+
+     <table>
+     <thead>
+     <tr>
+     <th>Parameter</th>
+     <th>Type</th>
+     <th>Description</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>
+     
+     `config_path`
+     
+     </td>
+     <td>
+     
+     Input
+     
+     </td>
+     <td>
+     
+     Path to the configuration file. The configuration file must be a JSON file.
+     
+     ```json
+     {
+         "torso_type": "ti5",           // Torso name
+         "torso_name": "ti5_torso",     // Torso name
+         "torso_joint_num": 4,          // Number of Torso joints
+         "can_device": "can0",          // CAN device name
+         "can_id": 0,                   // CAN node ID (0x00~0xFF)
+         "motor_params": [              // # Motor parameters
+             {
+                 "motor_id": 1,         // Motor ID
+                 "reduction_ratio": 121,// Reduction ratio
+                 "position_max": 1.0,   // Maximum rotation angle
+                 "position_min": -68.0, // Minimum rotation angle
+                 "speed_max": 30,       // Maximum rotation speed
+                 "speed_min": -30,      // Minimum rotation speed
+                 "acc_max": 10,         // Maximum rotation acceleration
+                 "acc_min": -10         // Minimum rotation acceleration
+             }
+         ]
+     }
+     ```
+     
+     </td>
+     </tr>
+     </tbody>
+     </table> 
+
+   - Return Value:
+   
+     Returns a shared pointer to an object of a class derived from `TorsoInterface` if the instance is created successfully; otherwise, returns `nullptr`. `PoseType` is a placeholder type name that is specified when the `TorsoFactory` class is instantiated.
+
+## Connect to the Torso
+
+- Method:
+
+  ```cpp
+  AbcErrorCode connect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Disconnect from the Torso
+
+- Method:
+
+  ```cpp
+  AbcErrorCode disconnect()
+  ```
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Control Torso Trajectories
+
+### Joint Motion
+
+In joint space, a motion trajectory is planned to drive each joint of the torso to the specified target joint positions.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position(
+      const std::vector<AbcType>& joints,
+      int v,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `v` | Input | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0–100. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Cartesian Linear Motion
+
+In Cartesian space, a linear motion trajectory is planned to move the torso along a straight line to the specified target pose.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_cartesian_linear(
+      const PoseType& pose,
+      int v,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. `PoseType` is a placeholder type name, matching the type specified when the `TorsoInterface` class is instantiated. |
+  | `v` | Input | Percentage of the maximum joint linear velocity and acceleration used for planning. Valid range: 0–100. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Move to Target Pose in Joint Space
+
+In joint space, a motion trajectory is planned to move the torso to the specified target pose.
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_pose(
+      const PoseType& pose,
+      int v,
+      int block)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | Target pose. `PoseType` is a placeholder type name, matching the type specified when the `TorsoInterface` class is instantiated. |
+  | `v` | Input | Percentage of the maximum joint angular velocity and joint angular acceleration used for planning. Valid range: 0–100. |
+  | `block` | Input | Blocking mode flag. Accepts 0 or 1.<br/>- `0`: Non-blocking mode. The method returns immediately after successfully sending the motion command to the controller.<br/>- `1`: Blocking mode. The method waits until the torso completes the motion or an error occurs before returning. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Angle Pass-through
+
+Joint angles are sent to the torso via CAN FD (Controller Area Network Flexible Data-rate), bypassing trajectory planning by the controller. If the method is called correctly, the torso executes the motion immediately.
+
+<Aside>
+- The pass-through control performance is affected by the communication cycle and trajectory smoothness; therefore, a stable communication cycle is required to avoid large fluctuations.
+- When using this feature, it is recommended to plan smooth trajectories to ensure stable operation of the torso.
+</Aside>
+
+- Method:
+
+  ```cpp
+  AbcErrorCode move_joint_position_canfd(const std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Target joint positions, in degrees. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Current Joint Angles
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_joint_degree(std::vector<AbcType>& joints)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Output | Current joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Get Error Information
+
+- Method:
+
+  ```cpp
+  AbcErrorCode get_error_flag(std::vector<int32_t>& error_flag)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `error_flag` | Output | Error codes. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Algorithms
+
+### Compute Forward Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode forward_kinematics(
+      const std::vector<AbcType>& joints,
+      PoseType& pose)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `joints` | Input | Joint angles. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `pose` | Output | Pose computed by forward kinematics. `PoseType` is a placeholder type name, matching the type specified when the `TorsoInterface` class is instantiated. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+### Compute Inverse Kinematics
+
+- Method:
+
+  ```cpp
+  AbcErrorCode inverse_kinematics(
+      const PoseType& pose,
+      const std::vector<AbcType>& ref_joints,
+      std::vector<AbcType>& joints,
+      int mode = 0)
+  ```
+
+- Parameters:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `pose` | Input | The target pose. `PoseType` is a placeholder type name, matching the type specified when the `TorsoInterface` class is instantiated. |
+  | `ref_joints` | Input | Reference joint angles. |
+  | `joints` | Output | Joint angles computed by inverse kinematics. For details, please refer to [AbcType](/en/sdk/c-plus-plus/data-structures#AbcType). |
+  | `mode` | Input (optional) | Solution mode. Accepts 0 or 1. Default is 0.<br/>- `0`: Single-step solution.<br/>- `1`: Iterative search solution. |
+
+- Return Value:
+
+  `AbcErrorCode::SUCCESS` indicates success. For other error codes, please refer to [AbcErrorCode](/en/sdk/c-plus-plus/data-structures#AbcErrorCode).
+
+## Register Torso State Callback Function
+
+- Method:
+
+  ```cpp
+  void set_torso_state_callback(AbcTorsoStateCallback realtime_callback)
+  ```
+
+- Parameter:
+
+  | Parameter | Type | Description |
+  |:---|:---|:---|
+  | `realtime_callback` | Input | `AbcTorsoStateCallback` is a function pointer type. For details, please refer to [AbcTorsoStateCallback](/en/sdk/c-plus-plus/data-structures#AbcTorsoStateCallback). The callback function is called whenever a torso state update is received. |
+
+- Return Value:
+
+  None (void).
+
+## Get Torso Name
+
+- Method:
+
+  ```cpp
+  std::string get_name() const
+  ```
+
+- Return Value:
+
+  The name of the torso instance.
