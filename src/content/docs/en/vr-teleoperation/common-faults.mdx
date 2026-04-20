@@ -1,26 +1,24 @@
 ---
-title: 常见故障
-description: VR 遥操设备的常见故障排查指南
+title: Troubleshooting
+description: VR Teleoperation Device Troubleshooting
 ---
 
-本文介绍 VR 遥操设备的常见故障及其解决方法。
+## VR Controllers Cannot Control the Robotic Arm
 
-## VR 手柄无法控制机械臂
+* Cause:
 
-* 故障原因：
+    1. VR USB cable is not connected.
+    2. VR USB permission is not granted.
+    3. VR USB debugging permission is not granted.
 
-    1. VR USB 线未连接。
-    2. VR 没有获取 USB 权限。
-    3. VR 没有获取 USB 调试权限。
-
-* 解决方法：
+* Solution:
     
-    1. 检查 VR USB 线是否正常连接。
-    2. 重新拔插 USB 线，参照[VR 设备前置配置](../operation-guide/#preconfiguration)重新配置 VR 的 USB 权限。
-    3. 在机器人终端处，执行 `rm -rf .android`，然后重新拔插 USB 数据线。
+    1. Check whether the VR USB cable is properly connected.
+    2. Reconnect the USB cable, and reconfigure VR USB permission according to the [Prerequisites](../operation-guide/#preconfiguration).
+    3. On the robot terminal, run `rm -rf .android` command, then reconnect the USB cable.
 
 
-## 其他故障
+## Other Problems
 
-如果您遇到其他故障，请尝试重启设备。如果问题仍然存在，请联系售后进行进一步检查和维修。
+If you encounter other problems, please first try restarting the device. If the problem still exists, please contact our support team.
 

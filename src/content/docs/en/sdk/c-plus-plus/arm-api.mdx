@@ -30,7 +30,7 @@ There are three ways to create a robotic arm instance.
 
      | Parameter | Type | Description |
      |:-------|:---|:-|
-     | `arm_type` | Input | The manufacturer or type of the robotic arm (e.g., `"realman"`). |
+     | `arm_type` | Input | The manufacturer or type of the robotic arm. |
      | `name` | Input | The instance identifier for the arm (e.g., `"left_arm"`, `"right_arm"`). |
      | `params` | Input | A key-value map for additional configuration parameters (e.g., `{{"ip", "192.168.1.18"}, {"port", "8080"}}`). |
 
@@ -93,7 +93,7 @@ There are three ways to create a robotic arm instance.
      
      ```json
      {
-         "arm_type":"realman", # Robotic arm vendor
+         "arm_type":"xxx", # Robotic arm vendor
          "arm_name":"left_arm", # Robotic arm name
          "ip": "192.168.1.18", # TCP IP address
          "port": "8080", # TCP port number

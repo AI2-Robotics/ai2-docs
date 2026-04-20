@@ -1,168 +1,167 @@
 ---
-title: 常用操作
-description: 常用操作
+title: Common Operations
+description: Common Operations
 ---
 
 import { Steps } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
 import { Image } from 'astro:assets';
 
-在使用外骨骼遥操设备时，掌握以下操作将有助于您更高效地使用和操作设备。
+Mastering the following operations will help you use the Exoskeleton Teleoperation Device more efficiently.
 
-## 启动 HMI 界面{#start-hmi-interface}
+## Starting the HMI Interface{#start-hmi-interface}
 
-ROBOT-CONTROL-HMI（简称 HMI）是用于控制和监控机器人系统的图形用户界面，也是使用外骨骼遥操设备时与机器人交互的核心工具。HMI 分为用户端（user）与机器人端（robot）两部分程序，使用前需分别启动，具体操作如下。
+ROBOT-CONTROL-HMI (hereinafter referred to as HMI) is the graphical user interface for controlling and monitoring the robot system. It serves as the core tool for interacting with the robot when using the Exoskeleton Teleoperation Device. The HMI consists of two separate programs: the user-side program and the robot-side program. Both must be started before use, following the procedures below.
 
-### 启动用户端程序
+### Starting the User-Side Program
 
 import operation_guide_1 from 'img/operation_guide_1.png';
 
 <Steps>
 
-1. 在工控机上，下载 [Microsoft Edge 浏览器安装包](https://www.microsoft.com/zh-cn/edge/download?form=MA13FJ)。
+1. On the industrial PC, download the [Microsoft Edge browser installation package](https://www.microsoft.com/en-us/edge/download).
 
-2. 在安装包所在文件夹下，打开终端，通过如下命令进行安装。
-
+2. In the folder containing the installer package, open a terminal and run the following command to install the browser.
 
    ```bash
    sudo dpkg -i microsoft-edge-stable_xxx_arm64.deb
    ```
    <Aside>
-   请将命令中的 `microsoft-edge-stable_xxx_arm64.deb` 替换为实际的安装包文件名。
+   Replace `microsoft-edge-stable_xxx_arm64.deb` in the command with the actual filename of the installation package.
    </Aside>
 
 
-3. 在 Ubuntu 操作系统中，依次点击 `设置 -> 默认应用程序 -> 网络(W)`，选择 Microsoft Edge，将 Microsoft Edge 设置为默认浏览器。
+3. In the Ubuntu operating system, navigate to `Settings -> Default Applications -> Web (W)` , select Microsoft Edge, and set Microsoft Edge as the default browser.
 
-4. 在工控机上，打开终端，输入以下命令。
+4. On the industrial PC, open a terminal and enter the following commands.
 
    ```bash
    cd ~
    bash ~/user_docker_start_xxx.sh
    ```
    <Aside>
-   xxx 为具体版本号。
+   `xxx` indicates the specific version number.
    </Aside>
 
-5. 上述脚本启动后，Microsoft Edge 浏览器会自动打开 HMI 界面。如未自动打开，请手动在浏览器地址栏输入 `http://127.0.0.1:4090`。
+5. After the script executes, the Microsoft Edge browser will launch the HMI interface automatically. If it does not open automatically, manually enter `http://127.0.0.1:4090` in the browser's address bar.
 
    <Image src={operation_guide_1} alt="" />
 
    <Aside>
-   - `外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，因此，在切换 `启动外骨骼设备` 、`启动 VR 控制设备` 和 `启动主动外骨骼设备` 时，需要将上一个设备下启动的所有控制一一关闭，即确保 `机器人控制` 区域中的按钮均为蓝色按钮，才可切换设备。
-   - 如需关闭 HMI，请先以 Ctrl+C 结束用户端与机器人端程序，再关闭对应终端，最后关闭 Microsoft Edge 浏览器。
+   - The Exoskeleton Device, VR Control Device, and Active Exoskeleton Device are three independent systems. Therefore, when switching between starting the Exoskeleton Device, VR Control Device, and Active Exoskeleton Device, you must close all controls running under the previous device first. Ensure all buttons in the Robot Control panel are blue before switching devices.
+   - To close the HMI, first press `Ctrl+C` to terminate both the user-side and robot-side programs, then close the corresponding terminals, and finally close the Microsoft Edge browser.
    </Aside>
    <Aside type="tip">
-      为保证通信，用户端程序约每 10 秒向机器人端发送状态获取请求并更新数据。在两端程序均运行的情况下，仅以下两种场景会导致无法定期获取机器人状态。
-      - HMI 界面被关闭：界面被手动关闭且无其他界面时，用户端无法通过浏览器获取机器人端状态。
-      - HMI 界面被浏览器后台休眠：多标签页下，若当前视焦未落在 HMI 界面，该界面将被浏览器自动休眠，导致用户端无法发送状态获取请求。
+      To maintain communication, the user-side program requests and updates robot status data approximately every 10 seconds. With both programs running, periodic robot status retrieval may fail only in the following two scenarios:
+      - HMI interface closed: The user-side program cannot retrieve robot status via the browser if the interface is manually closed with no other interface active.
+      - HMI interface suspended by browser background: In multi-tab browsing, if the HMI interface loses focus, the browser may automatically suspend it, preventing the user-side program from sending status requests.
    </Aside>
        
 
 </Steps>
 
-### 启动机器人端程序
+### Starting the Robot-Side Program
 
 <Steps>
 
-1. 在工控机上，打开另一个新终端，通过 SSH 命令远程连接到机器人终端。
+1. On the industrial PC, open a new terminal window and remotely connect to the robot terminal using the `ssh` command.
 
    ```bash
    zpf@zpf-MIC-770V3H:~$ ssh robot@192.168.1.100
-   # 密码为 robot
+   # Password: robot
    robot@192.168.1.100's password: 
-   # 如果终端的用户名以 robot 开头，则表示连接成功。
+   # Connection is successful if the terminal username starts with "robot".
    robot@ter30jb3-ubuntu:~$ 
    ```
 
-2. 在连接成功的终端中，输入以下命令。
+2. In the successfully connected terminal, enter the following commands.
 
    ```bash
    cd ~
    bash ~/robot_docker_start.sh
    ```
    <Aside>
-   如需关闭 HMI，请先以 Ctrl+C 结束用户端与机器人端程序，再关闭对应终端，最后关闭 Microsoft Edge 浏览器。
+   To close the HMI, first press `Ctrl+C` to terminate both the user-side and robot-side programs, then close the corresponding terminals, and finally close the Microsoft Edge browser.
    </Aside>
 </Steps>
 
-在启动 HMI 界面后，便可[使用外骨骼设备](#using-exoskeleton-device)对机器人进行控制。
+After Starting the HMI interface, you can [use the exoskeleton device](#using-exoskeleton-device) to control the robot.
 
-## 使用外骨骼设备{#using-exoskeleton-device}
+## Using the Exoskeleton Device{#using-exoskeleton-device}
 
-### 启动外骨骼控制设备{#start-exoskeleton-device}
+### Starting the Exoskeleton Control Device{#start-exoskeleton-device}
 
 import operation_guide_2 from 'img/operation_guide_2.png';
 import operation_guide_3 from 'img/operation_guide_3.png';
 
 <Steps>
-1. 在[启动 HMI 界面](#start-hmi-interface)后，点击 `启动外骨骼设备` 按钮。启动成功后，按钮将变为红色，同时文字显示为 `停止外骨骼设备`。
+1. After [starting the HMI interface](#start-hmi-interface), click the `Start Exoskeleton Device` button. Once started successfully, the button will turn red and the text will change to `Stop Exoskeleton Device`.
    <Image src={operation_guide_2} alt="" />
    <Aside>
-   - `外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，因此，在切换 `启动外骨骼设备` 、`启动 VR 控制设备` 和 `启动主动外骨骼设备` 时，需要将上一个设备下启动的所有控制一一关闭，即确保 `机器人控制` 区域中的按钮均为蓝色按钮，才可切换设备。
-   - 当机器人发生故障或机械臂运动异常、不受控制时，请立即点击 `停止外骨骼设备` 按钮，机器人将紧急停止响应。
+   - The Exoskeleton Device, VR Control Device, and Active Exoskeleton Device are three independent systems. Therefore, when switching between starting the Exoskeleton Device, VR Control Device, and Active Exoskeleton Device, you must close all controls running under the previous device first. Ensure all buttons in the Robot Control panel are blue before switching devices.
+   - If the robot malfunctions or the robotic arm moves abnormally or becomes uncontrollable, click the `Stop Exoskeleton Device` button immediately. The robot will emergency stop and cease response.
    </Aside>
 
-2. 弹出 AI2-HMI 窗口。该窗口将实时显示遥操数据，请勿在操作过程中关闭该窗口。
+2. The AI2-HMI window will pop up. This window displays real-time teleoperation data. Do not close this window during operation.
 
    <Image src={operation_guide_3} alt="" />
    
    <Aside>
-   - 若仅有一个显示器，请将该窗口最小化，以确保其不影响 HMI 主界面的操作。若有多个显示器，请将该窗口拖动至非主显示器上，便于观察数据变化。
-   - 该窗口不会随 HMI 界面的关闭而自动退出，必须通过点击窗口自身的关闭按钮或 HMI 界面上的 `停止外骨骼设备` 按钮方可将其关闭。
-   - 为防止多个窗口同时运行导致显示异常或数据冲突，每次启动前请务必确保仅开启一个 HMI 界面及一个对应的 AI2-HMI 窗口。
+   - If there is only one monitor, minimize this window to ensure it does not affect the operation of the main HMI interface. If there are multiple monitors, drag this window to a non-main monitor for easy observation of data changes.
+   - This window does not automatically exit when the HMI interface is closed. It can only be closed by clicking its own close button or the `Stop Exoskeleton Device` button on the HMI interface.
+   - To prevent display abnormalities or data conflicts caused by multiple windows running simultaneously, ensure only one HMI interface and one corresponding AI2-HMI window are open before each startup.
    </Aside>
 
 </Steps>
 
-### 启动机器臂{#start-robotic-arm}
+### Starting the Robotic Arm{#start-robotic-arm}
 
 import operation_guide_4 from 'img/operation_guide_4.png';
 import operation_guide_5 from 'img/operation_guide_5.png';
 import operation_guide_6 from 'img/operation_guide_6.png';
 
 <Steps>
-1. 在确保完成[启动外骨骼设备](#start-exoskeleton-device)后，在 `机器人控制` 区域，点击 `启动机器臂` 按钮。
+1. After ensuring that [the Exoskeleton Device has been successfully started](#start-exoskeleton-device), click the `Start Robotic Arm` button in the `Robot Control` panel.
    <Image src={operation_guide_4} alt="" />
 
-2. 此时页面会弹出如下提示信息，请耐心等待。
+2. A prompt message as shown below will appear; please wait patiently.
 
    <Image src={operation_guide_5} alt="" width="450"/>
 
-3. 启动成功后，机械臂会进入自检状态，`启动机械臂` 蓝色按钮将变为 `停止机械臂` 红色按钮，同时 `系统状态` 区域中的机械臂状态为 `运行中`。
+3. Upon successful startup, the robotic arm will enter a self-check state. The `Start Robotic Arm` blue button will change to a red `Stop Robotic Arm` button, and the `Robotic Arm Status` in the `System Status` panel will display `Running`.
 
    <Image src={operation_guide_6} alt="" />
    <Aside>
-   在机械臂启动成功后，您需要继续[启动随动](#start-follow)，并确保机械臂运动正常，方可使用外骨骼设备控制机械臂。
+   After the robotic arm is successfully started, you need to [start the follow-up mode](#start-follow) and ensure the robotic arm moves normally before using the exoskeleton device to control the robotic arm.
    </Aside>
 
 </Steps>
 
-### 启动随动{#start-follow}
+### Starting Follow-Up{#start-follow}
 
 import operation_guide_7 from 'img/operation_guide_7.png';
 import operation_guide_8 from 'img/operation_guide_8.png';
 import operation_guide_9 from 'img/operation_guide_9.png';
 
 <Steps>
-1. 在确保完成[启动机器臂](#start-robotic-arm)后，在 `机器人控制` 区域，点击 `启动慢速随动` 按钮。
+1. 在确保完成[启动机器臂](#start-robotic-arm)后，在 `机器人控制` 区域，点击 `启动慢速随动` 按钮。After ensuring [the robotic arm has been started](#start-robotic-arm), click the `Start Slow Follow-Up` button in the `Robot Control` panel.
    <Image src={operation_guide_7} alt="" />
 
-2. 此时页面会弹出如下提示信息，机械臂将慢速运动到遥操臂的姿态。确认该姿态正常后，点击 `确认` 按钮，切换至快速随动。
+2. A prompt message as shown below will appear. The robotic arm will slowly move to the pose of the teleoperation arm. After confirming that the pose is normal, click the `OK` button to switch to fast follow-up.
    <Aside type="tip">
-   在慢速随动状态下，机械臂会以较慢的速度跟随遥操臂的运动，便于操作者观察机械臂的运动状态，确认机械臂的运动姿态与遥操臂一致且无异常后，再切换至快速随动，以获得更流畅的操作体验。
+   In slow follow-up mode, the robotic arm follows the movement of the teleoperation arm at a slow speed, allowing the operator to observe the motion status of the robotic arm. After confirming that the motion pose is consistent with the teleoperation arm and there are no abnormalities, switch to fast follow-up for a smoother operation experience.
    </Aside>
 
    <Image src={operation_guide_8} alt="" width="450" />
 
-3. 在如下弹窗中，点击 `确认` 按钮，切换至快速随动。
+3. Click the `OK` button in the pop-up window below to switch to Fast Follow-Up.
    <Image src={operation_guide_9} alt="" width="450"/>
 
-4. 启动成功后，`启动慢速随动` 蓝色按钮将变为 `停止快速随动` 红色按钮，同时确认 `系统状态` 区域中的随动状态为 `快速随动`。
+4. Once started successfully, the blue Start `Slow Follow-Up` button will change to the red `Stop Fast Follow-Up` button. Also confirm that the follow-up status in the `System Status` panel is `Fast Follow-Up`.
 
 </Steps>   
 
-### 启动底盘
+### Starting the Chassis
 
 import operation_guide_10 from 'img/operation_guide_10.png';
 import operation_guide_11 from 'img/operation_guide_11.png';
@@ -170,21 +169,22 @@ import operation_guide_12 from 'img/operation_guide_12.png';
 
 
 <Steps>
-1. 将底盘旋钮旋转至 `自动模式`，并断开充电线缆。
+1. Rotate the chassis knob to `Auto Mode` and disconnect the charging cable.
 
-2. 在确保完成[启动外骨骼设备](#start-exoskeleton-device)后，在 `机器人控制` 区域，点击 `启动底盘` 按钮。
+2. After ensuring that [the Exoskeleton Device has been successfully started](#start-exoskeleton-device), click the `Start Chassis` button in the `Robot Control` panel.
+
    <Image src={operation_guide_10} alt="" />
 
-3. 此时页面会弹出如下提示信息，请耐心等待。
+3. A prompt message as shown below will appear; please wait patiently.
 
    <Image src={operation_guide_11} alt="" width="450"/>
 
-4. 启动成功后，底盘会进入自检状态，`启动底盘` 蓝色按钮将变为 `停止底盘` 红色按钮，同时 `系统状态` 区域中的底盘状态为 `运行中`。
+4. Upon successful startup, the chassis will enter a self-check state. The `Start Chassis` blue button will change to a red `Stop Chassis` button, and the `Chassis Status` in the `System Status` panel will display `Running`.
 
    <Image src={operation_guide_12} alt="" />
 </Steps>
 
-### 启动 RealSense 相机
+### Starting the RealSense Camera
 
 import operation_guide_13 from 'img/operation_guide_13.png';
 import operation_guide_14 from 'img/operation_guide_14.png';
@@ -194,121 +194,127 @@ import operation_guide_17 from 'img/operation_guide_17.png';
 import operation_guide_18 from 'img/operation_guide_18.png';
 
 <Steps>
-1. 在确保完成[启动外骨骼设备](#start-exoskeleton-device)后，在 `机器人控制` 区域，点击 `启动 RealSense 相机` 按钮。
+1. After ensuring that [the Exoskeleton Device has been successfully started](#start-exoskeleton-device), click the `Start RealSense Camera` button in the `Robot Control` panel.
    <Image src={operation_guide_13} alt="" />
-2. 此时页面会弹出如下提示信息，请耐心等待。
+2. A prompt message as shown below will appear; please wait patiently.
 
    <Image src={operation_guide_14} alt="" width="450"/>
 
-3. 启动成功后，RealSense 相机将进入自检状态，`启动 RealSense 相机` 蓝色按钮将变为 `停止 RealSense 相机` 红色按钮，同时 `系统状态` 区域中的 RealSense 相机状态为 `运行中`。
+3. Upon successful startup, the RealSense camera will enter a self-check state. The `Start RealSense Camera` blue button will change to a red `Stop RealSense Camera` button, and the `RealSense Camera Status` in the `System Status` panel will display `Running`.
 
    <Aside>
-   该功能为数据采集的核心，若未启动 RealSense 相机，则无法进行数据采集。
+   This feature is core to data acquisition. If the RealSense camera is not started, data acquisition cannot be performed.
    </Aside>
 
    <Image src={operation_guide_15} alt="" />
 
-4. 点击界面右上角的 `启动视频流` 按钮。
+4. Click the `Start Video Stream` button in the upper-right corner of the interface.
+
    <Image src={operation_guide_16} alt="" />
 
-5. 弹出如下窗口。该窗口会自动关闭。
+5. A window as shown below will pop up. This window will close automatically.
+
    <Image src={operation_guide_17} alt="" />
 
-6. 视频流播放区将显示实时视频流，同时 `系统状态` 区域中的视频流状态为 `运行中`。
+6. The video stream playback area will display the real-time video stream, and the `Video Stream Status` in the `System Status` panel will display `Running`.
+
    <Image src={operation_guide_18} alt="" />
 
 </Steps>
 
-### 启动躯干
+### Starting the Torso
 
 import operation_guide_19 from 'img/operation_guide_19.png';
 import operation_guide_20 from 'img/operation_guide_20.png';
 import operation_guide_21 from 'img/operation_guide_21.png';
 
 <Steps>
-1. 在确保完成[启动外骨骼设备](#start-exoskeleton-device)后，在 `机器人控制` 区域，点击 `启动躯干` 按钮。
+1. After ensuring that [the Exoskeleton Device has been successfully started](#start-exoskeleton-device), click the `Start Torso` button in the `Robot Control` panel.
+
    <Image src={operation_guide_19} alt="" />
-2. 此时页面会弹出如下提示信息，请耐心等待。
+
+2. A prompt message as shown below will appear; please wait patiently.
 
    <Image src={operation_guide_20} alt="" width="450"/>
 
-3. 启动成功后，躯干会进入自检状态，`启动躯干` 蓝色按钮将变为 `停止躯干` 红色按钮，同时 `系统状态` 区域中的躯干状态为 `运行中`。
+3. Upon successful startup, the torso will enter a self-check state. The `Start Torso` blue button will change to a red `Stop Torso` button, and the `Torso Status` in the `System Status` panel will display `Running`.
 
    <Image src={operation_guide_21} alt="" />
 
 </Steps>
 
-## 使用手柄
+## Using the Controller
 
 import operation_guide_22 from 'img/operation_guide_22.png';
 import operation_guide_23 from 'img/operation_guide_23.png';
 
-在[启动外骨骼设备](#start-exoskeleton-device)后，您便可使用手柄对机器人进行控制。
+After [starting the exoskeleton device](#start-exoskeleton-device), you can use the controller to control the robot.
 
 <Steps>
 
-1. 确保手柄接收器已连接至工控机 USB 接口，并且手柄电量充足。
+1. Ensure that the controller receiver is connected to the USB port of the industrial PC and that the controller has sufficient battery power.
 
    <Aside>
-   - 严禁使用有线方式连接手柄和工控机。
-   - 手柄充电规格为 5V/1-2A，不支持快充功能，请勿使用功率超过 66W 的快充充电器。充电状态指示说明如下。
+   - Do not connect the controller to the industrial PC using a wired connection.
+   - The controller charging specification is 5V/1-2A. Fast charging is not supported. Do not use a fast charger with a power output exceeding 66W. The charging status indicators are described below.
+
       <Image src={operation_guide_22} alt="" width="450"/>
    </Aside>
 
-2. 首次使用手柄时，手柄模式需配置为 `安卓模式 -> 接收器` 模式。
+2. When using the controller for the first time, the controller mode must be configured to `Android Mode -> Receiver` Mode.
 
-   配置方法：长按 HOME 键 3 秒，进入模式切换界面，选择 `安卓模式 -> 接收器` 选项。
+   Configuration method: Press and hold the HOME button for 3 seconds to enter the mode selection interface, then select `Android Mode -> Receiver`.
 
-3. 在工控机上，打开终端，输入以下命令。
+3. On the industrial PC, open a terminal and enter the following command:
 
    ```bash
    ros2 run joy joy_node
    ```
 
    <Aside>
-   使用手柄期间，请勿关闭该终端窗口，以免导致手柄无法使用。
+   Do not close this terminal window while using the controller, otherwise the controller will become unusable.
    </Aside>
    
-4. 通过手柄按键，可分别对脖颈、腰腿及底盘进行控制。
+4. You can control the neck, waist-legs, and chassis respectively through the controller buttons.
 
    <Image src={operation_guide_23} alt="" width="500"/>
 
    <table>
       <thead>
          <tr>
-            <th><strong>操作</strong></th>
-            <th><strong>说明</strong></th>
+            <th>Operation</th>
+            <th>Description</th>
          </tr>
       </thead>
       <tbody>
          <tr>
             <td>
-            移动底盘
+            Move Chassis
             </td>
             <td>      
-               - 前进后退：LB + 左摇杆 Y
-               - 左右转动：LB + 左摇杆 X
+               - Move forward/backward: LB + Left Stick Y
+               - Turn left/right: LB + Left Stick X
             </td>
          </tr>
          <tr>
             <td>
-            控制脖颈
+            Control Neck
             </td>
             <td>      
-               - 脖颈左右转头：右摇杆 X
-               - 脖颈上下点头：右摇杆 Y
+               - Turn head left/right: Right Stick X
+               - Tilt head up/down: Right Stick Y
             </td>
          </tr>  
          <tr>
             <td>
-            控制腰腿
+            Control Waist/Legs
             </td>
             <td>      
-               - 腰腿上升：RT + A
-               - 腰腿下降：RT + X
-               - 腰右转动：LT + A
-               - 腰左转动：LT + X
-               - 腰前后移动：左摇杆 Y
+               - Raise waist/legs: RT + A
+               - Lower waist/legs: RT + X
+               - Rotate waist right: LT + A
+               - Rotate waist left: LT + X
+               - Move waist forward/backward: Left Stick Y
             </td>
          </tr>       
       </tbody>
@@ -318,15 +324,16 @@ import operation_guide_23 from 'img/operation_guide_23.png';
 
 
 
-## 采集数据
+## Data Acquisition
 
-在[启动外骨骼设备](#start-exoskeleton-device)后，您可以通过 HMI 界面中的 `机器人数据采集` 功能来采集 VR 遥操设备的数据。
+After [starting the exoskeleton device](#start-exoskeleton-device), you can acquire data from the Exoskeleton Teleoperation Device using the `Robot Data Acquisition` function in the HMI interface.
+
 
 <Aside>
-`外骨骼设备` 、`VR 控制设备` 和 `主动外骨骼设备` 是三套独立的设备，请勿混用。
+The Exoskeleton Device, VR Control Device, and Active Exoskeleton Device are three independent systems; do not mix them.
 </Aside>
 
-### 创建任务{#create-task}
+### Creating a Task{#create-task}
 
 import operation_guide_36 from 'img/operation_guide_36.png';
 import operation_guide_37 from 'img/operation_guide_37.png';
@@ -336,145 +343,150 @@ import operation_guide_40 from 'img/operation_guide_40.png';
 import operation_guide_41 from 'img/operation_guide_41.png';
 
 <Steps>
-1. 在 `机器人数据采集` 区域，输入任务 ID，点击 `创建任务` 按钮。
+1. In the `Robot Data Acquisition` panel, enter a Task ID and click the `Create Task` button.
 
    <Aside>
-   任务 ID 只能为纯数字，禁止使用非法字符。
+   The Task ID can only contain numeric characters. Do not use illegal characters.
    </Aside>
    <Image src={operation_guide_36} alt="" />
 
-   - 若为新任务，页面会弹出如下提示信息。
+   -  If it is a new task, a prompt message as shown below will pop up on the page.
 
       <Image src={operation_guide_37} alt="" />
 
-      点击弹窗外空白处，即可关闭弹窗。
-   - 若任务 ID 已存在，页面会弹出如下提示信息，点击 `确认` 按钮，以续存任务。
+      Click the blank area outside the pop-up window to close it.
+   - If the Task ID already exists, a prompt message as shown below will pop up on the page. Click the `OK` button to resume the existing task.
       <Image src={operation_guide_38} alt="" />
 
-      点击弹窗外空白处，即可关闭弹窗。
+      Click the blank area outside the pop-up window to close it.
+
       <Image src={operation_guide_39} alt="" />
 
-2. 点击 `发送任务` 按钮，发送成功后会有弹窗提示。
+2. Click the `Send Task` button. A pop-up prompt will appear after successful sending.
 
    <Aside>
-   在点击 `发送任务` 按钮前，请确保已启动相机和机械臂，否则点击按钮将无响应。
+   Before clicking the `Send Task` button, ensure that the camera and robotic arm have been started. Otherwise, the button will not respond.
    </Aside>
 
    <Image src={operation_guide_40} alt="" />
 
-3. 此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。   
+3. At this time, a prompt message as shown below will pop up on the page. Click the blank area outside the pop-up window to close it.    
    <Image src={operation_guide_41} alt="" />
 
 </Steps>
 
 
-### 开始采集
+### Starting Data Acquisition
 
 import operation_guide_42 from 'img/operation_guide_42.png';
 import operation_guide_43 from 'img/operation_guide_43.png';
 import operation_guide_44 from 'img/operation_guide_44.png';
 
-在成功[创建任务](#create-task)后，您便可开始采集数据了。
+After successfully [creating a task](#create-task), you can start acquiring data.
 
 <Steps>
-1. 通过以下三种方法中的任意一种，开始采集数据。
+1. Use any of the following three methods to start data acquisition.
 
-   - 点击 `开始采集` 按钮。
+   - Click the `Start Acquisition` button.
       <Image src={operation_guide_42} alt="" />
-      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      A prompt message as shown below will pop up on the page. Click the blank area outside the pop-up window to close it.
       <Image src={operation_guide_43} alt="" />
-   - 通过按下键盘 `Ctrl+3` 快捷键来实现开始采集的功能。
-   - 通过按下踏板中键来实现开始采集的功能。
+   - Press the `Ctrl+3` keyboard shortcut.
+   - Press the middle button of the foot pedal.
 
-2. 开始采集后，`机器人数据采集状态` 区域中的采集状态从 `等待开始` 变为 `采集中`，同时采集时间开始计时。
+2. Once data acquisition starts, the `Acquisition Status` in the `Robot Data Acquisition Status` panel will change from `Waiting to Start` to `Acquiring`, and the acquisition timer will begin counting.
    <Image src={operation_guide_44} alt="" />
 
 </Steps>
 
-### 取消采集
+### Canceling Acquisition
 
 import operation_guide_45 from 'img/operation_guide_45.png';
 import operation_guide_46 from 'img/operation_guide_46.png';
 import operation_guide_47 from 'img/operation_guide_47.png';
 
-在采集过程中，您可以随时取消采集。
+During the acquisition process, you can cancel acquisition at any time.
 
 <Steps>
-1. 通过以下三种方法中的任意一种，取消采集数据。
+1. Use any of the following three methods to cancel data acquisition.
 
-   - 点击 `取消采集` 按钮。
+   - Click the `Cancel Acquisition` button. 
       <Image src={operation_guide_45} alt="" />
-      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      A prompt message as shown below will pop up on the page. Click the blank area outside the pop-up window to close it.
       <Image src={operation_guide_46} alt="" />
-   - 通过按下键盘 `Ctrl+4` 快捷键来实现取消采集的功能。
-   - 通过按下踏板右键来实现取消采集的功能。
+   - Press the `Ctrl+4` keyboard shortcut.
+   - Press the right button of the foot pedal.
 
-2. 取消采集后，`机器人数据采集状态` 区域中的采集状态从 `采集中` 变为 `等待开始`，同时运行时间停止计时，采集时间归零。
+2. After acquisition is canceled, the `Acquisition Status` in the `Robot Data Acquisition Status` panel will change from `Acquiring` to `Waiting to Start`. The running time will stop counting, and the acquisition time will reset to zero.
    <Image src={operation_guide_47} alt="" />
 </Steps>
 
-### 结束采集
+### Ending Acquisition
 
 import operation_guide_48 from 'img/operation_guide_48.png';
 import operation_guide_49 from 'img/operation_guide_49.png';
 import operation_guide_50 from 'img/operation_guide_50.png';
 
-在采集完成后，您需要手动结束采集过程。
+After data acquisition is complete, you need to manually end the acquisition process.
 
 <Steps>
-1. 通过以下三种方法中的任意一种，结束采集数据。
+1. Use any of the following three methods to end data acquisition.
 
-   - 点击 `结束采集` 按钮。
+   - Click the `End Acquisition` button.
       <Image src={operation_guide_48} alt="" />
-      此时页面会弹出如下提示信息。点击弹窗外空白处，即可关闭弹窗。
+      A prompt message as shown below will pop up on the page. Click the blank area outside the pop-up window to close it.
       <Image src={operation_guide_49} alt="" />
-   - 通过按下键盘 `Ctrl+3` 快捷键来实现结束采集的功能。
-   - 通过按下踏板中键来实现结束采集的功能。
+   - Press the `Ctrl+3` keyboard shortcut.
+   - Press the middle button of the foot pedal.
 
-2. 结束采集后，`机器人数据采集状态` 区域中的采集状态从 `采集中` 变为 `等待开始`，同时运行时间停止计时，采集时间归零，数据落盘一条，采集条目数加 1。
+2. After acquisition ends, the `Acquisition Status` in the `Robot Data Acquisition Status` panel will change from `Acquiring` to `Waiting to Start`. The running time will stop counting, the acquisition time will reset to zero, one data entry will be written to disk, and the acquisition entry count will increment by 1.
+
     <Image src={operation_guide_50} alt="" />
 
 </Steps>
 
-### 压缩数据
+### Compressing Data
 
 import operation_guide_51 from 'img/operation_guide_51.png';
 import operation_guide_52 from 'img/operation_guide_52.png';
 import operation_guide_53 from 'img/operation_guide_53.png';
 
-在完成数据采集后，您需要将数据压缩，便于后续上传和使用。在开始以下操作前，请确保至少已完成一次数据采集。
+After data acquisition, you need to compress data for easier subsequent upload and use. Before proceeding, ensure you have completed at least one data acquisition.
 
 <Steps>
-1. 点击 `数据压缩` 按钮。
+1. Click the `Data Compression` button.
    <Image src={operation_guide_51} alt="" />
 
-2. 在如下弹窗中，输入将要压缩的任务名称，点击 `开始压缩` 按钮。
+2. In the pop-up window below, enter a task name for compression, then click `Start Compression`.
+
    <Image src={operation_guide_52} alt="" width="400" />
 
-3. 压缩过程如下，等待压缩完成，点击弹窗外空白处，即可关闭弹窗。
+3. Wait for the compression process to finish. Click the blank area outside the window to close it.
+
    <Image src={operation_guide_53} alt="" width="400"/>
 
 </Steps>
 
-### 上传数据
+### Uploading Data
 
 import operation_guide_54 from 'img/operation_guide_54.png';
 import operation_guide_55 from 'img/operation_guide_55.png';
 
-在完成数据采集和压缩后，您可以使用 `数据上传` 功能来上传数据。在开始以下操作前，请确保至少已完成一次数据采集和压缩。
+After data acquisition and compression, you can use the `Data Upload` function to upload data. Before proceeding, ensure you have completed at least one data acquisition and compression.
 
 <Steps>
-1. 点击 `数据上传` 按钮。  
+1. Click the `Data Upload` button. 
    <Aside>
-   在上传过程中，请保持 HMI 界面活跃，且不可切换至浏览器其他标签页，否则可能导致上传失败。
+   During upload, keep the HMI interface active and do not switch to other browser tabs, otherwise the upload may fail.
    </Aside>
    <Image src={operation_guide_54} alt="" />
 
-2. 在如下弹窗中，请耐心等待数据上传完成。若需要取消上传，请点击 `取消上传` 按钮。
+2. In the pop-up window below, wait for the upload to complete. To cancel the upload, click the `Cancel Upload` button.
+
    <Image src={operation_guide_55} alt="" width="400" />
 </Steps>
 
 
-## 标零
+## Zero Calibration
 
-标零操作仅在拆装结构后需要进行。当遥操臂姿态与机械臂姿态不一致，且 AI2-HMI 界面未显示超限时，可能为零位异常，请联系我司售后工程师解决。
+The zero calibration operation is only required after disassembling or assembling the structure. When the pose of the robotic arm is inconsistent with that of the teleoperation arm, and no over-limit is displayed on the AI2-HMI interface, it may be a zero position abnormality. Please contact our after-sales engineers for assistance.

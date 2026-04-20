@@ -34,7 +34,7 @@ import { Aside } from '@astrojs/starlight/components';
      `vendor_type`
      </td>
      <td>     
-     机械臂厂商，如 `"realman"`。     
+     机械臂厂商。     
      </td>
      </tr>
      <tr>
@@ -123,7 +123,7 @@ import { Aside } from '@astrojs/starlight/components';
       
       ```json
       {
-          "arm_type":"realman", # 机械臂厂商
+          "arm_type":"xxxx", # 机械臂厂商
           "arm_name":"left_arm", # 机械臂名称
           "ip": "192.168.1.18", # TCP IP 地址
           "port": "8080", # TCP 端口号
@@ -152,7 +152,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 | 属性（可读写） | 数据类型 | 说明 |
 |:---|:---|:---|
-| `arm_type` | str | 机械臂厂商，例如 `"realman"`。 |
+| `arm_type` | str | 机械臂厂商。 |
 | `arm_name` | str | 机械臂名称，例如 `"left_arm"`。 |
 | `ip` | str | TCP IP 地址。 |
 | `udp_ip` | str | UDP IP 地址。 |
@@ -183,7 +183,7 @@ import { Aside } from '@astrojs/starlight/components';
                 若必需键缺失或格式错误，构造函数会抛出  `RuntimeError` 错误。
                  ```json
                  {
-                     'arm_type':'realman',  # 机械臂厂商
+                     'arm_type':'xxx',  # 机械臂厂商
                      'arm_name':'left_arm', # 机械臂名称
                      'ip':'192.168.1.10',   # TCP IP 地址
                      'port':'5000',         # TCP 端口号

@@ -3,7 +3,7 @@ title: Welcome to AI² Documentation
 description: AI² product and technical documentation
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
-  tagline: Let's extend AGI to the physical world together
+  tagline: Extend AGI to the physical world
   image:
     file: ../../../assets/robot_1.png
   actions:
@@ -20,14 +20,22 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 
 <CardGrid>
-	<Card title="🤖 Hardware">
-		System structure, specifications, connections, startup, and troubleshooting
+	<Card title="🤖 AlphaBot 2">
+		- [Product Overview](/en/alphabot2/hardware/architecture)
+		- [Common Operations](/en/alphabot2/hardware/operation-guide)
+		- [Troubleshooting ](/en/alphabot2/hardware/common-faults)
 	</Card>
-	<Card title="🧰 SDK">
-		C++ API, Python API
+	<Card title="🎮 遥操设备">
+		- VR 遥操: [Product Overview](/en/vr-teleoperation/introduction)、[Common Operations](/en/vr-teleoperation/operation-guide)、[Troubleshooting ](/en/vr-teleoperation/common-faults)
+		- 外骨骼遥操: [Product Overview](/en/exoskeleton-teleoperation/introduction)、[Common Operations](/en/exoskeleton-teleoperation/operation-guide)、[Troubleshooting](/en/exoskeleton-teleoperation/common-faults)
 	</Card>
-	<Card title="❓Support">
-		FAQ, Troubleshooting
+	<Card title="🧰 AlphaBotCore SDK">
+		- [C++ API](/en/sdk/c-plus-plus/quick-start)
+		- [Python API](/en/sdk/python/quick-start)
+	</Card>
+	<Card title="💬 Contact Us" >
+		- Business Cooperation: business@ai2robotics.com
+		- Business Consultation: +86 13910171451
 	</Card>
 </CardGrid>
 

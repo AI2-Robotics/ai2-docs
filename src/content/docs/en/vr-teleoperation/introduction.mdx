@@ -1,120 +1,116 @@
 ---
-title: 产品介绍
-description: VR 遥操设备介绍
+title: Product Introduction
+description: Product Introduction
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 import { Image } from 'astro:assets';
 
 
-## 产品简介
+## Introduction
 
-VR 遥操设备为本公司自主研发的人形机器人外骨骼式机械臂 VR 遥操系统，主要用于数据采集、沉浸式遥操作及人机交互研究。
+The VR Teleoperation Device is a VR‑based teleoperation system for AlphaBot, developed independently by AI² Robotics. It is mainly used for data acquisition, immersive teleoperation, and human-robot interaction research.
 
-通过该套 VR 遥操设备，操作者可在虚拟空间中以直观、自然的体感方式操控人形机器人，打破物理空间限制，高效适配人机协作、操作数据采集、远程控制及人工智能模型训练等多场景应用需求。
+With this VR Teleoperation Device, operators can control humanoid robots in a virtual space using intuitive, natural motion-based interactions. This capability transcends physical limitations and efficiently supports a wide range of application scenarios, including human-robot collaboration, operational data acquisition, remote control, and AI model training.
 
 <table>
    <tbody>
       <tr>
-         <td width="15%">产品名称</td>
-         <td>VR 遥操设备</td>
+         <td width="15%">Product Name</td>
+         <td>VR Teleoperation Device</td>
       </tr>
       <tr>
-         <td>产品型号</td>
+         <td>Product Model</td>
          <td>DC-VR</td>
       </tr>
       <tr>
-         <td>核心特性</td>
+         <td>Core Features</td>
          <td>
-             - 1:1 同构设计，遥操作逻辑与本公司人形机器人机械臂的自由度、运动行程、末端夹爪操控特性完全匹配
-             - VR 空间定位 + 体感交互，实现实时精准映射
-             - 支持数据采集、沉浸式遥操作、人机交互研究
+             -  1:1 isomorphic design; teleoperation logic fully matches the degrees of freedom, motion range, and end-effector gripper control characteristics of AI² Robotics humanoid robot arm
+             - VR spatial positioning + motion-based interaction for real-time, high-precision mapping
+             - Supports data acquisition, immersive teleoperation, and human-robot interaction research
          </td>
       </tr>
       <tr>
-         <td>功能特点</td>
+         <td>Functional Highlights</td>
          <td>
-             - 安全且沉浸式的摇操
-             - 设备小巧
-             - 操作简单方便
+             - Safe and immersive teleoperation
+             - Compact device design
+             - Easy and convenient operation
          </td>
       </tr>      
       <tr>
-         <td>应用场景</td>
+         <td>Application Scenarios</td>
          <td>
-             - 科研：高精准运动与交互数据采集
-             - 工程：高频次机器人调试与功能验证
-             - 远程：打破空间限制的人机协作与控制
+             - Scientific Research: High-precision motion and interaction data acquisition
+             - Engineering: High-frequency robot debugging and functional validation
+             - Remote Operation: Human-robot collaboration and control without physical constraints
          </td>
       </tr>        
    </tbody>
 </table>
 
 
-## 产品结构
+## Components
 
 import introduction_1 from 'img/introduction_1.png';
 import introduction_2 from 'img/introduction_2.png';
 
-{/* VR 遥操设备由 VR 头显、左右手柄、踏板、工控机、显示器等组成，支持通过 VR 设备对人形机器人进行沉浸式遥操作和数据采集。 */}
+The VR Teleoperation Device consists of the following two main components:
 
-VR 遥操设备主要由以下两部分组成：
-
-- **VR**：包括 VR 头显、左右手柄、踏板等，提供沉浸式交互体验，实现对人形机器人的直观控制。
+- **VR**: Includes VR headset, left/right controllers, foot pedal, etc. Provides an immersive interactive experience and enables intuitive control of the humanoid robot.
   <Image src={introduction_1} alt="" width="450"/>
 
 
-
-{/* - 数采服务器：包括工控机、显示器等，负责处理 VR 设备的输入信号，执行机器人控制指令，并提供数据采集和人机交互功能。 */}
-- **数采服务器**：包括工控机、显示器等，提供数据采集功能。
+- **Data Acquisition Server**: Includes industrial PC, monitor, etc. Provides data acquisition functionality.
   <Image src={introduction_2} alt="" width="450"/>
 
 
-## 电气特性
+## Electrical Characteristics
 
-### 电气参数
+### Electrical Specifications
 
 <table>
    <tbody>
       <tr>
-         <td>头显电源</td>
-         <td>18W 电源适配器</td>
+         <td>Headset Power</td>
+         <td>18W power adapter</td>
       </tr>
       <tr>
-         <td>手柄电池</td>
-         <td>AA 电池</td>
+         <td>Controller Battery</td>
+         <td>AA battery</td>
       </tr>
       <tr>
-         <td>有线视频</td>
+         <td>Wired Video</td>
          <td>USB Type-C Oculus Link</td>
       </tr>      
    </tbody>
 </table>
 
-### 接线方式
+### Wiring Method
 
 <table>
    <tbody>
       <tr>
-         <td>VR 头显</td>
+         <td>VR Headset</td>
          <td>
-            Type-C 接快充串流线<br/>
-            快充串流线充电口接 18W 快充头
+            Connect Type-C to the fast-charge link cable.<br/>
+            Connect the charging port of the fast-charge link cable to the 18W fast charger.
          </td>
       </tr>
       <tr>
-         <td>数采服务器</td>
+         <td>Data Acquisition Server</td>
          <td>
-            电源为 220V AC<br/>
-            网线连接机器人或者图传模块<br/>
-            USB 接口连接头显视频线
+            Power: 220V AC.<br/>
+            Connect Ethernet cable to the robot or video transmission module.<br/>
+            Connect USB port to the headset video cable.
          </td>
       </tr>
       <tr>
-         <td>图传模块或者网线直连<br/>（图传模块为选配）</td>
+         <td>Video Transmission Module (Optional) or Direct Ethernet Connection</td>
          <td>
-            图传模块电源为 220V AC 转 12V DC 2A<br/>
-            网线从机器人背部直连工控机
+            Video Transmission Module (Optional): Power: 220V AC to 12V DC 2A.<br/>
+            Direct Connection: Ethernet cable directly connected from the back of the robot to the industrial PC.
          </td>
       </tr>      
    </tbody>

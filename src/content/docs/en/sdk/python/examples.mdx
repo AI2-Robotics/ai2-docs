@@ -39,7 +39,7 @@ def main():
             "udp_cycle": "5"
         })
         
-        # Create Realman robotic arm instance
+        # Create a robotic arm instance from arm parameters
         arm1 = ArmFactory.create_arm(param)
         if not arm1:
             print("Failed to create robotic arm instance")
@@ -48,7 +48,7 @@ def main():
         print(f"Successfully created robotic arm: {arm1}")
         
         print("\n----- Method 2: Creating a Robotic Arm Using Configuration File -----")
-        # Create robotic arm instance from configuration file
+        # Create a robotic arm instance from configuration file
         arm2 = ArmFactory.create_arm_from_config(config_path)
         if not arm2:
             print("Failed to create robotic arm instance from configuration file")

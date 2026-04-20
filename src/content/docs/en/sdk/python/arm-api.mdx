@@ -34,7 +34,7 @@ The `ArmFactory` class provides the following methods for creating robotic arm i
      `vendor_type`
      </td>
      <td>     
-     The manufacturer or type of the robotic arm (e.g., `"realman"`).    
+     The manufacturer or type of the robotic arm.    
      </td>
      </tr>
      <tr>
@@ -122,7 +122,7 @@ The `ArmFactory` class provides the following methods for creating robotic arm i
       
       ```json
       {
-          "arm_type":"realman", # Robotic arm vendor
+          "arm_type":"xxx", # Robotic arm vendor
           "arm_name":"left_arm", # Robotic arm name
           "ip": "192.168.1.18", # TCP IP address
           "port": "8080", # TCP port number
@@ -182,7 +182,7 @@ All attributes of the `ArmFactoryParam` class are read-write.
                 The constructor will raise a `RuntimeError` if any required key is missing or its format is invalid.
                  ```json
                  {
-                     'arm_type':'realman',  # Robotic arm vendor
+                     'arm_type':'xxx',  # Robotic arm vendor
                      'arm_name':'left_arm', # Robotic arm name
                      'ip':'192.168.1.10',   # TCP IP address
                      'port':'5000',         # TCP port number

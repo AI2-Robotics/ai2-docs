@@ -422,7 +422,7 @@ The following table lists the main specifications for the chassis.
 |LiDAR|2D LiDAR, measuring range up to 25 m|
 |RGBD Camera|1|
 |Debugging Ports|RJ45, USB, HDMI|
-|Software Interface| API||
+|Software Interface| API|
 
 #### Functional Description
 
@@ -438,22 +438,22 @@ import architecture_7 from 'img/architecture-7.png';
    |Auto|Mode for autonomous robot movement. In this mode, tasks or task groups can be sent to the robot, which will automatically execute the pre-programmed combined commands. In this mode, the chassis status light is white.|
    |Manual|Mode for manually controlling robot movement. In this mode, the robot can be pushed, and the chassis status light is yellow.|
    |Maintenance|In this mode, the power of the overall motion module is cut off, the robot and integrated mechanism cannot be controlled to move, and the chassis status light is red.|
-   |Power switch|Press and hold for 1.5s to power on or off the robot.|
+   |Power|Press and hold for 1.5s to power on or off the robot.|
    |Pause/Continue|When an abnormality occurs, press the `Pause/Continue` button, the robot will pause the current task, and the chassis status light will be white trailing flowing. When connected to the LAN Wi-Fi, press and hold this button, and the robot will broadcast the current IP address by voice.|
    |Reset|Short press to reset the robot to the previously recorded coordinate point. Long press to reset the robot to the preset initial reset point.|
-   |Combination Button|Simultaneously long press the Pause/Resume and Reset buttons for 5 seconds to activate the robot's hotspot (for connection by [the chassis host PC software](../operation-guide#use_chassis_software)), accompanied by a voice prompt.|
+   |Combination Button|Simultaneously long press the Pause/Resume and Reset buttons for 5 seconds to activate the robot's hotspot (for connection by [the chassis upper computer software](../operation-guide#use_chassis_software)), accompanied by a voice prompt.|
 
-2. Chassis external interfaces.
+2. Chassis external ports.
 
    <Image src={architecture_7} alt="" width="500"/>
 
    |Name|Description|
    |---|---|
-   |Charging Interface|Connects the power adapter to charge the robot.|
-   |CAN Debugging Interface|When motor anomalies require inspection, remove the external CAN interface cover. Use a CAN cable and CAN analyzer to view and adjust the status parameters of joint motors.|
+   |Charging Port|Connects the power adapter to charge the robot.|
+   |CAN Debugging Port|When motor anomalies require inspection, remove the external CAN port cover. Use a CAN cable and CAN analyzer to view and adjust the status parameters of joint motors.|
 
    <Aside class="warning">
-   The CAN debugging interface is for maintenance and debugging purposes only. Operation is permitted only under the guidance of our company's engineers. Do not attempt debugging without authorization.
+   The CAN debugging port is for maintenance and debugging purposes only. Operation is permitted only under the guidance of our company's engineers. Do not attempt debugging without authorization.
    </Aside>
 
 ### Computing Module
@@ -470,17 +470,17 @@ AlphaBot 2 is equipped with an NVIDIA AGX Orin 64G as its computing module, prov
 import architecture_11 from 'img/architecture-11.png';
 import architecture_12 from 'img/architecture-12.png';
 
-The rear back of AlphaBot 2 integrates external interfaces and an emergency stop device.
+The rear back of AlphaBot 2 integrates external ports and an emergency stop device.
 
-1. External Interfaces: Remove the cover to access interfaces for expanding external devices.
+1. External ports: Remove the cover to access ports for expanding external devices.
 
    <Image src={architecture_11} alt=""/>
 
-   |Name|Quantity|Description|
+   |Port|Quantity|Description|
    |---|---|---|
-   |HDMI Interface|1|Connects to a monitor or other video output device for convenient debugging and monitoring.|
-   |USB 3.0 Interface|1|Connects external devices such as cameras or sensors, supporting high-speed data transfer.|
-   |RJ45 Interface|1|Enables direct communication with the robot controller via an Ethernet cable.|
+   |HDMI|1|Connects to a monitor or other video output device for convenient debugging and monitoring.|
+   |USB 3.0|1|Connects external devices such as cameras or sensors, supporting high-speed data transfer.|
+   |RJ45|1|Enables direct communication with the robot controller via an Ethernet cable.|
 
 2. Emergency Stop Device: Press the emergency stop button, the chassis will brake, and the robotic arm will stop moving; turn clockwise to release the emergency stop.
 
@@ -513,9 +513,9 @@ import architecture_10 from 'img/architecture-10.png';
    <table>
       <thead>
          <tr>
-            <th><strong>LED</strong></th>
-            <th><strong>Color</strong></th>
-            <th><strong>Status</strong></th>
+            <th>LED</th>
+            <th>Color</th>
+            <th>Status</th>
          </tr>
       </thead>
       <tbody>

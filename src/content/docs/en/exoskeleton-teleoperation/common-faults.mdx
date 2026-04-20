@@ -1,48 +1,46 @@
 ---
-title: 常见故障
-description: 外骨骼遥操设备的常见故障排查指南
+title: Troubleshooting
+description: Troubleshooting
 ---
 
-本文介绍外骨骼遥操设备的常见故障及其解决方法。
+## Encoder Light Does Not Illuminate
 
-## 编码器灯不亮
+* Cause:
 
-* 故障原因：
+    1. Power supply not connected.
+    2. Loose wiring.
 
-    1. 电源未连接。
-    2. 接线松动。
-
-* 解决方法：
+* Solution:
     
-    1. 确保外骨骼遥操设备已正确连接电源。
-    2. 断电后紧固连接线，重新上电。
+    1. Ensure the exoskeleton teleoperation device is correctly connected to the power supply.
+    2. Tighten the connecting wires after powering off, then power on again.
 
-## AI2-HMI 界面无数据
+## No Data on AI2-HMI Interface
 
-* 故障原因：
+* Cause:
 
-    1. 外骨骼遥操设备与工控机之间的 USB 线未连接或接线松动。
-    2. 采集器未正常工作。
+    1. The USB cable between the exoskeleton teleoperation device and the Industrial PC is not connected or is loose.
+    2. The data acquisition unit is not functioning properly.
 
-* 解决方法：
+* Solution:
     
-    1. 确保外骨骼遥操设备与工控机已正确连接。
-    2. 拔掉工控机与外骨骼之间的 USB 线及采集器电源；先接通采集器电源，再连接 USB 线。
+    1. Ensure the exoskeleton teleoperation device is correctly connected to the industrial PC.
+    2. Disconnect both the USB cable and the acquisition unit power supply; then reconnect by powering on the acquisition unit first, followed by connecting the USB cable.
 
-## 当编码器结构处于零位时，AI2-HMI 界面数值不为零
+## Non-Zero Value on AI2-HMI Interface When Encoder Is at Zero Position
 
-* 故障原因：
+* Cause:
 
-    1. 零位标定错误。
-    2. 偏移量配置不当。
+    1. Incorrect zero calibration.
+    2. Improper offset configuration.
 
-* 解决方法：
+* Solution:
     
-    1. 重新标定编码器零位。
-    2. 修改配置文件中对应的编码器偏移值。    
+    1. Re-calibrate the encoder zero position.
+    2. Modify the corresponding encoder offset value in the configuration file.  
 
 
-## 其他故障
+## Other Problems
 
-如果您遇到其他故障，请尝试重启设备。如果问题仍然存在，请联系售后进行进一步检查和维修。
+If you encounter other problems, please first try restarting the device. If the problem still exists, please contact our support team.
 

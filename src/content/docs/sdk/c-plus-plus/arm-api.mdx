@@ -31,7 +31,7 @@ import { Aside } from '@astrojs/starlight/components';
 
      | 参数名 | 类型 | 说明 |
      |:-------|:---|:-|
-     | `arm_type` | 输入参数 | 机械臂厂商，如 `"realman"`。 |
+     | `arm_type` | 输入参数 | 机械臂厂商。 |
      | `name` | 输入参数 | 机械臂名称，如 `"left_arm"` 或 `"right_arm"`。 |
      | `params` | 输入参数 | 机械臂其他参数，如 `{{"ip", "192.168.1.18"}, {"port", "8080"}}`。|
 
@@ -94,7 +94,7 @@ import { Aside } from '@astrojs/starlight/components';
      
      ```json
      {
-         "arm_type":"realman", # 机械臂厂商
+         "arm_type":"xxx", # 机械臂厂商
          "arm_name":"left_arm", # 机械臂名称
          "ip": "192.168.1.18", # TCP IP 地址
          "port": "8080", # TCP 端口号

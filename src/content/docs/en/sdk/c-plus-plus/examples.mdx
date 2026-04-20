@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
             {"udp_cycle", "5"}
         };
 
-        // Create a Realman robotic arm instance
+        // Create a robotic arm instance
         auto arm1 = factory.create_arm("realman", "right_arm", params);
         if (!arm1) {
             std::cerr << "Failed to create robotic arm instance" << std::endl;

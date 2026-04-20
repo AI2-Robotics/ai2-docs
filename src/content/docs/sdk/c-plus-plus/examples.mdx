@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
             {"udp_port", "8089"},
             {"udp_cycle", "5"}};
 
-        // 创建Realman机械臂实例
+        // 创建机械臂实例
         auto arm1 = factory.create_arm("realman", "right_arm", params);
         if (!arm1)
         {
