@@ -14,11 +14,13 @@
     "@astrojs/starlight": "^0.38.2",
     "antd": "^6.2.2",
     "astro": "^6.0.8",
+    "puppeteer": "^23.11.1",
     "remark-custom-heading-id": "^2.0.0",
     "sharp": "^0.34.2",
     "starlight-heading-badges": "^0.6.1",
     "starlight-image-zoom": "^0.13.2",
-    "starlight-sidebar-topics": "^0.6.2"
+    "starlight-sidebar-topics": "^0.6.2",
+    "starlight-to-pdf": "^1.4.0"
   },
   "devDependencies": {
     "astro-vtbot": "^2.1.10"

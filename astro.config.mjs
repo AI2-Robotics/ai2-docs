@@ -15,9 +15,6 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: { 'en': 'AI² Robotics', 'zh-CN': '智平方' },
-			editLink: {
-				baseUrl: 'https://github.com/AI2-Robotics/ai2-docs/edit/main/',
-			},
 			logo: {
 				light: './src/assets/logo.png',
 				dark: './src/assets/logo-white.png',
