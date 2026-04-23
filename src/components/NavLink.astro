@@ -1,11 +1,32 @@
 ---
 const { lang } = Astro.locals.starlightRoute;
-const linkData = {'zh-CN':{'text':'官方网站', 'link':'https://ai2robotics.com/'},'en':{'text':'Website', 'link':'https://ai2robotics.com/en'}};
-const data = linkData[lang]
 
+const links = [
+  {
+    'icon': '',
+    'zh-CN': { text: '官方网站', link: 'https://ai2robotics.com/' },
+    'en': { text: 'Website', link: 'https://ai2robotics.com/en' }
+  },
+  {
+    'icon': 'github',
+    'zh-CN': { text: '讨论', link: 'https://github.com/AI2-Robotics/ai2-docs/discussions' },
+    'en': { text: 'Discussions', link: 'https://github.com/AI2-Robotics/ai2-docs/discussions' }
+  }
+];
+import { Icon } from '@astrojs/starlight/components';
 ---
 
-<a href={data.link} target="_blank">{data.text}</a>
+
+
+{links.map(item => (  
+  <a 
+    href={item[lang].link} 
+    target="_blank" 
+    style="margin: 0 0.5rem;"
+  > <Icon name={item['icon']} />&thinsp;
+    {item[lang].text}
+  </a>
+))}
 
 
 <style>

@@ -10,6 +10,7 @@ hero:
     - text: Quick Start
       link: /en/start/product-introduction/
       icon: right-arrow
+editUrl: false		  
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
@@ -41,5 +42,125 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <style>{`
 
+.card-grid a {
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.card-grid a:hover {
+    transform: scale(1.1);
+}
+
+.hero img {
+    animation: float 3s ease-in-out infinite;
+}
+
+.card,
+article.card,
+.card.sl-flex,
+article.card.sl-flex {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  background-image: none !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 1.25rem !important;
+  color: inherit !important;
+}
+
+html[data-theme='dark'] .card,
+html[data-theme='dark'] article.card,
+html[data-theme='dark'] .card.sl-flex,
+html[data-theme='dark'] article.card.sl-flex {
+  background-color: rgba(8, 14, 28, 0.88) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(220%) !important;
+  color: #e2e8f0 !important;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background-color: rgb(248, 250, 252) !important;
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(20, 184, 166, 0.16), transparent 22%),
+    radial-gradient(circle at 80% 10%, rgba(37, 99, 235, 0.12), transparent 24%),
+    linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(37, 99, 235, 0.08)),
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px) !important;
+  background-size: cover, cover, cover, 40px 40px, 40px 40px !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat !important;
+  background-attachment: fixed !important;
+  color: rgb(15, 23, 42) !important;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), text-decoration-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), fill 0.3s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page,
+.main-frame,
+main,
+.sl-markdown-content,
+.sl-markdown-content > * {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html[data-theme='dark'] .page,
+html[data-theme='dark'] .main-frame,
+html[data-theme='dark'] main,
+html[data-theme='dark'] .sl-markdown-content,
+html[data-theme='dark'] .sl-markdown-content > * {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html[data-theme='dark'],
+html[data-theme='dark'] body {
+  background-color: #05080f !important;
+  background-image:
+    radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.08), transparent 22%),
+    radial-gradient(circle at 82% 12%, rgba(96, 165, 250, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(10, 14, 26, 1), rgba(4, 6, 12, 1)) !important;
+  background-size: cover, cover, cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  color: #f8fafc !important;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes borderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.text-gradient {
+  background-image: linear-gradient(to right, #14b8a6, #2563eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html[data-theme='dark'] .text-gradient {
+  background-image: linear-gradient(to right, #5eead4, #3b82f6);
+}
 
 `}</style>

@@ -29,6 +29,11 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 		.page {
 			flex-direction: column;
 			min-height: 100vh;
+			background-color: transparent !important;
+		}
+
+		.main-frame {
+			background-color: transparent !important;
 		}
 
 		.header {
@@ -43,6 +48,26 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 			padding-inline-end: var(--sl-nav-pad-x);
 			background-color: var(--sl-color-bg-nav);
 		}
+
+		html:not([data-theme='dark']) .header {
+			/* background-color: transparent !important;
+			background-image: none !important;
+			border-color: transparent !important; */
+			background: rgba(255, 255, 255, 0.15); /* 透明度：0~1 越小越透明 */
+			backdrop-filter: blur(12px); /* 模糊值：数值越大毛玻璃越强 */border-bottom: 1px solid rgba(255,255,255,0.2); /* 高光边框提升质感 */
+		}
+
+		/* html:not([data-theme='dark']) .site-search,
+		html:not([data-theme='dark']) .site-search button,
+		html:not([data-theme='dark']) .site-search .search-container,
+		html:not([data-theme='dark']) .site-search .dialog-frame,
+		html:not([data-theme='dark']) .site-search #starlight__search {
+			background: transparent !important;
+			background-color: transparent !important;
+			background-image: none !important;
+			border: none !important;
+			box-shadow: none !important;
+		} */
 
 		:global([data-has-sidebar]) .header {
 			padding-inline-end: calc(

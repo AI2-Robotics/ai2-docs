@@ -15,6 +15,9 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: { 'en': 'AI² Robotics', 'zh-CN': '智平方' },
+			editLink: {
+				baseUrl: 'https://github.com/AI2-Robotics/ai2-docs/edit/main/',
+			},
 			logo: {
 				light: './src/assets/logo.png',
 				dark: './src/assets/logo-white.png',
@@ -54,13 +57,13 @@ export default defineConfig({
 					translations: {
 						'zh-CN': 'AlphaBot 2',
 					},
-					badge: {
-						text: {
-							'zh-CN': '新',
-							'en': 'New',
-						},
-						variant: "tip",
-					},
+					// badge: {
+					// 	text: {
+					// 		'zh-CN': '新',
+					// 		'en': 'New',
+					// 	},
+					// 	variant: "tip",
+					// },
 					items: [
 						'alphabot2/hardware/getting-started',
 						'alphabot2/hardware/architecture',
@@ -142,7 +145,7 @@ export default defineConfig({
 						'zh-CN': '声明',
 					},
 					items: [
-						'statement/disclaimer', 
+						'statement/disclaimer',
 					],
 				},
 			],

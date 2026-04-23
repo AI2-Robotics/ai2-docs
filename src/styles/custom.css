@@ -33,3 +33,31 @@ table {
 .sl-steps {
     padding-inline-start: 0px;
 }
+
+@layer starlight.components {
+  article.card,
+  .card.sl-flex,
+  article.card.sl-flex,
+  .sl-markdown-content article.card,
+  .sl-markdown-content .card,
+  .sl-markdown-content .card.sl-flex {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    background-image: none !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    backdrop-filter: blur(18px) saturate(180%) !important;
+    box-shadow: 0 24px 40px rgba(15, 23, 42, 0.08) !important;
+    border-radius: 1.5rem !important;
+  }
+
+  :root[data-theme='dark'] article.card,
+  :root[data-theme='dark'] .card.sl-flex,
+  :root[data-theme='dark'] article.card.sl-flex,
+  :root[data-theme='dark'] .sl-markdown-content article.card,
+  :root[data-theme='dark'] .sl-markdown-content .card,
+  :root[data-theme='dark'] .sl-markdown-content .card.sl-flex {
+    background-color: rgba(15, 23, 42, 0.32) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 40px rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(22px) saturate(220%) !important;
+  }
+}
